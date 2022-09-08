@@ -1,0 +1,47 @@
+@prefix sb: <http://sigmathling.kwarc.info/spotterbase/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# SPOTTERS
+
+sb:spotter a owl:Class .
+sb:spotterRun a owl:Class .
+
+sb:withSpotter a owl:ObjectProperty ;
+               rdfs:domain sb:spotterRun ;
+               rdfs:range sb:spotter .
+sb:runDate a owl:ObjectProperty ;
+           rdfs:domain sb:spotterRun ;
+           rdfs:range xsd:dateTime .
+sb:spotterVersion a owl:ObjectProperty ;
+                  rdfs:domain sb:spotterRun .
+
+
+
+
+
+sb:dataset a owl:Class .
+sb:document a owl:Class .
+sb:html5doc a owl:Class ;
+            rdfs:subClassOf sb:document .
+sb:topic a owl:Class .
+
+sb:subset a owl:ObjectProperty ;
+          rdfs:domain sb:dataset ;
+          rdfs:range sb:dataset .
+
+# e.g. a document to a dataset, a topic to a topic system
+sb:belongsTo a owl:ObjectProperty .
+
+# E.g. a document/dataset being based on another document/dataaset
+sb:basedOn a owl:ObjectProperty .
+
+sb:hasTopic a owl:ObjectProperty ;
+             rdfs:domain sb:document ;
+             rdfs:range sb:topic .
+
+sb:subtopicOf a owl:ObjectProperty ;
+               rdfs:domain sb:topic ;
+               rdfs:range sb:topic .

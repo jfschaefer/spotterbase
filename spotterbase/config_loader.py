@@ -15,13 +15,13 @@ import configargparse
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_CONFIG_PATHS: list[Path] = [
+DEFAULT_CONFIG_PATHS: list[Path] = list(map(lambda p: p.expanduser(), [
     Path('~/.config/spotterbase.conf'),
     Path('~/.spotterbase.conf'),
     Path('~/spotterbase.conf'),
     Path('./.spotterbase.conf'),
     Path('./spotterbase.conf'),
-]
+]))
 
 
 class ConfigExtension:
@@ -47,13 +47,14 @@ class ConfigLoader:
         self.used_default_config_paths: list[Path] = [path for path in config_paths if path.is_file()]
         self.argparser = configargparse.ArgumentParser(default_config_files=self.used_default_config_paths,
                                                        add_help=False)
+            #, ignore_unknown_config_file_keys=True)
         self.argparser.add_argument('-c', '--config', is_config_file=True, help='config file path')
         for extension in self.extensions:
             extension.prepare_argparser(self.argparser)
 
     def load_from_args(self, args: Optional[list[str]] = None) -> argparse.Namespace:
         if args is None:
-            args = sys.argv[1]
+            args = sys.argv[1:]
         self.argparser.add_help = True  # previously set to false in case it is the parent of another ``ArgumentParser``
         namespace = self.argparser.parse_args(args=args)
         self.load_from_namespace(namespace)

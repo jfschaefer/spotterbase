@@ -63,8 +63,10 @@ class DataDir:
 
     @classmethod
     def get(cls, rel_path: Path | str) -> Path:
-        if path := cls.data_locator.location_opt():
-            return path / rel_path
-        return Path('~/spotterbase-data') / rel_path
+        path = cls.data_locator.location_opt() or Path('~/spotterbase-data')
+        if not path.exists():
+            path.mkdir()
+        return path/rel_path
+
 
 

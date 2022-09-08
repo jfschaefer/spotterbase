@@ -4,6 +4,10 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+class MissingDataException(Exception):
+    pass
+
+
 @functools.cache  # cache it to avoid repeated warnings
 def json_lib():
     """ Attempts to load a faster JSON library than provided by the standard library.
