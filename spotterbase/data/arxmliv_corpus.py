@@ -13,11 +13,16 @@ from spotterbase.data.utils import MissingDataException
 from spotterbase.data.zipfilecache import SHARED_ZIP_CACHE
 
 
-class Uris:
+class ArXMLivUris:
     arxmliv = URIRef(f'http://sigmathling.kwarc.info/arxmliv/')
 
+    severity = URIRef(arxmliv + 'severity/')
+    severity_no_problem = URIRef(severity + 'noProblem')
+    severity_warning = URIRef(severity + 'warning')
+    severity_error = URIRef(severity + 'error')
 
-class Document(abc.ABC):
+
+class ArXMLivDocument(abc.ABC):
     arxivid: ArxivId
     release: str
 
@@ -32,7 +37,7 @@ class Document(abc.ABC):
         raise NotImplementedError()
 
 
-class SimpleDocument(Document):
+class SimpleArXMLivDocument(ArXMLivDocument):
     def __init__(self, arxivid: ArxivId, release: str, path: Path):
         super().__init__(arxivid, release)
         self.path = path
@@ -41,7 +46,7 @@ class SimpleDocument(Document):
         return self.path.open(*args, **kwargs)
 
 
-class ZipDocument(Document):
+class ZipArXMLivDocument(ArXMLivDocument):
     def __init__(self, arxivid: ArxivId, release: str, path_to_zipfile: Path, filename: str):
         super().__init__(arxivid, release)
         self.path_to_zipfile = path_to_zipfile
@@ -64,13 +69,13 @@ class ArXMLivCorpus:
         self.release = release
         self.path = path
 
-    def get_document(self, arxivid: ArxivId) -> Document:
+    def get_document(self, arxivid: ArxivId) -> ArXMLivDocument:
         location = self._get_yymm_location(arxivid.yymm)
         if location.name.endswith('.zip'):
-            return ZipDocument(arxivid, self.release, location,
+            return ZipArXMLivDocument(arxivid, self.release, location,
                                f'{arxivid.yymm}/{arxivid.identifier.replace("/", "")}.html')
         else:
-            return SimpleDocument(arxivid, self.release, location)
+            return SimpleArXMLivDocument(arxivid, self.release, location)
 
     def _get_yymm_location(self, yymm: str) -> Path:
         for directory in [self.path / f'{yymm}', self.path / 'data' / f'{yymm}']:
@@ -89,25 +94,26 @@ class ArXMLivCorpus:
             if path_regex.match(content.name):
                 yield content
 
-    def _filename_to_arxivid_or_none(self, filename: str) -> Optional[ArxivId]:
-        if match := self.filename_regex.match(filename):
+    @classmethod
+    def filename_to_arxivid_or_none(cls, filename: str) -> Optional[ArxivId]:
+        if match := cls.filename_regex.match(filename):
             if match.group('oldprefix'):
                 return ArxivId(match.group('oldprefix') + '/' + match.group('digits'))
             else:
                 return ArxivId(match.group('digits'))
         return None
 
-    def __iter__(self) -> Iterator[Document]:
+    def __iter__(self) -> Iterator[ArXMLivDocument]:
         for yymm_location in self._iter_yymm_locations():
             if yymm_location.is_dir():
                 for path in yymm_location.iterdir():
-                    if arxivid := self._filename_to_arxivid_or_none(path.name):
-                        yield SimpleDocument(arxivid, self.release, path)
+                    if arxivid := self.filename_to_arxivid_or_none(path.name):
+                        yield SimpleArXMLivDocument(arxivid, self.release, path)
             else:
                 assert yymm_location.name.endswith('.zip')
                 for name in SHARED_ZIP_CACHE[yymm_location].namelist():
-                    if arxivid := self._filename_to_arxivid_or_none(name.split('/')[-1]):
-                        yield ZipDocument(arxivid, self.release, yymm_location, name)
+                    if arxivid := self.filename_to_arxivid_or_none(name.split('/')[-1]):
+                        yield ZipArXMLivDocument(arxivid, self.release, yymm_location, name)
 
 
 class ArXMLivConfig(ConfigExtension):
@@ -122,9 +128,9 @@ class ArXMLivConfig(ConfigExtension):
                                              default_rel_locations=[f'arxmliv-{release}', f'arxmliv-{release}.tar.gz'],
                                              how_to_get=f'SIGMathLing members can download the arXMLiv copora from https://sigmathling.kwarc.info/resources/')
 
-    def prepare_argparser(self, argparser: argparse.ArgumentParser):
-        argparser.add_argument('--default-arxmliv-release', help='default release of the arXMLiv corpus',
-                               choices=self.releases, default=self.releases[-1])
+#     def prepare_argparser(self, argparser: argparse.ArgumentParser):
+#         argparser.add_argument('--default-arxmliv-release', help='default release of the arXMLiv corpus',
+#                                choices=self.releases, default=self.releases[-1])
 
 
 class ArXMLiv:
@@ -137,5 +143,5 @@ class ArXMLiv:
 
     @classmethod
     def get_release_uri(cls, release: str) -> URIRef:
-        return URIRef(Uris.arxmliv + release + '/')
+        return URIRef(ArXMLivUris.arxmliv + release + '/')
 

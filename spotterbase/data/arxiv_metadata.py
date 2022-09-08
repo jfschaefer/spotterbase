@@ -6,12 +6,12 @@ from rdflib import URIRef, Namespace
 
 from spotterbase.config_loader import ConfigFlag
 
-USE_CENTI_ARXIV = ConfigFlag('--centi-arxiv', 'use a subset of arxiv (≈ 1%)')
+USE_CENTI_ARXIV = ConfigFlag('--centi-arxiv', 'use a subset of arxiv (≈ 1 percent)')
 
 
 class ArxivUris:
     topic_system = URIRef('https://arxiv.org/category_taxonomy/')
-    corpus = URIRef('https://arxiv.org/')
+    dataset = URIRef('https://arxiv.org/')
     centi_arxiv = URIRef('http://sigmathling.kwarc.info/centi-arxiv')
 
 

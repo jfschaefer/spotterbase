@@ -45,9 +45,9 @@ class ConfigLoader:
             config_paths = DEFAULT_CONFIG_PATHS
 
         self.used_default_config_paths: list[Path] = [path for path in config_paths if path.is_file()]
-        self.argparser = configargparse.ArgumentParser(default_config_files=self.used_default_config_paths,
+        self.argparser = configargparse.ArgumentParser(default_config_files=list(map(str, self.used_default_config_paths)),
                                                        add_help=False)
-            #, ignore_unknown_config_file_keys=True)
+        #, ignore_unknown_config_file_keys=True)
         self.argparser.add_argument('-c', '--config', is_config_file=True, help='config file path')
         for extension in self.extensions:
             extension.prepare_argparser(self.argparser)
@@ -55,7 +55,9 @@ class ConfigLoader:
     def load_from_args(self, args: Optional[list[str]] = None) -> argparse.Namespace:
         if args is None:
             args = sys.argv[1:]
-        self.argparser.add_help = True  # previously set to false in case it is the parent of another ``ArgumentParser``
+        # help was previously suppressed in case it is the parent of another ``ArgumentParser``
+        self.argparser.add_argument('-h', '--help', action='help', default=argparse.SUPPRESS,
+                                    help='show this help message and exit')
         namespace = self.argparser.parse_args(args=args)
         self.load_from_namespace(namespace)
         return namespace
@@ -109,7 +111,7 @@ class ConfigFlag(ConfigExtension):
             ConfigLoader.default_extensions.append(self)
 
     def prepare_argparser(self, argparser: argparse.ArgumentParser):
-        argparser.add_argument(self.name, action='store_true')
+        argparser.add_argument(self.name, action='store_true', help=self.description)
 
     def process_namespace(self, args: argparse.Namespace):
         k = self.name.lstrip('-').replace('-', '_')
@@ -117,3 +119,28 @@ class ConfigFlag(ConfigExtension):
 
     def __bool__(self) -> bool:
         return self.value
+
+
+class ConfigString(ConfigExtension):
+    value: Optional[str] = None
+
+    def __init__(self, name: str, description: str, add_to_default_configs: bool = True, **kwargs):
+        self.name = name
+        self.description = description
+        self.kwargs = kwargs
+        if add_to_default_configs:
+            ConfigLoader.default_extensions.append(self)
+
+    def prepare_argparser(self, argparser: argparse.ArgumentParser):
+        argparser.add_argument(self.name, help=self.description, **self.kwargs)
+
+    def process_namespace(self, args: argparse.Namespace):
+        k = self.name.lstrip('-').replace('-', '_')
+        self.value = getattr(args, k)
+
+    def __eq__(self, other: Optional[str]) -> bool:
+        return self.value == other
+
+
+def auto():
+    ConfigLoader().load_from_args()

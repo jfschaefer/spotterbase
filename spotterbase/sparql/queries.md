@@ -10,6 +10,12 @@ PREFIX oa: <http://www.w3.org/ns/oa#>
 PREFIX sb: <http://sigmathling.kwarc.info/spotterbase/>
 # arxiv categories
 PREFIX axc: <https://arxiv.org/archive/>
+# arXMLiv
+PREFIX axm: <http://sigmathling.kwarc.info/arxmliv/>
+# arXMLiv severities
+PREFIX axmsev: <http://sigmathling.kwarc.info/arxmliv/severity/>
+# arMXLiv 2020 release
+PREFIX axm2020: <http://sigmathling.kwarc.info/arxmliv/2020/>
 ```
 
 
@@ -31,5 +37,19 @@ SELECT DISTINCT ?document WHERE {
     ?document a sb:document .
     ?anno oa:hasTarget ?document .
     ?anno oa:hasBody axc:q-bio.SC .
+}
+```
+
+
+#### Error-free ArXMLiv documents of a particular category
+```sparql
+SELECT DISTINCT ?arxivdoc ?doc WHERE {
+    ?anno oa:hasBody axc:q-bio.SC .
+    ?anno oa:hasTarget ?arxivdoc .
+
+    ?doc sb:basedOn ?arxivdoc .
+    ?doc sb:belongsto axm2020: .
+    ?sanno oa:hasTarget ?doc .
+    ?sanno oa:hasBody axmSev:noProblem .
 }
 ```
