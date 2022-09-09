@@ -8,11 +8,11 @@ from rdflib import RDF
 
 from spotterbase import config_loader
 from spotterbase.config_loader import ConfigString
-from spotterbase.data.arxiv_metadata import ArxivUris, USE_CENTI_ARXIV
-from spotterbase.data.arxmliv_corpus import ArXMLivConfig, ArXMLiv, ArXMLivCorpus, ArXMLivUris
+from spotterbase.data.arxiv import ArxivUris, USE_CENTI_ARXIV
+from spotterbase.data.arxmliv import ArXMLivConfig, ArXMLiv, ArXMLivCorpus, ArXMLivUris
 from spotterbase.data.locator import DataDir
 from spotterbase.data.rdf import SB
-from spotterbase.rdf_gen.utils import TripleT, SpotterRun, Annotation
+from spotterbase.spotters.utils import TripleT, SpotterRun, Annotation
 from spotterbase.utils import version_string
 
 logger = logging.getLogger(__name__)
@@ -47,7 +47,7 @@ def iter_triples(corpus: ArXMLivCorpus) -> Iterator[TripleT]:
             continue
         yield document.get_uri(), SB.basedOn, document.arxivid.as_uri()
         yield document.get_uri(), RDF.type, SB.document
-        yield document.get_uri(), SB.belongsto, dataset_uri
+        yield document.get_uri(), SB.belongsTo, dataset_uri
 
     spotter_run = SpotterRun(SB['spotter/arxmlivmetadata'], spotter_version=version_string())
     yield from spotter_run.triples()

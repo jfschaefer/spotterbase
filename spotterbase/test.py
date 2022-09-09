@@ -1,5 +1,5 @@
 from spotterbase.config_loader import ConfigLoader
-from spotterbase.data.arxmliv_corpus import ArXMLiv
+from spotterbase.data.arxmliv import ArXMLiv
 
 ConfigLoader().load_from_args()
 

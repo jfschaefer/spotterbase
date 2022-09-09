@@ -101,28 +101,8 @@ class LogConfigExtension(ConfigExtension):
 ConfigLoader.default_extensions.append(LogConfigExtension())
 
 
-class ConfigFlag(ConfigExtension):
-    value: bool = False
-
-    def __init__(self, name: str, description: str, add_to_default_configs: bool = True):
-        self.name = name
-        self.description = description
-        if add_to_default_configs:
-            ConfigLoader.default_extensions.append(self)
-
-    def prepare_argparser(self, argparser: argparse.ArgumentParser):
-        argparser.add_argument(self.name, action='store_true', help=self.description)
-
-    def process_namespace(self, args: argparse.Namespace):
-        k = self.name.lstrip('-').replace('-', '_')
-        self.value = getattr(args, k)
-
-    def __bool__(self) -> bool:
-        return self.value
-
-
-class ConfigString(ConfigExtension):
-    value: Optional[str] = None
+class SimpleExtension(ConfigExtension):
+    value: Any
 
     def __init__(self, name: str, description: str, add_to_default_configs: bool = True, **kwargs):
         self.name = name
@@ -138,8 +118,29 @@ class ConfigString(ConfigExtension):
         k = self.name.lstrip('-').replace('-', '_')
         self.value = getattr(args, k)
 
-    def __eq__(self, other: Optional[str]) -> bool:
+    def __eq__(self, other) -> bool:
         return self.value == other
+
+
+class ConfigFlag(SimpleExtension):
+    value: bool = False
+
+    def prepare_argparser(self, argparser: argparse.ArgumentParser):
+        argparser.add_argument(self.name, action='store_true', help=self.description, **self.kwargs)
+
+    def __bool__(self) -> bool:
+        return self.value
+
+
+class ConfigString(SimpleExtension):
+    value: Optional[str] = None
+
+
+class ConfigInt(SimpleExtension):
+    value: Optional[int] = None
+
+    def prepare_argparser(self, argparser: argparse.ArgumentParser):
+        argparser.add_argument(self.name, help=self.description, type=int, **self.kwargs)
 
 
 def auto():

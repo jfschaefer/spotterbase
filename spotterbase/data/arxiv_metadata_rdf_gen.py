@@ -9,11 +9,11 @@ import rdflib
 from rdflib import RDF
 
 from spotterbase import config_loader
-from spotterbase.data.arxiv_metadata import ArxivId, ArxivCategory, USE_CENTI_ARXIV, ArxivUris
+from spotterbase.data.arxiv import ArxivId, ArxivCategory, USE_CENTI_ARXIV, ArxivUris
 from spotterbase.data.locator import Locator, DataDir
 from spotterbase.data.rdf import SB
 from spotterbase.data.utils import json_lib
-from spotterbase.rdf_gen.utils import TripleT, Annotation, SpotterRun
+from spotterbase.spotters.utils import TripleT, Annotation, SpotterRun
 from spotterbase.utils import version_string
 
 logger = logging.getLogger(__name__)
@@ -79,7 +79,7 @@ class MetadataRdfGenerator:
         for cat in cat_to_arxivid:
             cat_uri = ArxivCategory(cat).as_uri()
             yield cat_uri, RDF.type, SB.topic
-            yield cat_uri, SB.belongsto, ArxivUris.topic_system
+            yield cat_uri, SB.belongsTo, ArxivUris.topic_system
             if '.' in cat:
                 assert cat.count('.') == 1
                 supercat = cat.split('.')[0]
@@ -97,9 +97,9 @@ class MetadataRdfGenerator:
         for arxiv_id in self.accumulator:
             uri = arxiv_id.as_uri()
             yield uri, RDF.type, SB.document
-            yield uri, SB.belongsto, ArxivUris.dataset
+            yield uri, SB.belongsTo, ArxivUris.dataset
             if arxiv_id.is_in_centi_arxiv():
-                yield uri, SB.belongsto, ArxivUris.centi_arxiv
+                yield uri, SB.belongsTo, ArxivUris.centi_arxiv
 
 
 def _get_rdf_dest() -> Path:

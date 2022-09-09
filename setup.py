@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(
-    name='arxivnlp',
+    name='spotterbase',
     version='',
     packages=['spotterbase'],
     url='',

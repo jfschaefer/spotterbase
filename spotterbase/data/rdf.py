@@ -4,6 +4,7 @@ from rdflib.namespace import DefinedNamespace
 
 class SB(DefinedNamespace):
     _NS = Namespace('http://sigmathling.kwarc.info/spotterbase/')
+    NS = _NS
     _warn = False
 
     # spotter info
@@ -19,7 +20,7 @@ class SB(DefinedNamespace):
     document: URIRef
 
     subset: URIRef
-    belongsto: URIRef
+    belongsTo: URIRef
     basedOn: URIRef
 
     # topics/categories

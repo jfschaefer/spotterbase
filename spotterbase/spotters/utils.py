@@ -1,10 +1,13 @@
 import datetime
+import logging
 from typing import Optional, Iterator
 
 from rdflib import URIRef, BNode, RDF, Literal, DC
 from rdflib.term import Identifier
 
 from spotterbase.data.rdf import SB, OA
+
+logger = logging.getLogger(__name__)
 
 TripleT = tuple[Identifier, Identifier, Identifier]
 

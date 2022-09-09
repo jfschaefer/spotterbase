@@ -16,6 +16,11 @@ Conductor interface: http://localhost:8890/conductor/
 
 Default admin credentials: `dba`, `dba`.
 
+To allow `LOAD` queries, give user `SPARQL` the `SPARQL_UPDATE` role (in Conductor/System Admin/User Accounts).
+Furthermore, add the directory containing the RDF files to `DirsAllowed` in the `virtuoso.ini`.
+
+
+# Initial research
 Follow this website https://vos.openlinksw.com/owiki/wiki/VOS/VirtRDFInsert#HTTP%20POST%20Example%201
 
 the following should work
@@ -25,3 +30,6 @@ curl --verbose --digest --user "spotterbase:spotterbasepwd" -T centi-arxiv-metad
 but doesn't because of https://github.com/openlink/virtuoso-opensource/issues/764
 
 Possible solution: gunzip in /tmp first (works without gzip)
+
+
+Also interesting: https://gist.github.com/jonlazaro/6934282

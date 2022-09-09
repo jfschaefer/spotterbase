@@ -1,5 +1,4 @@
 import abc
-import argparse
 import re
 from pathlib import Path
 from typing import IO, Iterator, Optional
@@ -7,7 +6,8 @@ from typing import IO, Iterator, Optional
 from rdflib import URIRef
 
 from spotterbase.config_loader import ConfigExtension, ConfigLoader
-from spotterbase.data.arxiv_metadata import ArxivId
+from spotterbase.data.arxiv import ArxivId
+from spotterbase.data.document import Document, Corpus
 from spotterbase.data.locator import Locator
 from spotterbase.data.utils import MissingDataException
 from spotterbase.data.zipfilecache import SHARED_ZIP_CACHE
@@ -22,7 +22,7 @@ class ArXMLivUris:
     severity_error = URIRef(severity + 'error')
 
 
-class ArXMLivDocument(abc.ABC):
+class ArXMLivDocument(Document, abc.ABC):
     arxivid: ArxivId
     release: str
 
@@ -62,7 +62,7 @@ class ZipArXMLivDocument(ArXMLivDocument):
             raise missing
 
 
-class ArXMLivCorpus:
+class ArXMLivCorpus(Corpus):
     filename_regex = re.compile(f'^(?P<oldprefix>[a-z-]+)?(?P<digits>[0-9.]+).html$')
 
     def __init__(self, release: str, path: Path):
@@ -76,6 +76,9 @@ class ArXMLivCorpus:
                                f'{arxivid.yymm}/{arxivid.identifier.replace("/", "")}.html')
         else:
             return SimpleArXMLivDocument(arxivid, self.release, location)
+
+    def get_uri(self) -> URIRef:
+        return ArXMLiv.get_release_uri(self.release)
 
     def _get_yymm_location(self, yymm: str) -> Path:
         for directory in [self.path / f'{yymm}', self.path / 'data' / f'{yymm}']:

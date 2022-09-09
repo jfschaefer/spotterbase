@@ -15,6 +15,10 @@ class ArxivUris:
     centi_arxiv = URIRef('http://sigmathling.kwarc.info/centi-arxiv')
 
 
+class InvalidArxivId(Exception):
+    pass
+
+
 class ArxivId:
     uri_namespace = Namespace('https://arxiv.org/abs/')
 
@@ -26,8 +30,14 @@ class ArxivId:
     def __hash__(self):
         return hash(self.identifier)
 
-    def __eq__(self, other: 'ArxivId') -> bool:
-        return self.identifier == other.identifier
+    def __eq__(self, other) -> bool:
+        match other:
+            case ArxivId():
+                return self.identifier == other.identifier
+            case str():
+                return self.identifier == other
+            case _:
+                return NotImplemented
 
     def as_uri(self) -> URIRef:
         return self.uri_namespace[self.identifier]
@@ -39,7 +49,9 @@ class ArxivId:
 
     @property
     def yymm(self) -> str:
-        return self.arxiv_id_regex.match(self.identifier).group('yymm')
+        if match := self.arxiv_id_regex.match(self.identifier):
+            return match.group('yymm')
+        raise InvalidArxivId(self.arxiv_id_regex)
 
 
 class ArxivCategory:
