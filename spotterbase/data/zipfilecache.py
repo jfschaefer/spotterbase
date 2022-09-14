@@ -10,6 +10,8 @@ from spotterbase.config_loader import ConfigExtension, ConfigLoader
 logger = logging.getLogger(__name__)
 
 
+# TODO: Use collections.OrderedDict for LRU mechanism
+
 class OpenedZipFile(zipfile.ZipFile):
     """ A zip file that is currently opened in the :class:`ZipFileCache`.
 

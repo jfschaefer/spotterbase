@@ -35,7 +35,7 @@ def _get_severities_lists(corpus: ArXMLivCorpus) -> Optional[tuple[list[str], li
 
 
 def iter_triples(corpus: ArXMLivCorpus) -> Iterator[TripleT]:
-    dataset_uri = ArXMLiv.get_release_uri(corpus.release)
+    dataset_uri = ArXMLiv.get_release_uri(corpus.release).as_uriref()
     yield dataset_uri, RDF.type, SB.dataset
     yield dataset_uri, SB.basedOn, ArxivUris.dataset
 
@@ -45,9 +45,9 @@ def iter_triples(corpus: ArXMLivCorpus) -> Iterator[TripleT]:
     for document in corpus:
         if USE_CENTI_ARXIV and not document.arxivid.is_in_centi_arxiv():
             continue
-        yield document.get_uri(), SB.basedOn, document.arxivid.as_uri()
-        yield document.get_uri(), RDF.type, SB.document
-        yield document.get_uri(), SB.belongsTo, dataset_uri
+        yield document.get_uri().as_uriref(), SB.basedOn, document.arxivid.as_uri()
+        yield document.get_uri().as_uriref(), RDF.type, SB.document
+        yield document.get_uri().as_uriref(), SB.belongsTo, dataset_uri
 
     spotter_run = SpotterRun(SB['spotter/arxmlivmetadata'], spotter_version=version_string())
     yield from spotter_run.triples()
@@ -55,11 +55,11 @@ def iter_triples(corpus: ArXMLivCorpus) -> Iterator[TripleT]:
     severities = _get_severities_lists(corpus)
     if severities:
         np, w, e = severities
-        yield ArXMLivUris.severity_no_problem, RDF.type, ArXMLivUris.severity
-        yield ArXMLivUris.severity_warning, RDF.type, ArXMLivUris.severity
-        yield ArXMLivUris.severity_error, RDF.type, ArXMLivUris.severity
-        for (docs, sev) in [(np, ArXMLivUris.severity_no_problem), (w, ArXMLivUris.severity_warning),
-                            (e, ArXMLivUris.severity_error)]:
+        yield ArXMLivUris.severity_no_problem.as_uriref(), RDF.type, ArXMLivUris.severity.as_uriref()
+        yield ArXMLivUris.severity_warning.as_uriref(), RDF.type, ArXMLivUris.severity.as_uriref()
+        yield ArXMLivUris.severity_error.as_uriref(), RDF.type, ArXMLivUris.severity.as_uriref()
+        for (docs, sev) in [(np, ArXMLivUris.severity_no_problem.as_uriref()), (w, ArXMLivUris.severity_warning.as_uriref()),
+                            (e, ArXMLivUris.severity_error.as_uriref())]:
             annotation = Annotation(spotter_run)
             annotation.add_body(sev)
             for doc in docs:

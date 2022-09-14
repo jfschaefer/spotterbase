@@ -8,5 +8,5 @@ setup(
     license='',
     author='Jan Frederik Schaefer',
     author_email='',
-    description='Framework for spotters on HTML5 documents (specifically arXMLiv documents)',
+    description='Framework for spotters on HTML5 documents (especially arXMLiv documents)',
 )

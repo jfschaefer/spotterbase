@@ -3,23 +3,21 @@ import re
 from pathlib import Path
 from typing import IO, Iterator, Optional
 
-from rdflib import URIRef
-
 from spotterbase.config_loader import ConfigExtension, ConfigLoader
 from spotterbase.data.arxiv import ArxivId
-from spotterbase.data.document import Document, Corpus
+from spotterbase.data.document import Document, Corpus, DocumentNotFoundException
 from spotterbase.data.locator import Locator
-from spotterbase.data.utils import MissingDataException
+from spotterbase.rdf.base import Uri
 from spotterbase.data.zipfilecache import SHARED_ZIP_CACHE
 
 
 class ArXMLivUris:
-    arxmliv = URIRef(f'http://sigmathling.kwarc.info/arxmliv/')
+    arxmliv = Uri(f'http://sigmathling.kwarc.info/arxmliv/')
 
-    severity = URIRef(arxmliv + 'severity/')
-    severity_no_problem = URIRef(severity + 'noProblem')
-    severity_warning = URIRef(severity + 'warning')
-    severity_error = URIRef(severity + 'error')
+    severity = arxmliv / 'severity/'
+    severity_no_problem = severity / 'noProblem'
+    severity_warning = severity / 'warning'
+    severity_error = severity / 'error'
 
 
 class ArXMLivDocument(Document, abc.ABC):
@@ -30,7 +28,7 @@ class ArXMLivDocument(Document, abc.ABC):
         self.arxivid = arxivid
         self.release = release
 
-    def get_uri(self) -> URIRef:
+    def get_uri(self) -> Uri:
         return ArXMLiv.get_release_uri(self.release) + self.arxivid.identifier
 
     def open(self, *args, **kwargs) -> IO:
@@ -57,7 +55,7 @@ class ZipArXMLivDocument(ArXMLivDocument):
         try:
             return zf.open(self.filename, *args, **kwargs)
         except KeyError as e:
-            missing = MissingDataException(f'Failed to find {self.filename} in {self.path_to_zipfile}: {e}')
+            missing = DocumentNotFoundException(f'Failed to find {self.filename} in {self.path_to_zipfile}: {e}')
             missing.__suppress_context__ = True
             raise missing
 
@@ -73,11 +71,11 @@ class ArXMLivCorpus(Corpus):
         location = self._get_yymm_location(arxivid.yymm)
         if location.name.endswith('.zip'):
             return ZipArXMLivDocument(arxivid, self.release, location,
-                               f'{arxivid.yymm}/{arxivid.identifier.replace("/", "")}.html')
+                                      f'{arxivid.yymm}/{arxivid.identifier.replace("/", "")}.html')
         else:
             return SimpleArXMLivDocument(arxivid, self.release, location)
 
-    def get_uri(self) -> URIRef:
+    def get_uri(self) -> Uri:
         return ArXMLiv.get_release_uri(self.release)
 
     def _get_yymm_location(self, yymm: str) -> Path:
@@ -87,7 +85,7 @@ class ArXMLivCorpus(Corpus):
         for zip_path in [self.path / f'{yymm}.zip', self.path / 'data' / f'{yymm}.zip']:
             if zip_path.is_file():
                 return zip_path
-        raise MissingDataException(f'Failed to find a folder for "{yymm}" in {self.path}')
+        raise DocumentNotFoundException(f'Failed to find a folder for "{yymm}" in {self.path}')
 
     def _iter_yymm_locations(self) -> Iterator[Path]:
         if not (path := self.path / 'data').is_dir():
@@ -131,6 +129,7 @@ class ArXMLivConfig(ConfigExtension):
                                              default_rel_locations=[f'arxmliv-{release}', f'arxmliv-{release}.tar.gz'],
                                              how_to_get=f'SIGMathLing members can download the arXMLiv copora from https://sigmathling.kwarc.info/resources/')
 
+
 #     def prepare_argparser(self, argparser: argparse.ArgumentParser):
 #         argparser.add_argument('--default-arxmliv-release', help='default release of the arXMLiv corpus',
 #                                choices=self.releases, default=self.releases[-1])
@@ -145,6 +144,5 @@ class ArXMLiv:
         return ArXMLivCorpus(release, self.config.locators[release].require())
 
     @classmethod
-    def get_release_uri(cls, release: str) -> URIRef:
-        return URIRef(ArXMLivUris.arxmliv + release + '/')
-
+    def get_release_uri(cls, release: str) -> Uri:
+        return ArXMLivUris.arxmliv / 'release/'

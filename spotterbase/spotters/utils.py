@@ -6,6 +6,7 @@ from rdflib import URIRef, BNode, RDF, Literal, DC
 from rdflib.term import Identifier
 
 from spotterbase.data.rdf import SB, OA
+from spotterbase.rdf.base import Uri
 
 logger = logging.getLogger(__name__)
 
@@ -38,7 +39,9 @@ class Annotation:
     def add_body(self, body: Identifier):
         self.body.append(body)
 
-    def add_target(self, target: Identifier):
+    def add_target(self, target: Uri | Identifier):
+        if isinstance(target, Uri):
+            target = target.as_uriref()
         self.target.append(target)
 
     def triples(self) -> Iterator[TripleT]:

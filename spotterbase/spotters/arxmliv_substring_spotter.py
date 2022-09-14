@@ -4,7 +4,7 @@ import multiprocessing
 from typing import Iterator
 
 import rdflib
-from rdflib import URIRef, BNode, RDF, Literal
+from rdflib import BNode, RDF, Literal
 
 from spotterbase import config_loader
 from spotterbase.config_loader import ConfigString, ConfigInt
@@ -12,6 +12,7 @@ from spotterbase.data.arxiv import USE_CENTI_ARXIV
 from spotterbase.data.arxmliv import ArXMLivConfig, ArXMLiv, ArXMLivDocument, ArXMLivCorpus
 from spotterbase.data.locator import DataDir
 from spotterbase.data.rdf import SB
+from spotterbase.rdf.base import Uri
 from spotterbase.spotters.utils import Annotation, TripleT, SpotterRun
 from spotterbase.utils import version_string, ProgressLogger
 
@@ -28,7 +29,7 @@ SUBSTRINGS = ['ltx_unit']
 CONTAINS_SUBSTRING = SB.NS['containsSubstring']
 
 
-def check(document: ArXMLivDocument) -> tuple[URIRef, list[str]]:
+def check(document: ArXMLivDocument) -> tuple[Uri, list[str]]:
     """ Returns document URI and contained substrings """
     try:
         with document.open() as fp:
@@ -67,7 +68,7 @@ def process(corpus: ArXMLivCorpus) -> Iterator[TripleT]:
         for i, result in enumerate(pool.imap(check, document_iterator(), chunksize=50)):
             uri, substrings = result
             for substring in substrings:
-                annos[substring].add_target(uri)
+                annos[substring].add_target(uri.as_uriref())
             progress_logger.update(i+1)
     logger.info(f'Processed a total of {i} documents')
 
