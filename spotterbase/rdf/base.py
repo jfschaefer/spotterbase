@@ -1,33 +1,33 @@
+"""
+A small library for RDF triples.
+"""
 from __future__ import annotations
 
 import dataclasses
 import functools
 import re
-import typing
-from typing import Optional, TypeVar, Type
+from typing import Optional, Iterable
 
 from rdflib import URIRef
 
 
-# https://www.w3.org/TR/turtle/#sec-grammar-grammar
-
 class NameSpace:
-    def __init__(self, uri: Uri, prefix: Optional[str] = None):
-        self.uri = uri
+    def __init__(self, uri: Uri | str, prefix: Optional[str] = None):
+        self.uri = uri if isinstance(uri, Uri) else Uri(uri)
         self.prefix = prefix
 
     def __getitem__(self, item) -> Uri:
         assert isinstance(item, str)
         return Uri(item, self)
 
-    def format(self, format: typing.Literal['sparql', 'turtle']) -> str:
-        match format:
+    def __format__(self, format_spec) -> str:
+        match format_spec:
             case 'sparql':
-                return f'@prefix {self.prefix} {self.uri.format(with_angular_brackets=True)} .'
-            case 'turtle':
-                return f'PREFIX {self.prefix} {self.uri.format(with_angular_brackets=True)}'
+                return f'PREFIX {self.prefix} {self.uri:<>}'
+            case 'turtle' | 'ttl':
+                return f'@prefix {self.prefix} {self.uri:<>} .'
             case other:
-                raise Exception(f'Unsupported format: "{other}"')
+                raise Exception(f'Unsupported format: {other!r}')
 
 
 class VocabularyMeta(type):
@@ -35,17 +35,11 @@ class VocabularyMeta(type):
     def __getattr__(cls, item: str) -> Uri:
         if item not in cls.__annotations__:
             raise AttributeError(f'{cls.__class__} has no attribute {item}')
-        class_ = cls.__annotations__[item]
-        assert issubclass(class_, Uri)
-        uri = cls.NS[item]
-        return class_.from_uri(uri)
+        return cls.NS[item]
 
 
 class Vocabulary(metaclass=VocabularyMeta):
     NS: NameSpace
-
-
-_T = TypeVar('_T', bound='Uri')
 
 
 class Uri:
@@ -83,16 +77,22 @@ class Uri:
     def __str__(self) -> str:
         return self.full_uri()
 
-    def format(self, with_angular_brackets: bool = False, allow_prefixed: bool = False) -> str:
-        if allow_prefixed:
-            if self.namespace and self.namespace.prefix:
-                reserved_chars = "~.-!$&'()*+,;=/?#@%_"
-                uri = re.sub('([' + re.escape(reserved_chars) + '])', r'\\\1', self.uri)
-                return self.namespace.prefix + uri
-        if with_angular_brackets:
-            return f'<{self.full_uri()}>'
-        else:
-            return self.full_uri()
+    @functools.cache
+    def __format__(self, format_spec) -> str:
+        match format_spec:
+            case '' | 'plain':
+                return self.full_uri()
+            case '<>':
+                return f'<{self.full_uri()}>'
+            case ':' | 'prefix':
+                if self.namespace and self.namespace.prefix:
+                    reserved_chars = "~.-!$&'()*+,;=/?#@%_"
+                    uri = re.sub('([' + re.escape(reserved_chars) + '])', r'\\\1', self.uri)
+                    return self.namespace.prefix + uri
+                else:
+                    return f'<{self.full_uri()}>'
+            case other:
+                raise NotImplementedError(f'Unsupported format specification: {format_spec!r}')
 
     def full_uri(self) -> str:
         if not self._full_uri:
@@ -103,17 +103,15 @@ class Uri:
         return self._full_uri
 
     def __repr__(self) -> str:
-        return self.format(with_angular_brackets=True)
-
-    @classmethod
-    def from_uri(cls: Type[_T], uri: Uri) -> _T:
-        return cls(uri.uri, uri.namespace)
+        return format(self, '<>')
 
     def __eq__(self, other) -> bool:
         return self.full_uri() == str(other)
 
     def __hash__(self):
         return hash(self.full_uri())
+
+    # def __sub__(self, other) -> :
 
 
 class BlankNode:
@@ -124,6 +122,12 @@ class BlankNode:
         self.value = hex(BlankNode.counter)[2:]
         BlankNode.counter += 1
 
+    def __repr__(self):
+        return f'{self.__class__.__name__}({self.value})'
+
+    def __str__(self):
+        return f'_:{self.value}'
+
 
 class Literal:
     pass
@@ -133,9 +137,4 @@ Subject = Uri | BlankNode
 Predicate = Uri
 Object = Uri | BlankNode | Literal
 
-
-@dataclasses.dataclass
-class Triple:
-    s: Subject
-    p: Predicate
-    o: Object
+Triple = tuple[Subject, Predicate, Object]

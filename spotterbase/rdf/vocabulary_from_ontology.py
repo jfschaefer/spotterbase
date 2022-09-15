@@ -1,15 +1,22 @@
-import argparse
+"""
+A very hacky script to generate classes for commonly used vocabularies.
+"""
+
 import sys
 
 import rdflib
 import requests
 
 VOCABULARIES = [
-    ('AS', 'https://raw.githubusercontent.com/w3c/activitystreams/master/vocabulary/activitystreams2.owl', 'http://www.w3.org/ns/activitystreams#'),
-    ('DC', 'https://www.dublincore.org/specifications/dublin-core/dcmi-terms/dublin_core_elements.ttl', 'http://purl.org/dc/elements/1.1/'),
-    ('DCAM', 'https://www.dublincore.org/specifications/dublin-core/dcmi-terms/dublin_core_abstract_model.ttl', 'http://purl.org/dc/dcam/'),
+    ('AS', 'https://raw.githubusercontent.com/w3c/activitystreams/master/vocabulary/activitystreams2.owl',
+     'http://www.w3.org/ns/activitystreams#'),
+    ('DC', 'https://www.dublincore.org/specifications/dublin-core/dcmi-terms/dublin_core_elements.ttl',
+     'http://purl.org/dc/elements/1.1/'),
+    ('DCAM', 'https://www.dublincore.org/specifications/dublin-core/dcmi-terms/dublin_core_abstract_model.ttl',
+     'http://purl.org/dc/dcam/'),
     ('DCTERMS', 'http://dublincore.org/2020/01/20/dublin_core_terms.ttl', 'http://purl.org/dc/terms/'),
-    ('DCTYPES', 'https://www.dublincore.org/specifications/dublin-core/dcmi-terms/dublin_core_type.ttl', 'http://purl.org/dc/dcmitype/'),
+    ('DCTYPES', 'https://www.dublincore.org/specifications/dublin-core/dcmi-terms/dublin_core_type.ttl',
+     'http://purl.org/dc/dcmitype/'),
     ('FOAF', 'http://xmlns.com/foaf/0.1/index.rdf', 'http://xmlns.com/foaf/0.1/'),
     ('RDF', 'http://www.w3.org/1999/02/22-rdf-syntax-ns#', 'http://www.w3.org/1999/02/22-rdf-syntax-ns#'),
     ('RDFS', 'http://www.w3.org/2000/01/rdf-schema#', 'http://www.w3.org/2000/01/rdf-schema#'),
@@ -18,7 +25,6 @@ VOCABULARIES = [
     ('SKOS', 'https://www.w3.org/2009/08/skos-reference/skos.rdf', 'http://www.w3.org/2004/02/skos/core#')
     # XSD is hard-coded
 ]
-
 
 PREFIXES = '''
     PREFIX dc: <http://purl.org/dc/elements/1.1/>
@@ -33,8 +39,7 @@ def create_from(ontology: str, namespace: str):
     response = requests.get(ontology)
     assert response.status_code == 200, f'Bad response code ({response.status_code}): {response.text}'
     # graph.parse(ontology, format='xml' if ontology.endswith('.rdf') else 'ttl')
-    graph.parse(data = response.text, format='xml' if response.text.startswith('<') else 'ttl')
-
+    graph.parse(data=response.text, format='xml' if response.text.startswith('<') else 'ttl')
 
     # PROPERTIES
     property_results = graph.query(PREFIXES + '''
@@ -88,11 +93,12 @@ def create_from(ontology: str, namespace: str):
         OPTIONAL {{ ?thing rdfs:comment ?comm }}
     }}
     ''')
-    comments = {row.thing: '\n    # '.join(line.strip() for line in row.comm.strip().splitlines()) for row in other_results if row.comm}
+    comments = {row.thing: '\n    # '.join(line.strip() for line in row.comm.strip().splitlines()) for row in
+                other_results if row.comm}
     covered = classes | properties
     printed_other = False
     for result in sorted(other_results, key=lambda r: r.thing):
-        if '-' in result.thing:   # can't just use it as Python attribute
+        if '-' in result.thing:  # can't just use it as Python attribute
             continue
         if result.thing in covered:
             continue
@@ -105,7 +111,7 @@ def create_from(ontology: str, namespace: str):
             print('    # ' + comments[result.thing])
         covered.add(result.thing)
         name = result.thing[len(namespace):]
-        print('    ' + name + ': Uri ' + max(0, 30-len(name))*' ' + '# a ' + str(result.type))
+        print('    ' + name + ': Uri ' + max(0, 30 - len(name)) * ' ' + '# a ' + str(result.type))
 
 
 def main():
@@ -120,16 +126,13 @@ def main():
         print()
     print('\nclass XSD(Vocabulary):')
     print("    NS = NameSpace(Uri('http://www.w3.org/2001/XMLSchema#'), prefix='xsd:')\n")
-    for e in ['anyURI', 'base64Binary', 'boolean', 'byte', 'date', 'dateTime', 'dateTimeStamp', 'dayTimeDuration', 'decimal', 'double', 'float', 'gDay', 'gMonth', 'gMonthDay', 'gYear', 'gYearMonth', 'hexBinary', 'int', 'integer', 'language', 'long', 'Name', 'NCName', 'NMTOKEN', 'negativeInteger', 'nonNegativeInteger', 'nonPositiveInteger', 'normalizedString', 'positiveInteger', 'short', 'string', 'time', 'token', 'unsignedByte', 'unsignedInt', 'unsignedLong', 'unsignedShort', 'yearMonthDuration', 'precisionDecimal']:
+    for e in ['anyURI', 'base64Binary', 'boolean', 'byte', 'date', 'dateTime', 'dateTimeStamp', 'dayTimeDuration',
+              'decimal', 'double', 'float', 'gDay', 'gMonth', 'gMonthDay', 'gYear', 'gYearMonth', 'hexBinary', 'int',
+              'integer', 'language', 'long', 'Name', 'NCName', 'NMTOKEN', 'negativeInteger', 'nonNegativeInteger',
+              'nonPositiveInteger', 'normalizedString', 'positiveInteger', 'short', 'string', 'time', 'token',
+              'unsignedByte', 'unsignedInt', 'unsignedLong', 'unsignedShort', 'yearMonthDuration', 'precisionDecimal']:
         print(f'    {e}: Uri')
-
-
 
 
 if __name__ == '__main__':
     main()
-#     argparser = argparse.ArgumentParser(add_help=True)
-#     argparser.add_argument('ontology', nargs=1)
-#     argparser.add_argument('namespace', nargs=1)
-#     args = argparser.parse_args()
-#     create_from(args.ontology[0], args.namespace[0])

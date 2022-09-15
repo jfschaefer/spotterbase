@@ -1,23 +1,25 @@
 import abc
 from collections import OrderedDict, defaultdict
-from typing import Iterable, TextIO
+from typing import TextIO, Iterable
 
 from spotterbase.rdf.base import Triple, Uri, Object, NameSpace, Subject, BlankNode, Predicate
+from spotterbase.rdf.vocab import RDF
 
 
 class Serializer(abc.ABC):
-    def add(self, triple: Triple):
+    def add(self, s: Subject, p: Predicate, o: Object):
         raise NotImplementedError()
 
     def add_from_iterable(self, triples: Iterable[Triple]):
         for triple in triples:
-            self.add(triple)
+            self.add(*triple)
 
     def flush(self):
         pass
 
 
 class TurtleSerializer(Serializer):
+    # https://www.w3.org/TR/turtle/#sec-grammar-grammar
     def __init__(self, fp: TextIO, buffer_size: int = 1000):
         self.fp = fp
         self.max_buffer_size = buffer_size
@@ -25,12 +27,12 @@ class TurtleSerializer(Serializer):
         self.buffer: OrderedDict[Subject, list[tuple[Predicate, Object]]] = OrderedDict()
         self.used_prefixes: dict[str, str] = {}
 
-    def add(self, triple: Triple):
-        if triple.s in self.buffer:
-            self.buffer[triple.s].append((triple.p, triple.o))
-            self.buffer.move_to_end(triple.s)
+    def add(self, s: Subject, p: Predicate, o: Object):
+        if s in self.buffer:
+            self.buffer[s].append((p, o))
+            self.buffer.move_to_end(s)
         else:
-            self.buffer[triple.s] = [(triple.p, triple.o)]
+            self.buffer[s] = [(p, o)]
         self.cur_buffer_size += 1
         if self.cur_buffer_size >= self.max_buffer_size:
             self._write_one_from_buffer()
@@ -39,6 +41,7 @@ class TurtleSerializer(Serializer):
         subject, pairs = self.buffer.popitem(last=False)
         self.cur_buffer_size -= len(pairs)
 
+        # make sure all prefixes have been created
         self._require_prefix(subject.namespace)
         prop_to_obj = defaultdict(list)
         for prop, obj in pairs:
@@ -46,6 +49,7 @@ class TurtleSerializer(Serializer):
             self._require_prefix(obj.namespace)
             prop_to_obj[prop].append(obj)
 
+        # write triples
         self._write_node(subject)
         first_prop = True
         for prop, objs in prop_to_obj.items():
@@ -54,7 +58,10 @@ class TurtleSerializer(Serializer):
                 first_prop = False
             else:
                 self.fp.write(' ;\n  ')
-            self._write_node(prop)
+            if prop == RDF.type:
+                self.fp.write('a')
+            else:
+                self._write_node(prop)
             first_obj = True
             for obj in objs:
                 if first_obj:
@@ -63,12 +70,12 @@ class TurtleSerializer(Serializer):
                 else:
                     self.fp.write(',\n    ')
                 self._write_node(obj)
-        self.fp.write('\n')
+        self.fp.write(' .\n')
 
     def _write_node(self, node: Subject | Predicate | Object):
         match node:
             case Uri():
-                self.fp.write(node.format(with_angular_brackets=True, allow_prefixed=True))
+                self.fp.write(format(node, 'prefix'))
             case BlankNode():
                 self.fp.write(f'_:{node.value}')
             case _:
@@ -83,7 +90,7 @@ class TurtleSerializer(Serializer):
                                 f'{self.used_prefixes[ns.prefix]} and {str(ns.uri)}')
             return
         self.used_prefixes[ns.prefix] = str(ns.uri)
-        self.fp.write(ns.format('turtle') + '\n')
+        self.fp.write(f'{ns:turtle}\n')
 
     def flush(self):
         while self.buffer:

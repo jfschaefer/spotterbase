@@ -3,7 +3,7 @@ from setuptools import setup
 setup(
     name='spotterbase',
     version='',
-    packages=['spotterbase'],
+    packages=['spotterbase', 'spotterbase.data', 'spotterbase.rdf', 'spotterbase.sparql', 'spotterbase.spotters', 'spotterbase.test'],
     url='',
     license='',
     author='Jan Frederik Schaefer',
