@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import dataclasses
 import functools
+import pathlib
 import re
 from typing import Optional, Iterable
 
@@ -34,7 +35,7 @@ class VocabularyMeta(type):
     @functools.cache
     def __getattr__(cls, item: str) -> Uri:
         if item not in cls.__annotations__:
-            raise AttributeError(f'{cls.__class__} has no attribute {item}')
+            raise AttributeError(f'{cls.__name__} has no attribute {item}')
         return cls.NS[item]
 
 
@@ -47,7 +48,7 @@ class Uri:
     namespace: Optional[NameSpace]
     _full_uri: Optional[str] = None
 
-    def __init__(self, uri: str, namespace: Optional[NameSpace] = None):
+    def __init__(self, uri: str | URIRef | pathlib.Path, namespace: Optional[NameSpace] = None):
         self.namespace = namespace
         match uri:
             case str():
@@ -57,6 +58,8 @@ class Uri:
                     self.uri = uri
             case URIRef():
                 self.uri = str(uri)
+            case pathlib.Path():
+                self.uri = uri.as_uri()
             case _:
                 raise NotImplementedError(f'Unsupported type {type(uri)}')
         if namespace:
@@ -130,7 +133,17 @@ class BlankNode:
 
 
 class Literal:
-    pass
+    def __init__(self, string: str, datatype: Uri, lang_tag: Optional[str] = None):
+        self.string = string
+        self.datatype = datatype
+        self.lang_tag = lang_tag
+
+    def __str__(self) -> str:
+        # Does repr(self.string) always work?
+        if self.lang_tag:
+            return f'{self.string!r}@{self.lang_tag}'   # datatype must be xsd:langString and can be omitted
+        else:
+            return f'{self.string!r}^^{self.datatype::}'
 
 
 Subject = Uri | BlankNode
@@ -138,3 +151,4 @@ Predicate = Uri
 Object = Uri | BlankNode | Literal
 
 Triple = tuple[Subject, Predicate, Object]
+TripleI = Iterable[Triple]

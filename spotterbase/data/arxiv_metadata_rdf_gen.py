@@ -3,17 +3,17 @@ import logging
 import zipfile
 from collections import defaultdict
 from pathlib import Path
-from typing import IO, Iterator
-
-import rdflib
-from rdflib import RDF
+from typing import IO
 
 from spotterbase import config_loader
 from spotterbase.data.arxiv import ArxivId, ArxivCategory, USE_CENTI_ARXIV, ArxivUris
 from spotterbase.data.locator import Locator, DataDir
 from spotterbase.data.rdf import SB
 from spotterbase.data.utils import json_lib
-from spotterbase.spotters.utils import TripleT, Annotation, SpotterRun
+from spotterbase.rdf.base import TripleI
+from spotterbase.rdf.serializer import TurtleSerializer
+from spotterbase.rdf.vocab import RDF
+from spotterbase.spotters.utils import Annotation, SpotterRun
 from spotterbase.utils import version_string
 
 logger = logging.getLogger(__name__)
@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 arxiv_raw_metadata_locator = Locator('--arxiv-raw-metadata', 'path to the arxiv metadata OAI snapshot',
                                      ['arxiv-metadata-oai-snapshot.json', 'arxiv-metadata-oai-snapshot.json.zip'],
                                      'You can download it from https://www.kaggle.com/datasets/Cornell-University/arxiv')
-arxiv_rdf_metadata_locator = Locator('--arxiv-rdf_gen-metadata', 'path to the arxiv metadata RDF file',
+arxiv_rdf_metadata_locator = Locator('--arxiv-rdf-gen-metadata', 'path to the arxiv metadata RDF file',
                                      ['arxiv-metadata.ttl.gz', 'centi-arxiv-metadata.ttl.gz'])
 
 
@@ -57,17 +57,17 @@ class MetadataRdfGenerator:
     def __init__(self, accumulator: MetatdataAccumulator):
         self.accumulator = accumulator
 
-    def _highlevel(self) -> Iterator[TripleT]:
+    def _highlevel(self) -> TripleI:
         yield ArxivUris.dataset, RDF.type, SB.dataset
         yield ArxivUris.centi_arxiv, RDF.type, SB.dataset
         yield ArxivUris.centi_arxiv, SB.subset, ArxivUris.dataset
 
-    def triples(self) -> Iterator[TripleT]:
+    def triples(self) -> TripleI:
         # Yielding triples and then discarding built-up data structures reduces the memory requirements
 
         yield from self._highlevel()
 
-        spotter_run = SpotterRun(SB['spotter/arxivmetadata'], spotter_version=version_string())
+        spotter_run = SpotterRun(SB.NS['spotter/arxivmetadata'], spotter_version=version_string())
         yield from spotter_run.triples()
 
         # re-arrange data
@@ -117,15 +117,14 @@ def main():
     logging.info(f'Loading the arxiv metadata from {path}. This will take a moment.')
     accumulator.load_from_file(path)
     logging.info(f'Loaded the metadata of {len(accumulator)} arxiv documents.')
-    logging.info(f'Entering triples into graph.')
-    graph = rdflib.Graph()
-    for triple in MetadataRdfGenerator(accumulator).triples():
-        graph.add(triple)
-    logging.info(f'Created {len(graph)} triples.')
+
     dest = _get_rdf_dest()
     logging.info(f'Writing graph to {dest}.')
-    with gzip.open(dest, 'wb') as fp:
-        graph.serialize(fp)
+    with gzip.open(dest, 'wt') as fp:
+        fp.write(f'# Graph: {ArxivUris.graph:<>}\n')
+        serializer = TurtleSerializer(fp)
+        serializer.add_from_iterable(MetadataRdfGenerator(accumulator).triples())
+        serializer.flush()
     logging.info(f'The graph has successfully been written to {dest}.')
 
 

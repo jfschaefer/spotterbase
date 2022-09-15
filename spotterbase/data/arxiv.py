@@ -2,17 +2,18 @@ import functools
 import hashlib
 import re
 
-from rdflib import URIRef, Namespace
-
 from spotterbase.config_loader import ConfigFlag
+from spotterbase.data.rdf import SB
+from spotterbase.rdf.base import Uri, NameSpace
 
 USE_CENTI_ARXIV = ConfigFlag('--centi-arxiv', 'use a subset of arxiv (≈ 1 percent)')
 
 
 class ArxivUris:
-    topic_system = URIRef('https://arxiv.org/category_taxonomy/')
-    dataset = URIRef('https://arxiv.org/')
-    centi_arxiv = URIRef('http://sigmathling.kwarc.info/centi-arxiv')
+    topic_system = Uri('https://arxiv.org/category_taxonomy/')
+    dataset = Uri('https://arxiv.org/')
+    centi_arxiv = Uri('http://sigmathling.kwarc.info/centi-arxiv')
+    graph = SB.NS['graph/arxiv-meta']
 
 
 class InvalidArxivId(Exception):
@@ -20,7 +21,7 @@ class InvalidArxivId(Exception):
 
 
 class ArxivId:
-    uri_namespace = Namespace('https://arxiv.org/abs/')
+    uri_namespace = NameSpace('https://arxiv.org/abs/', 'arxiv:')
 
     arxiv_id_regex = re.compile(r'^(?P<oldprefix>[a-z-]+/)?(?P<yymm>[0-9]{4})[0-9.]*$')
 
@@ -39,7 +40,7 @@ class ArxivId:
             case _:
                 return NotImplemented
 
-    def as_uri(self) -> URIRef:
+    def as_uri(self) -> Uri:
         return self.uri_namespace[self.identifier]
 
     @functools.cache
@@ -55,10 +56,10 @@ class ArxivId:
 
 
 class ArxivCategory:
-    uri_namespace = Namespace('https://arxiv.org/archive/')
+    uri_namespace = NameSpace('https://arxiv.org/archive/')
 
     def __init__(self, category: str):
         self.category = category
 
-    def as_uri(self) -> URIRef:
+    def as_uri(self) -> Uri:
         return self.uri_namespace[self.category]

@@ -1,51 +1,27 @@
-from rdflib import Namespace, URIRef
-from rdflib.namespace import DefinedNamespace
+from spotterbase.rdf.base import Vocabulary, NameSpace, Uri
 
 
-class SB(DefinedNamespace):
-    _NS = Namespace('http://sigmathling.kwarc.info/spotterbase/')
-    NS = _NS
-    _warn = False
+class SB(Vocabulary):
+    NS = NameSpace('http://sigmathling.kwarc.info/spotterbase/', 'sb:')
 
     # spotter info
-    spotter: URIRef
-    spotterRun: URIRef
+    spotter: Uri
+    spotterRun: Uri
 
-    withSpotter: URIRef
-    runDate: URIRef
-    spotterVersion: URIRef
+    withSpotter: Uri
+    runDate: Uri
+    spotterVersion: Uri
 
     # datasets
-    dataset: URIRef
-    document: URIRef
+    dataset: Uri
+    document: Uri
 
-    subset: URIRef
-    belongsTo: URIRef
-    basedOn: URIRef
+    subset: Uri
+    belongsTo: Uri
+    basedOn: Uri
 
     # topics/categories
-    html5doc: URIRef
-    topic: URIRef
-    hasTopic: URIRef
-    subtopicOf: URIRef
-
-
-class OA(DefinedNamespace):
-    _NS = Namespace('http://www.w3.org/ns/oa#')
-
-    Annotation: URIRef
-
-    hasBody: URIRef
-    hasTarget: URIRef
-
-
-class AS(DefinedNamespace):
-    _NS = Namespace('http://www.w3.org/ns/activitystreams#')
-
-    generator: URIRef
-
-
-class DCTERMS(DefinedNamespace):
-    _NS = Namespace('http://purl.org/dc/terms/')
-
-    creator: URIRef
+    html5doc: Uri
+    topic: Uri
+    hasTopic: Uri
+    subtopicOf: Uri

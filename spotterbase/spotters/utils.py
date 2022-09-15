@@ -1,50 +1,45 @@
 import datetime
 import logging
-from typing import Optional, Iterator
+from typing import Optional
 
-from rdflib import URIRef, BNode, RDF, Literal, DC
-from rdflib.term import Identifier
-
-from spotterbase.data.rdf import SB, OA
-from spotterbase.rdf.base import Uri
+from spotterbase.data.rdf import SB
+from spotterbase.rdf.base import Uri, TripleI, Object, BlankNode
+from spotterbase.rdf.vocab import OA, RDF, DC
+from spotterbase.rdf.literals import DateTimeLiteral, StringLiteral
 
 logger = logging.getLogger(__name__)
 
-TripleT = tuple[Identifier, Identifier, Identifier]
-
 
 class SpotterRun:
-    def __init__(self, spotter_uri: Optional[URIRef], spotter_version: Optional[str]):
+    def __init__(self, spotter_uri: Optional[Uri], spotter_version: Optional[str]):
         self.spotter_uri = spotter_uri
         self.spotter_version = spotter_version
-        self.run_identifier = BNode()
+        self.run_identifier = BlankNode()
         self.run_date = datetime.datetime.now()
 
-    def triples(self) -> Iterator[TripleT]:
+    def triples(self) -> TripleI:
         yield self.run_identifier, RDF.type, SB.spotterRun
-        yield self.run_identifier, SB.runDate, Literal(self.run_date)
+        yield self.run_identifier, SB.runDate, DateTimeLiteral(self.run_date)
         if self.spotter_uri:
             yield self.run_identifier, SB.withSpotter, self.spotter_uri
         if self.spotter_version:
-            yield self.run_identifier, SB.spotterVersion, Literal(self.spotter_version)
+            yield self.run_identifier, SB.spotterVersion, StringLiteral(self.spotter_version)
 
 
 class Annotation:
-    def __init__(self, spotter_run: Optional[SpotterRun] = None, annotation_uri: Optional[Identifier] = None):
+    def __init__(self, spotter_run: Optional[SpotterRun] = None, annotation_uri: Optional[Uri] = None):
         self.spotter_run = spotter_run
-        self.annotation_uri = annotation_uri or BNode()
-        self.body: list[Identifier] = []
-        self.target: list[Identifier] = []
+        self.annotation_uri = annotation_uri or BlankNode()
+        self.body: list[Object] = []
+        self.target: list[Object] = []
 
-    def add_body(self, body: Identifier):
+    def add_body(self, body: Object):
         self.body.append(body)
 
-    def add_target(self, target: Uri | Identifier):
-        if isinstance(target, Uri):
-            target = target.as_uriref()
+    def add_target(self, target: Object):
         self.target.append(target)
 
-    def triples(self) -> Iterator[TripleT]:
+    def triples(self) -> TripleI:
         if self.spotter_run:
             yield self.annotation_uri, DC.creator, self.spotter_run.run_identifier
         yield self.annotation_uri, RDF.type, OA.Annotation

@@ -1,8 +1,8 @@
 import abc
 from collections import OrderedDict, defaultdict
-from typing import TextIO, Iterable
+from typing import TextIO, Iterable, Optional
 
-from spotterbase.rdf.base import Triple, Uri, Object, NameSpace, Subject, BlankNode, Predicate
+from spotterbase.rdf.base import Triple, Uri, Object, NameSpace, Subject, BlankNode, Predicate, Literal
 from spotterbase.rdf.vocab import RDF
 
 
@@ -20,7 +20,7 @@ class Serializer(abc.ABC):
 
 class TurtleSerializer(Serializer):
     # https://www.w3.org/TR/turtle/#sec-grammar-grammar
-    def __init__(self, fp: TextIO, buffer_size: int = 1000):
+    def __init__(self, fp: TextIO, buffer_size: int = 100000):
         self.fp = fp
         self.max_buffer_size = buffer_size
         self.cur_buffer_size = 0
@@ -42,11 +42,14 @@ class TurtleSerializer(Serializer):
         self.cur_buffer_size -= len(pairs)
 
         # make sure all prefixes have been created
-        self._require_prefix(subject.namespace)
+        if isinstance(subject, Uri):
+            self._require_prefix(subject.namespace)
         prop_to_obj = defaultdict(list)
         for prop, obj in pairs:
+            assert isinstance(prop, Uri), f'{prop!r} was used as a predicate but is not a Uri'
             self._require_prefix(prop.namespace)
-            self._require_prefix(obj.namespace)
+            if isinstance(obj, Uri):
+                self._require_prefix(obj.namespace)
             prop_to_obj[prop].append(obj)
 
         # write triples
@@ -78,11 +81,13 @@ class TurtleSerializer(Serializer):
                 self.fp.write(format(node, 'prefix'))
             case BlankNode():
                 self.fp.write(f'_:{node.value}')
+            case Literal():
+                self.fp.write(str(node))
             case _:
                 raise NotImplementedError(f'Unsupported node type {type(node)}')
 
-    def _require_prefix(self, ns: NameSpace):
-        if not ns.prefix:
+    def _require_prefix(self, ns: Optional[NameSpace]):
+        if not ns or not ns.prefix:
             return
         if ns.prefix in self.used_prefixes:
             if self.used_prefixes[ns.prefix] != str(ns.uri):

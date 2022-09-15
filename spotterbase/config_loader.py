@@ -46,7 +46,7 @@ class ConfigLoader:
 
         self.used_default_config_paths: list[Path] = [path for path in config_paths if path.is_file()]
         self.argparser = configargparse.ArgumentParser(default_config_files=list(map(str, self.used_default_config_paths)),
-                                                       add_help=False)
+                                                       add_help=False, ignore_unknown_config_file_keys=True)
         #, ignore_unknown_config_file_keys=True)
         self.argparser.add_argument('-c', '--config', is_config_file=True, help='config file path')
         for extension in self.extensions:
