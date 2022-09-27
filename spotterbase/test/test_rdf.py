@@ -2,6 +2,7 @@ import io
 import unittest
 
 from spotterbase.rdf.base import Vocabulary, NameSpace, Uri, Triple
+from spotterbase.rdf.literals import StringLiteral
 from spotterbase.rdf.serializer import TurtleSerializer
 from spotterbase.rdf.vocab import RDF
 
@@ -22,7 +23,8 @@ class TestRdf(unittest.TestCase):
             (MyVocab.thingA, RDF.type, MyVocab.someClass),
             (MyVocab.thingB, RDF.type, MyVocab.someClass),
             (MyVocab.thingA, MyVocab.someRel, MyVocab.thingA),
-            (MyVocab.thingA, MyVocab.someRel, MyVocab.thingB)
+            (MyVocab.thingA, MyVocab.someRel, MyVocab.thingB),
+            (MyVocab.thingA, MyVocab.someRel, StringLiteral('some string')),
         ])
         serializer.flush()
         self.assertEqual(stringio.getvalue().strip(), '''
@@ -31,4 +33,12 @@ class TestRdf(unittest.TestCase):
 mv:thingB a mv:someClass .
 mv:thingA a mv:someClass ;
   mv:someRel mv:thingA,
-    mv:thingB .'''.strip())
+    mv:thingB,
+    'some string' .'''.strip())
+
+    def test_uri(self):
+        uri = Uri('abc', NameSpace('http://example.com/', 'ex:'))
+        self.assertEqual(format(uri, ':'), 'ex:abc')
+        self.assertEqual(format(uri, '<>'), '<http://example.com/abc>')
+        self.assertEqual(str(uri), 'http://example.com/abc')
+

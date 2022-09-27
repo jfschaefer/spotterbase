@@ -98,7 +98,7 @@ def create_from(ontology: str, namespace: str):
     covered = classes | properties
     printed_other = False
     for result in sorted(other_results, key=lambda r: r.thing):
-        if '-' in result.thing:  # can't just use it as Python attribute
+        if '-' in result.thing[len(namespace):]:  # can't just use it as Python attribute
             continue
         if result.thing in covered:
             continue

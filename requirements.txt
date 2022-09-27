@@ -1,3 +1,4 @@
 ConfigArgParse
 rdflib
 requests
+lxml

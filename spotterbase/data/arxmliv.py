@@ -7,17 +7,9 @@ from spotterbase.config_loader import ConfigExtension, ConfigLoader
 from spotterbase.data.arxiv import ArxivId
 from spotterbase.data.document import Document, Corpus, DocumentNotFoundException
 from spotterbase.data.locator import Locator
+from spotterbase.data.rdf import SB, ArXMLivUris
 from spotterbase.rdf.base import Uri
 from spotterbase.data.zipfilecache import SHARED_ZIP_CACHE
-
-
-class ArXMLivUris:
-    arxmliv = Uri(f'http://sigmathling.kwarc.info/arxmliv/')
-
-    severity = arxmliv / 'severity/'
-    severity_no_problem = severity / 'noProblem'
-    severity_warning = severity / 'warning'
-    severity_error = severity / 'error'
 
 
 class ArXMLivDocument(Document, abc.ABC):
@@ -29,7 +21,7 @@ class ArXMLivDocument(Document, abc.ABC):
         self.release = release
 
     def get_uri(self) -> Uri:
-        return ArXMLiv.get_release_uri(self.release) + self.arxivid.identifier
+        return ArXMLivUris.get_release_uri(self.release) + self.arxivid.identifier
 
     def open(self, *args, **kwargs) -> IO:
         raise NotImplementedError()
@@ -76,7 +68,7 @@ class ArXMLivCorpus(Corpus):
             return SimpleArXMLivDocument(arxivid, self.release, location)
 
     def get_uri(self) -> Uri:
-        return ArXMLiv.get_release_uri(self.release)
+        return ArXMLivUris.get_release_uri(self.release)
 
     def _get_yymm_location(self, yymm: str) -> Path:
         for directory in [self.path / f'{yymm}', self.path / 'data' / f'{yymm}']:
@@ -145,4 +137,8 @@ class ArXMLiv:
 
     @classmethod
     def get_release_uri(cls, release: str) -> Uri:
-        return ArXMLivUris.arxmliv / 'release/'
+        return ArXMLivUris.arxmliv / release
+
+    @classmethod
+    def get_graph_uri(cls, release: str) -> Uri:
+        return SB.NS[f'graph/arxmliv-meta/' + release]

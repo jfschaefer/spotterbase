@@ -3,17 +3,10 @@ import hashlib
 import re
 
 from spotterbase.config_loader import ConfigFlag
-from spotterbase.data.rdf import SB
+from spotterbase.data.rdf import ArxivUris
 from spotterbase.rdf.base import Uri, NameSpace
 
 USE_CENTI_ARXIV = ConfigFlag('--centi-arxiv', 'use a subset of arxiv (≈ 1 percent)')
-
-
-class ArxivUris:
-    topic_system = Uri('https://arxiv.org/category_taxonomy/')
-    dataset = Uri('https://arxiv.org/')
-    centi_arxiv = Uri('http://sigmathling.kwarc.info/centi-arxiv')
-    graph = SB.NS['graph/arxiv-meta']
 
 
 class InvalidArxivId(Exception):
@@ -21,8 +14,6 @@ class InvalidArxivId(Exception):
 
 
 class ArxivId:
-    uri_namespace = NameSpace('https://arxiv.org/abs/', 'arxiv:')
-
     arxiv_id_regex = re.compile(r'^(?P<oldprefix>[a-z-]+/)?(?P<yymm>[0-9]{4})[0-9.]*$')
 
     def __init__(self, identifier: str):
@@ -41,7 +32,7 @@ class ArxivId:
                 return NotImplemented
 
     def as_uri(self) -> Uri:
-        return self.uri_namespace[self.identifier]
+        return ArxivUris.arxiv_id[self.identifier]
 
     @functools.cache
     def is_in_centi_arxiv(self) -> bool:
@@ -56,10 +47,8 @@ class ArxivId:
 
 
 class ArxivCategory:
-    uri_namespace = NameSpace('https://arxiv.org/archive/')
-
     def __init__(self, category: str):
         self.category = category
 
     def as_uri(self) -> Uri:
-        return self.uri_namespace[self.category]
+        return ArxivUris.arxiv_cat[self.category]

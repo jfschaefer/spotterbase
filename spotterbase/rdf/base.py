@@ -3,7 +3,6 @@ A small library for RDF triples.
 """
 from __future__ import annotations
 
-import dataclasses
 import functools
 import pathlib
 import re
@@ -14,6 +13,8 @@ from rdflib import URIRef
 
 class NameSpace:
     def __init__(self, uri: Uri | str, prefix: Optional[str] = None):
+        if not re.match(r'([A-Za-z0-9:_]([A-Za-z0-9:_.-]*[A-Za-z0-9:_])?)?:', prefix):
+            raise Exception(f'Invalid prefix: {prefix!r}')  # note: the regex does not cover all legal cases
         self.uri = uri if isinstance(uri, Uri) else Uri(uri)
         self.prefix = prefix
 
@@ -65,6 +66,12 @@ class Uri:
         if namespace:
             assert self.full_uri().startswith(namespace.uri.full_uri())
 
+    def with_namespace_from(self, namespaces: list[NameSpace]) -> Optional[Uri]:
+        for namespace in sorted(namespaces, key=lambda ns: len(ns.uri.full_uri()), reverse=True):
+            if self.full_uri().startswith(namespace.uri.full_uri()):
+                return Uri(self.full_uri()[len(namespace.uri.full_uri()):], namespace)
+        return None
+
     def __truediv__(self, other) -> Uri:
         if self.uri.endswith('/'):
             return Uri(self.uri + other, self.namespace)
@@ -94,7 +101,7 @@ class Uri:
                     return self.namespace.prefix + uri
                 else:
                     return f'<{self.full_uri()}>'
-            case other:
+            case _:
                 raise NotImplementedError(f'Unsupported format specification: {format_spec!r}')
 
     def full_uri(self) -> str:
@@ -141,7 +148,7 @@ class Literal:
     def __str__(self) -> str:
         # Does repr(self.string) always work?
         if self.lang_tag:
-            return f'{self.string!r}@{self.lang_tag}'   # datatype must be xsd:langString and can be omitted
+            return f'{self.string!r}@{self.lang_tag}'  # datatype must be xsd:langString and can be omitted
         else:
             return f'{self.string!r}^^{self.datatype::}'
 

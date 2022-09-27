@@ -6,9 +6,9 @@ from pathlib import Path
 from typing import IO
 
 from spotterbase import config_loader
-from spotterbase.data.arxiv import ArxivId, ArxivCategory, USE_CENTI_ARXIV, ArxivUris
+from spotterbase.data.arxiv import ArxivId, ArxivCategory, USE_CENTI_ARXIV
 from spotterbase.data.locator import Locator, DataDir
-from spotterbase.data.rdf import SB
+from spotterbase.data.rdf import SB, ArxivUris
 from spotterbase.data.utils import json_lib
 from spotterbase.rdf.base import TripleI
 from spotterbase.rdf.serializer import TurtleSerializer
@@ -32,7 +32,7 @@ class MetatdataAccumulator(dict[ArxivId, list[str]]):
     def load_from_io(self, file: IO):
         json = json_lib()
         if USE_CENTI_ARXIV:
-            logging.info(f'Note: Since `{USE_CENTI_ARXIV.name}` was set, most documents will be ignored')
+            logger.info(f'Note: Since `{USE_CENTI_ARXIV.name}` was set, most documents will be ignored')
         for line in file:
             entry = json.loads(line)
             arxiv_id = ArxivId(entry['id'])
@@ -106,7 +106,7 @@ def _get_rdf_dest() -> Path:
     if arxiv_rdf_metadata_locator.specified_location:
         dest = arxiv_rdf_metadata_locator.require()
         if dest.name.startswith('centi') and not USE_CENTI_ARXIV:
-            logging.warning(f'RDF destination ({str(dest)}) starts with "centi", but the whole arxiv is included')
+            logger.warning(f'RDF destination ({str(dest)}) starts with "centi", but the whole arxiv is included')
         return dest
     return DataDir.get(('centi-' if USE_CENTI_ARXIV else '') + 'arxiv-metadata.ttl.gz')
 
@@ -114,18 +114,18 @@ def _get_rdf_dest() -> Path:
 def main():
     accumulator = MetatdataAccumulator()
     path = arxiv_raw_metadata_locator.require()
-    logging.info(f'Loading the arxiv metadata from {path}. This will take a moment.')
+    logger.info(f'Loading the arxiv metadata from {path}. This will take a moment.')
     accumulator.load_from_file(path)
-    logging.info(f'Loaded the metadata of {len(accumulator)} arxiv documents.')
+    logger.info(f'Loaded the metadata of {len(accumulator)} arxiv documents.')
 
     dest = _get_rdf_dest()
-    logging.info(f'Writing graph to {dest}.')
+    logger.info(f'Writing graph to {dest}.')
     with gzip.open(dest, 'wt') as fp:
-        fp.write(f'# Graph: {ArxivUris.graph:<>}\n')
+        fp.write(f'# Graph: {ArxivUris.meta_graph:<>}\n')
         serializer = TurtleSerializer(fp)
         serializer.add_from_iterable(MetadataRdfGenerator(accumulator).triples())
         serializer.flush()
-    logging.info(f'The graph has successfully been written to {dest}.')
+    logger.info(f'The graph has successfully been written to {dest}.')
 
 
 if __name__ == '__main__':

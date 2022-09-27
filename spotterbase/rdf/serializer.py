@@ -17,6 +17,12 @@ class Serializer(abc.ABC):
     def flush(self):
         pass
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.flush()
+
 
 class TurtleSerializer(Serializer):
     # https://www.w3.org/TR/turtle/#sec-grammar-grammar

@@ -12,7 +12,7 @@ class SB(Vocabulary):
     runDate: Uri
     spotterVersion: Uri
 
-    # datasets
+    # datasets (TODO: can this replaced with dublin core?)
     dataset: Uri
     document: Uri
 
@@ -20,8 +20,29 @@ class SB(Vocabulary):
     belongsTo: Uri
     basedOn: Uri
 
-    # topics/categories
+    # topics/categories (TODO: can this replaced with dublin core?)
     html5doc: Uri
     topic: Uri
     hasTopic: Uri
     subtopicOf: Uri
+
+
+class ArxivUris:
+    """ Namespaces and URIs for arXiv. Note that we are trying to use valid arxiv URLs where possible. """
+    meta_graph = SB.NS['graph/arxiv-meta']
+
+    topic_system = Uri('https://arxiv.org/category_taxonomy/')
+    dataset = Uri('https://arxiv.org/')
+    centi_arxiv = Uri('http://sigmathling.kwarc.info/centi-arxiv')
+
+    arxiv_id = NameSpace('https://arxiv.org/abs/', 'arxiv:')
+    arxiv_cat = NameSpace('https://arxiv.org/archive/', 'arxivcat:')
+
+
+class ArXMLivUris:
+    arxmliv = Uri(f'http://sigmathling.kwarc.info/arxmliv/')
+
+    severity = arxmliv / 'severity/'
+    severity_no_problem = severity / 'noProblem'
+    severity_warning = severity / 'warning'
+    severity_error = severity / 'error'

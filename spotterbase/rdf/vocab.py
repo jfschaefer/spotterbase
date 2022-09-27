@@ -696,6 +696,20 @@ class RDF(Vocabulary):
     # The class of RDF statements.
     Statement: Uri
 
+    # OTHER
+    # The datatype of RDF literals storing fragments of HTML content
+    HTML: Uri                           # a http://www.w3.org/2000/01/rdf-schema#Datatype
+    # The datatype of RDF literals storing JSON content.
+    JSON: Uri                           # a http://www.w3.org/2000/01/rdf-schema#Datatype
+    # The class of plain (i.e. untyped) literal values, as used in RIF and OWL 2
+    PlainLiteral: Uri                   # a http://www.w3.org/2000/01/rdf-schema#Datatype
+    # The datatype of XML literal values.
+    XMLLiteral: Uri                     # a http://www.w3.org/2000/01/rdf-schema#Datatype
+    # The datatype of language-tagged string values
+    langString: Uri                     # a http://www.w3.org/2000/01/rdf-schema#Datatype
+    # The empty list, with no items in it. If the rest of a list is nil then the list has no more items in it.
+    nil: Uri                            # a http://www.w3.org/1999/02/22-rdf-syntax-ns#List
+
 
 class RDFS(Vocabulary):
     """ Generated from http://www.w3.org/2000/01/rdf-schema# """
