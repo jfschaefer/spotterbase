@@ -1,6 +1,6 @@
 from typing import Optional, Iterable
 
-from lxml.etree import _Element
+from lxml.etree import _Element, _ElementUnicodeResult
 
 from spotterbase.dnm.dnm import DomPoint
 from spotterbase.dnm.token_dnm import Token, TokenGenerator
@@ -9,12 +9,13 @@ from spotterbase.dnm.xml_util import XmlNode, get_node_classes
 
 class TextToken(Token):
     def __init__(self, node: _Element):
+        assert node.text
         self.string = node.text
-        self.node = XmlNode(node)
+        self.node = XmlNode(node, text_node='text')
         assert self.string is not None
 
     def to_point(self, offset: int) -> DomPoint:
-        return DomPoint(self.node.getparent(), text_offset=offset)
+        return DomPoint(self.node.node, text_offset=offset)
 
 
 class NodeToken(Token):
@@ -29,12 +30,13 @@ class NodeToken(Token):
 
 class TailToken(Token):
     def __init__(self, node: _Element):
+        assert node.tail
         self.string = node.tail
-        self.node = XmlNode(node.tail)
+        self.node = XmlNode(node, text_node='tail')
         assert self.string is not None
 
     def to_point(self, offset: int) -> DomPoint:
-        return DomPoint(self.node.getparent(), tail_offset=offset)
+        return DomPoint(self.node.node, tail_offset=offset)
 
 
 class SimpleTokenGenerator(TokenGenerator):
@@ -50,6 +52,7 @@ class SimpleTokenGenerator(TokenGenerator):
         for c in get_node_classes(node):
             if c in self.classes_to_replace:
                 return self.classes_to_replace[c]
+        return None
 
     def process(self, node: _Element) -> Iterable[Token]:
         replacement = self.get_replacement(node)

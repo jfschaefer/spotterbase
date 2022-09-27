@@ -1,46 +1,56 @@
 from __future__ import annotations
 
+from typing import Literal, Optional
+
 from lxml.etree import _Element, _ElementUnicodeResult
 
 
 class XmlNode:
     """ the lxml implementation of text nodes is not very convenient, so we will have wrapper for the needed nodes. """
 
-    node: _Element | _ElementUnicodeResult
+    node: _Element
+    text: bool = False
+    tail: bool = False
 
-    def __init__(self, node: _Element | _ElementUnicodeResult | XmlNode):
-        if isinstance(node, XmlNode):
-            self.node = node.node
-        else:
-            self.node = node
+    def __init__(self, node: _Element, text_node: Literal['text', 'tail', 'none'] = 'none'):
+        self.node = node
+        match text_node:
+            case 'text':
+                self.text = True
+            case 'tail':
+                self.tail = True
+            case other:
+                assert other == 'none'
 
-    def getparent(self) -> _Element:
-        match self.node:
+    @classmethod
+    def new(cls, node: _Element | _ElementUnicodeResult) -> XmlNode:
+        match node:
             case _Element():
-                return self.node.getparent()
+                return XmlNode(node)
             case _ElementUnicodeResult():
-                if self.node.is_text:
-                    return self.node.getparent()
+                if node.is_tail:
+                    assert (parent := node.getparent())
+                    return XmlNode(parent, text_node='tail')
                 else:
-                    assert self.node.is_tail
-                    # tail.getparent returns node that the tail is attached to
-                    return self.node.getparent().getparent()
+                    assert node.is_text
+                    assert (parent := node.getparent())
+                    return XmlNode(parent, text_node='text')
+            case _:
+                raise NotImplementedError()
+
+    def getparent(self) -> Optional[XmlNode]:
+        parent = self.node.getparent()
+        if parent:
+            return XmlNode(parent)
+        return None
 
     def __eq__(self, other):
         if not isinstance(other, XmlNode):
             raise NotImplementedError(f'Comparison with {type(other)} is not supported')
-        if isinstance(self.node, _Element):
-            return self.node == other.node
-        else:
-            # lxml text nodes are only compared by string value
-            return self.node == other.node and self.node.getparent() == other.node.getparent()
+        return self.node == other.node and self.text == other.text and self.tail == other.tail
 
     def __hash__(self):
-        if isinstance(self.node, _Element):
-            return hash(self.node)
-        else:
-            # lxml text nodes are hashed by string value
-            return hash((self.node, self.node.getparent()))
+        return hash((self.node, self.text, self.tail))
 
 
 def get_node_classes(node: _Element) -> list[str]:

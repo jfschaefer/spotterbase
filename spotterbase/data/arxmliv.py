@@ -21,7 +21,7 @@ class ArXMLivDocument(Document, abc.ABC):
         self.release = release
 
     def get_uri(self) -> Uri:
-        return ArXMLivUris.get_release_uri(self.release) + self.arxivid.identifier
+        return ArXMLiv.get_release_uri(self.release) + self.arxivid.identifier
 
     def open(self, *args, **kwargs) -> IO:
         raise NotImplementedError()
@@ -68,7 +68,7 @@ class ArXMLivCorpus(Corpus):
             return SimpleArXMLivDocument(arxivid, self.release, location)
 
     def get_uri(self) -> Uri:
-        return ArXMLivUris.get_release_uri(self.release)
+        return ArXMLiv.get_release_uri(self.release)
 
     def _get_yymm_location(self, yymm: str) -> Path:
         for directory in [self.path / f'{yymm}', self.path / 'data' / f'{yymm}']:

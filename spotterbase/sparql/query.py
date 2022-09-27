@@ -21,6 +21,8 @@ def _get_prefixes(ns_list: list[NameSpace]):
     used_prefixes: set[str] = set()
     lines = []
     for ns in ns_list:
+        if not ns.prefix:
+            continue
         assert ns.prefix not in used_prefixes
         used_prefixes.add(ns.prefix)
         lines.append(format(ns, 'sparql'))

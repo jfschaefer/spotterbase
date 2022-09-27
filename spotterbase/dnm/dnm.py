@@ -37,7 +37,7 @@ class DnmStr(LStr):
         self.dnm = dnm
 
     def new(self: DnmStrT, new_string: str, new_backrefs: list[int]) -> DnmStrT:
-        return self.__class__(new_string, new_backrefs)
+        return self.__class__(new_string, new_backrefs, self.dnm)
 
 
 @dataclasses.dataclass
@@ -45,9 +45,13 @@ class DnmPoint:
     offset: int
     dnm: Dnm
 
+    def __eq__(self, other) -> bool:
+        if not isinstance(other, DnmPoint):
+            raise NotImplementedError()
+        return self.dnm == other.dnm and self.offset == other.offset
 
-@dataclasses.dataclass
+
 class DnmRange:
-    from_: DnmPoint | DnmRange
-    to: DnmPoint | DnmRange
+    from_: DnmPoint
+    to: DnmPoint
     to_inclusive: bool = True

@@ -16,3 +16,4 @@ class TestDnm(unittest.TestCase):
                                                                       classes_to_replace={'skip': ''}))
         dnmstr = dnm.get_dnm_str()
         self.assertEqual(dnmstr, 't1t2t3Ct4t5')
+

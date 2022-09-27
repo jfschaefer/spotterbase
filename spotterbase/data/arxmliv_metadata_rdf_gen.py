@@ -6,7 +6,7 @@ from typing import Optional
 from spotterbase import config_loader
 from spotterbase.config_loader import ConfigString
 from spotterbase.data.arxiv import USE_CENTI_ARXIV
-from spotterbase.data.arxmliv import ArXMLivConfig, ArXMLivUris, ArXMLivCorpus
+from spotterbase.data.arxmliv import ArXMLivConfig, ArXMLivUris, ArXMLivCorpus, ArXMLiv
 from spotterbase.data.locator import DataDir
 from spotterbase.data.rdf import SB, ArxivUris, ArXMLivUris
 from spotterbase.rdf.base import TripleI
@@ -35,7 +35,7 @@ def _get_severities_lists(corpus: ArXMLivCorpus) -> Optional[tuple[list[str], li
 
 
 def iter_triples(corpus: ArXMLivCorpus) -> TripleI:
-    dataset_uri = ArXMLivUris.get_release_uri(corpus.release)
+    dataset_uri = ArXMLiv.get_release_uri(corpus.release)
     yield dataset_uri, RDF.type, SB.dataset
     yield dataset_uri, SB.basedOn, ArxivUris.dataset
 
@@ -76,11 +76,11 @@ def iter_triples(corpus: ArXMLivCorpus) -> TripleI:
 
 
 def main():
-    arxmliv = ArXMLivUris()
+    arxmliv = ArXMLiv()
     corpus = arxmliv.get_corpus(RELEASE_VERSION.value)
     dest = DataDir.get(('centi-' if USE_CENTI_ARXIV else '') + f'arxmliv-{corpus.release}.ttl.gz')
     with gzip.open(dest, 'wt') as fp:
-        fp.write(f'# Graph: {ArXMLivUris.get_graph_uri(RELEASE_VERSION.value):<>}\n')
+        fp.write(f'# Graph: {ArXMLiv.get_graph_uri(RELEASE_VERSION.value):<>}\n')
         with TurtleSerializer(fp) as serializer:
             serializer.add_from_iterable(iter_triples(corpus))
     logger.info(f'The graph has successfully been written to {dest}.')

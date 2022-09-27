@@ -13,7 +13,7 @@ class SparqlEndpoint(abc.ABC):
         result = self.get(query, accept='application/json')
 
         for binding in result['results']['bindings']:
-            d = {}
+            d: dict[str, Optional[Object]] = {}
             for var in result['head']['vars']:
                 if var in binding:
                     d[var] = json_binding_to_object(binding[var])

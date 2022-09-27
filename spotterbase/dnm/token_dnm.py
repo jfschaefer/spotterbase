@@ -42,9 +42,9 @@ class TokenBasedDnm(Dnm):
         self.string = ''.join(token.string for token in self.tokens)
 
     @classmethod
-    def from_token_generator(cls: TokenBasedDnm_T, tree: _ElementTree, generator: TokenGenerator) -> TokenBasedDnm_T:
+    def from_token_generator(cls: type[TokenBasedDnm_T], tree: _ElementTree, generator: TokenGenerator) -> TokenBasedDnm_T:
         tokens = list(generator.process(tree.getroot()))
-        return TokenBasedDnm(tree, tokens)
+        return cls(tree, tokens)
 
     def get_dnm_str(self) -> DnmStr:
         return DnmStr(self.string, list(range(len(self.string))), self)

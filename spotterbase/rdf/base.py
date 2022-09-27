@@ -13,7 +13,7 @@ from rdflib import URIRef
 
 class NameSpace:
     def __init__(self, uri: Uri | str, prefix: Optional[str] = None):
-        if not re.match(r'([A-Za-z0-9:_]([A-Za-z0-9:_.-]*[A-Za-z0-9:_])?)?:', prefix):
+        if prefix and not re.match(r'([A-Za-z0-9:_]([A-Za-z0-9:_.-]*[A-Za-z0-9:_])?)?:', prefix):
             raise Exception(f'Invalid prefix: {prefix!r}')  # note: the regex does not cover all legal cases
         self.uri = uri if isinstance(uri, Uri) else Uri(uri)
         self.prefix = prefix
@@ -37,6 +37,7 @@ class VocabularyMeta(type):
     def __getattr__(cls, item: str) -> Uri:
         if item not in cls.__annotations__:
             raise AttributeError(f'{cls.__name__} has no attribute {item}')
+        assert isinstance(cls.NS, NameSpace)
         return cls.NS[item]
 
 

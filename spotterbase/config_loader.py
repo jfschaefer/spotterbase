@@ -11,7 +11,7 @@ import sys
 from pathlib import Path
 from typing import Any, Optional
 
-import configargparse
+import configargparse   # type: ignore
 
 logger = logging.getLogger(__name__)
 
