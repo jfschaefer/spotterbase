@@ -9,6 +9,7 @@ class StringLiteral(Literal):
         Literal.__init__(self, string=string, datatype=XSD.string)
 
     def __str__(self):
+        # string literals do not require a datatype annotation
         return repr(self.string)   # does this always work?
 
 
@@ -16,5 +17,3 @@ class DateTimeLiteral(Literal):
     def __init__(self, dt: datetime.datetime):
         self.dt = dt
         Literal.__init__(self, string=dt.isoformat(), datatype=XSD.dateTime)
-
-

@@ -29,11 +29,11 @@ class XmlNode:
                 return XmlNode(node)
             case _ElementUnicodeResult():
                 if node.is_tail:
-                    assert (parent := node.getparent())
+                    assert (parent := node.getparent()) is not None
                     return XmlNode(parent, text_node='tail')
                 else:
                     assert node.is_text
-                    assert (parent := node.getparent())
+                    assert (parent := node.getparent()) is not None
                     return XmlNode(parent, text_node='text')
             case _:
                 raise NotImplementedError()

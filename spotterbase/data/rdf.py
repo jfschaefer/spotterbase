@@ -12,6 +12,9 @@ class SB(Vocabulary):
     runDate: Uri
     spotterVersion: Uri
 
+    # selection
+    docFrag: Uri
+
     # datasets (TODO: can this replaced with dublin core?)
     dataset: Uri
     document: Uri

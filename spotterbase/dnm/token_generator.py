@@ -1,8 +1,8 @@
 from typing import Optional, Iterable
 
-from lxml.etree import _Element, _ElementUnicodeResult
+from lxml.etree import _Element
 
-from spotterbase.dnm.dnm import DomPoint
+from spotterbase.dnm.dnm import DomPoint, DomRange
 from spotterbase.dnm.token_dnm import Token, TokenGenerator
 from spotterbase.dnm.xml_util import XmlNode, get_node_classes
 
@@ -14,8 +14,8 @@ class TextToken(Token):
         self.node = XmlNode(node, text_node='text')
         assert self.string is not None
 
-    def to_point(self, offset: int) -> DomPoint:
-        return DomPoint(self.node.node, text_offset=offset)
+    def to_range(self, offset: int) -> DomRange:
+        return DomPoint(self.node.node, text_offset=offset).as_range()
 
 
 class NodeToken(Token):
@@ -23,9 +23,9 @@ class NodeToken(Token):
         self.string = string
         self.node = XmlNode(node)
 
-    def to_point(self, offset: int) -> DomPoint:
+    def to_range(self, offset: int) -> DomRange:
         assert isinstance(self.node.node, _Element)
-        return DomPoint(self.node.node)
+        return DomPoint(self.node.node).as_range()
 
 
 class TailToken(Token):
@@ -35,8 +35,8 @@ class TailToken(Token):
         self.node = XmlNode(node, text_node='tail')
         assert self.string is not None
 
-    def to_point(self, offset: int) -> DomPoint:
-        return DomPoint(self.node.node, tail_offset=offset)
+    def to_range(self, offset: int) -> DomRange:
+        return DomPoint(self.node.node, tail_offset=offset).as_range()
 
 
 class SimpleTokenGenerator(TokenGenerator):

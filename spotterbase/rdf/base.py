@@ -122,8 +122,6 @@ class Uri:
     def __hash__(self):
         return hash(self.full_uri())
 
-    # def __sub__(self, other) -> :
-
 
 class BlankNode:
     counter: int = 0

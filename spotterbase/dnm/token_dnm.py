@@ -3,7 +3,7 @@ from typing import Iterable, TypeVar
 
 from lxml.etree import _ElementTree, _Element
 
-from spotterbase.dnm.dnm import Dnm, DomPoint, DnmStr
+from spotterbase.dnm.dnm import Dnm, DnmStr, DomRange
 from spotterbase.dnm.xml_util import XmlNode
 
 
@@ -12,8 +12,8 @@ class Token(abc.ABC):
     string: str     # string representation of the token
     node: XmlNode  # node that is covered by the token
 
-    def to_point(self, offset: int) -> DomPoint:
-        """ Returns the DomPoint corresponding to self.string[offset] """
+    def to_range(self, offset: int) -> DomRange:
+        """ Returns the DomRange corresponding to self.string[offset] """
         raise NotImplementedError()
 
 
@@ -49,8 +49,7 @@ class TokenBasedDnm(Dnm):
     def get_dnm_str(self) -> DnmStr:
         return DnmStr(self.string, list(range(len(self.string))), self)
 
-    def offset_to_point(self, offset: int) -> DomPoint:
+    def offset_to_range(self, offset: int) -> DomRange:
         token = self.tokens[self.back_refs[offset][0]]
         rel_offset = self.back_refs[offset][1]
-        return token.to_point(rel_offset)
-
+        return token.to_range(rel_offset)
