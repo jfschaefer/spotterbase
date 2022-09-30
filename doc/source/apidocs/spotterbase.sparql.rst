@@ -1,0 +1,45 @@
+spotterbase.sparql package
+==========================
+
+Submodules
+----------
+
+spotterbase.sparql.endpoint module
+----------------------------------
+
+.. automodule:: spotterbase.sparql.endpoint
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+spotterbase.sparql.load\_external\_graph module
+-----------------------------------------------
+
+.. automodule:: spotterbase.sparql.load_external_graph
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+spotterbase.sparql.load\_graph module
+-------------------------------------
+
+.. automodule:: spotterbase.sparql.load_graph
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+spotterbase.sparql.query module
+-------------------------------
+
+.. automodule:: spotterbase.sparql.query
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: spotterbase.sparql
+   :members:
+   :undoc-members:
+   :show-inheritance:
