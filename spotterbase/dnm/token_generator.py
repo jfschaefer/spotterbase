@@ -68,3 +68,18 @@ class SimpleTokenGenerator(TokenGenerator):
             yield from self.process(child)
             if child.tail:
                 yield TailToken(child)
+
+
+class DefaultGenerators:
+    ARXMLIV_TEXT_ONLY = SimpleTokenGenerator(
+        nodes_to_replace={'head': '', 'figure': '', 'math': 'MathNode'},
+        classes_to_replace={
+            # to ignore
+            'ltx_bibliography': '', 'ltx_page_footer': '', 'ltx_dates': '', 'ltx_authors': '',
+            'ltx_role_affiliationtext': '', 'ltx_tag_equation': '', 'ltx_classification': '',
+            'ltx_tag_section': '', 'ltx_tag_subsection': '',
+            # to replace
+            'ltx_equationgroup': 'MathGroup', 'ltx_cite': 'LtxCite',
+            'ltx_ref': 'LtxRef', 'ltx_ref_tag': 'LtxRef', 'ltx_equation': 'MathEquation',
+        }
+    )

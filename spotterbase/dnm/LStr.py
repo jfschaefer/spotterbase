@@ -1,6 +1,7 @@
 
 __all__ = ['LStr']
 
+import re
 from typing import TypeVar
 
 T = TypeVar('T', bound='LStr')   # TODO: Replace with ``typing.Self'' in Python 3.11
@@ -24,6 +25,9 @@ class LStr:
                 return self.new(self.string[item], self.backrefs[item])
             case int():
                 return self.new(self.string[item], [self.backrefs[item]])
+            case re.Match():
+                s = slice(item.start(), item.end())
+                return self.new(self.string[s], self.backrefs[s])
             case other:
                 raise NotImplementedError(f'Unsupported type {type(other)}')
 

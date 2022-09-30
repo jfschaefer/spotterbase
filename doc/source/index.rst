@@ -9,6 +9,7 @@ Content
 
    contribute
    rdf
+   utils
 
 
 API reference

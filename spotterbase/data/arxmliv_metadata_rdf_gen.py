@@ -13,7 +13,7 @@ from spotterbase.rdf.base import TripleI
 from spotterbase.rdf.serializer import TurtleSerializer
 from spotterbase.rdf.vocab import RDF
 from spotterbase.spotters.utils import SpotterRun, Annotation
-from spotterbase.utils import version_string
+from spotterbase import __version__
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +49,7 @@ def iter_triples(corpus: ArXMLivCorpus) -> TripleI:
         yield document.get_uri(), RDF.type, SB.document
         yield document.get_uri(), SB.belongsTo, dataset_uri
 
-    spotter_run = SpotterRun(SB.NS['spotter/arxmlivmetadata'], spotter_version=version_string())
+    spotter_run = SpotterRun(SB.NS['spotter/arxmlivmetadata'], spotter_version=__version__)
     yield from spotter_run.triples()
     logger.info(f'Loading severity data')
     severities = _get_severities_lists(corpus)

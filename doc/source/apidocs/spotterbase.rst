@@ -13,6 +13,7 @@ Subpackages
    spotterbase.sparql
    spotterbase.spotters
    spotterbase.test
+   spotterbase.utils
 
 Submodules
 ----------
@@ -29,14 +30,6 @@ spotterbase.test module
 -----------------------
 
 .. automodule:: spotterbase.test
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-spotterbase.utils module
-------------------------
-
-.. automodule:: spotterbase.utils
    :members:
    :undoc-members:
    :show-inheritance:

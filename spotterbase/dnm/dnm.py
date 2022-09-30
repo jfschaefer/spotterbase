@@ -29,6 +29,9 @@ class DomPoint:
         self.tail_offset = tail_offset
         self.after = after
 
+    def is_element(self) -> bool:
+        return self.text_offset is None and self.tail_offset is None
+
     def as_range(self) -> DomRange:
         return DomRange(self, self.as_after())
 

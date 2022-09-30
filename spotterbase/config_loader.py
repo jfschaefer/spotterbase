@@ -1,7 +1,7 @@
 """ Code extensible for configuration and configuration management.
 
 Both, configuration files and (optionally) command line arguments are supported (using :mod:`configargparse`).
-The configuration can be extended with custom :class:`ConfigExtension`s.
+The configuration can be extended with custom :class:`ConfigExtension`\s.
 
 The configuration can be loaded with the :class:`ConfigLoader`.
 """

@@ -14,7 +14,7 @@ from spotterbase.rdf.base import TripleI
 from spotterbase.rdf.serializer import TurtleSerializer
 from spotterbase.rdf.vocab import RDF
 from spotterbase.spotters.utils import Annotation, SpotterRun
-from spotterbase.utils import version_string
+from spotterbase import __version__
 
 logger = logging.getLogger(__name__)
 
@@ -67,7 +67,7 @@ class MetadataRdfGenerator:
 
         yield from self._highlevel()
 
-        spotter_run = SpotterRun(SB.NS['spotter/arxivmetadata'], spotter_version=version_string())
+        spotter_run = SpotterRun(SB.NS['spotter/arxivmetadata'], spotter_version=__version__)
         yield from spotter_run.triples()
 
         # re-arrange data

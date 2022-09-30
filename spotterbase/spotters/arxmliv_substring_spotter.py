@@ -6,7 +6,7 @@ from typing import Iterator
 from spotterbase import config_loader
 from spotterbase.config_loader import ConfigString, ConfigInt
 from spotterbase.data.arxiv import USE_CENTI_ARXIV
-from spotterbase.data.arxmliv import ArXMLivConfig, ArXMLivUris, ArXMLivDocument, ArXMLivCorpus
+from spotterbase.data.arxmliv import ArXMLivConfig, ArXMLivDocument, ArXMLivCorpus, ArXMLiv
 from spotterbase.data.locator import DataDir
 from spotterbase.data.rdf import SB
 from spotterbase.rdf.base import Uri, TripleI, BlankNode
@@ -14,7 +14,8 @@ from spotterbase.rdf.literals import StringLiteral
 from spotterbase.rdf.serializer import TurtleSerializer
 from spotterbase.rdf.vocab import RDF
 from spotterbase.spotters.utils import Annotation, SpotterRun
-from spotterbase.utils import version_string, ProgressLogger
+from spotterbase import __version__
+from spotterbase.utils.logutils import ProgressLogger
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +45,7 @@ def check(document: ArXMLivDocument) -> tuple[Uri, list[str]]:
 
 
 def process(corpus: ArXMLivCorpus) -> TripleI:
-    spotter_run = SpotterRun(SB.NS['spotter/arxmlivsubstrings'], spotter_version=version_string())
+    spotter_run = SpotterRun(SB.NS['spotter/arxmlivsubstrings'], spotter_version=__version__)
     yield from spotter_run.triples()
 
     annos: dict[str, Annotation] = {}
@@ -76,7 +77,7 @@ def process(corpus: ArXMLivCorpus) -> TripleI:
 
 
 def main():
-    arxmliv = ArXMLivUris()
+    arxmliv = ArXMLiv()
     corpus = arxmliv.get_corpus(RELEASE_VERSION.value)
     dest = DataDir.get(('centi-' if USE_CENTI_ARXIV else '') + f'arxmliv-substrings-{corpus.release}.ttl.gz')
 

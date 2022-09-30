@@ -13,8 +13,8 @@ author = 'Jan Frederik Schaefer'
 from pathlib import Path
 import sys
 sys.path.append(str(Path(__file__).parent.parent.parent))
-from spotterbase.utils import version_string
-release = version_string()
+from spotterbase import __version__
+release = __version__
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration

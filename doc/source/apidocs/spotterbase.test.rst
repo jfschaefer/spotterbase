@@ -12,6 +12,14 @@ spotterbase.test.test\_dnm module
    :undoc-members:
    :show-inheritance:
 
+spotterbase.test.test\_documentation module
+-------------------------------------------
+
+.. automodule:: spotterbase.test.test_documentation
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 spotterbase.test.test\_rdf module
 ---------------------------------
 
