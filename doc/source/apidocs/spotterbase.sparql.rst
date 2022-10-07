@@ -36,6 +36,14 @@ spotterbase.sparql.query module
    :undoc-members:
    :show-inheritance:
 
+spotterbase.sparql.visualize\_query\_result module
+--------------------------------------------------
+
+.. automodule:: spotterbase.sparql.visualize_query_result
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Module contents
 ---------------
 

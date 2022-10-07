@@ -84,7 +84,8 @@ class TurtleSerializer(Serializer):
     def _write_node(self, node: Subject | Predicate | Object):
         match node:
             case Uri():
-                self.fp.write(format(node, 'prefix'))
+                # use 'nrprefix' because virtuoso seems to have problems with prefix:path\/to\/something
+                self.fp.write(format(node, 'nrprefix'))
             case BlankNode():
                 self.fp.write(f'_:{node.value}')
             case Literal():

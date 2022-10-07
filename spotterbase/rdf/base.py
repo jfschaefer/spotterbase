@@ -46,7 +46,7 @@ class Vocabulary(metaclass=VocabularyMeta):
 
 
 class Uri:
-    uri: str
+    _suffix: str
     namespace: Optional[NameSpace]
     _full_uri: Optional[str] = None
 
@@ -55,13 +55,13 @@ class Uri:
         match uri:
             case str():
                 if uri.startswith('<') and uri.endswith('>'):
-                    self.uri = uri[1:-1]
+                    self._suffix = uri[1:-1]
                 else:
-                    self.uri = uri
+                    self._suffix = uri
             case URIRef():
-                self.uri = str(uri)
+                self._suffix = str(uri)
             case pathlib.Path():
-                self.uri = uri.as_uri()
+                self._suffix = uri.as_uri()
             case _:
                 raise NotImplementedError(f'Unsupported type {type(uri)}')
         if namespace:
@@ -74,31 +74,40 @@ class Uri:
         return None
 
     def __truediv__(self, other) -> Uri:
-        if self.uri.endswith('/'):
-            return Uri(self.uri + other, self.namespace)
+        if self._suffix.endswith('/'):
+            return Uri(self._suffix + other, self.namespace)
         else:
-            return Uri(self.uri + '/' + other, self.namespace)
+            return Uri(self._suffix + '/' + other, self.namespace)
 
     def __add__(self, other) -> Uri:
-        return Uri(self.uri + other, self.namespace)
+        return Uri(self._suffix + other, self.namespace)
 
-    def as_uriref(self) -> URIRef:
-        return URIRef(self.uri)
+    def to_rdflib(self) -> URIRef:
+        return URIRef(self._suffix)
 
     def __str__(self) -> str:
         return self.full_uri()
 
-    @functools.cache
+    # Note: caching might make sense, but it is not straight-forward.
+    # We have Uri('http://example.org/abc') == Uri('abc', namespace=...).
+    # Formatting the former with prefix will give us <http://example.org/abc>,
+    # and caching that would give us the same result for the latter, which is of course undesired.
     def __format__(self, format_spec) -> str:
+        reserved_chars = "~.-!$&'()*+,;=/?#@%_"
         match format_spec:
             case '' | 'plain':
                 return self.full_uri()
             case '<>':
                 return f'<{self.full_uri()}>'
+            case 'nrprefix':  # prefixed only if no reserved characters
+                if self.namespace and self.namespace.prefix and not \
+                        re.match('.*[' + re.escape(reserved_chars) + '].*', self._suffix):
+                    return self.namespace.prefix + self._suffix
+                else:
+                    return f'<{self.full_uri()}>'
             case ':' | 'prefix':
                 if self.namespace and self.namespace.prefix:
-                    reserved_chars = "~.-!$&'()*+,;=/?#@%_"
-                    uri = re.sub('([' + re.escape(reserved_chars) + '])', r'\\\1', self.uri)
+                    uri = re.sub('([' + re.escape(reserved_chars) + '])', r'\\\1', self._suffix)
                     return self.namespace.prefix + uri
                 else:
                     return f'<{self.full_uri()}>'
@@ -108,9 +117,9 @@ class Uri:
     def full_uri(self) -> str:
         if not self._full_uri:
             if self.namespace:
-                self._full_uri = self.namespace.uri.full_uri() + self.uri
+                self._full_uri = self.namespace.uri.full_uri() + self._suffix
             else:
-                self._full_uri = self.uri
+                self._full_uri = self._suffix
         return self._full_uri
 
     def __repr__(self) -> str:
@@ -147,9 +156,12 @@ class Literal:
     def __str__(self) -> str:
         # Does repr(self.string) always work?
         if self.lang_tag:
-            return f'{self.string!r}@{self.lang_tag}'  # datatype must be xsd:langString and can be omitted
+            return f'{self.string!r}@{self.lang_tag}'  # datatype must be rdf:langString and can be omitted
         else:
             return f'{self.string!r}^^{self.datatype::}'
+
+    def __repr__(self) -> str:
+        return str(self)
 
 
 Subject = Uri | BlankNode

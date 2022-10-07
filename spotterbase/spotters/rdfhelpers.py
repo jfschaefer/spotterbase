@@ -1,17 +1,15 @@
 import datetime
-import logging
 from typing import Optional
 
 from spotterbase.data.rdf import SB
 from spotterbase.rdf.base import Uri, TripleI, Object, BlankNode
-from spotterbase.rdf.vocab import OA, RDF, DC
 from spotterbase.rdf.literals import DateTimeLiteral, StringLiteral
-
-logger = logging.getLogger(__name__)
+from spotterbase.rdf.vocab import OA, RDF, DC
 
 
 class SpotterRun:
     def __init__(self, spotter_uri: Optional[Uri], spotter_version: Optional[str]):
+        self.anno_id_counter = 0
         self.spotter_uri = spotter_uri
         self.spotter_version = spotter_version
         self.run_identifier = BlankNode()
@@ -25,11 +23,17 @@ class SpotterRun:
         if self.spotter_version:
             yield self.run_identifier, SB.spotterVersion, StringLiteral(self.spotter_version)
 
+    def get_anno_node(self) -> Uri | BlankNode:
+        if self.spotter_uri:
+            self.anno_id_counter += 1
+            return self.spotter_uri + f'#anno{self.anno_id_counter}'
+        return BlankNode()
+
 
 class Annotation:
     def __init__(self, spotter_run: Optional[SpotterRun] = None, annotation_uri: Optional[Uri] = None):
         self.spotter_run = spotter_run
-        self.annotation_uri = annotation_uri or BlankNode()
+        self.annotation_uri = annotation_uri or (self.spotter_run and self.spotter_run.get_anno_node()) or BlankNode()
         self.body: list[Object] = []
         self.target: list[Object] = []
 

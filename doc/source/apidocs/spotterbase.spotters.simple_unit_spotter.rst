@@ -28,6 +28,14 @@ spotterbase.spotters.simple\_unit\_spotter.om\_vocab module
    :undoc-members:
    :show-inheritance:
 
+spotterbase.spotters.simple\_unit\_spotter.patterns module
+----------------------------------------------------------
+
+.. automodule:: spotterbase.spotters.simple_unit_spotter.patterns
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Module contents
 ---------------
 

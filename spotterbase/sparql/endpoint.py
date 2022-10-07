@@ -37,7 +37,7 @@ class Virtuoso(SparqlEndpoint):
                          headers={'Accept': accept},
                          auth=HTTPBasicAuth('SPARQL', 'SPARQL'),
                          )
-        print(r.text)
+        # print(r.text)
         r.raise_for_status()
         if accept == 'application/json':
             return r.json()

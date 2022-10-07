@@ -1,0 +1,39 @@
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX dc: <http://purl.org/dc/elements/1.1/>
+PREFIX dcterms: <http://purl.org/dc/terms/>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+PREFIX oa: <http://www.w3.org/ns/oa#>
+PREFIX om: <http://www.ontology-of-units-of-measure.org/resource/om-2/>
+PREFIX arxivcat: <https://arxiv.org/archive/>
+PREFIX arxiv: <https://arxiv.org/abs/>
+PREFIX sb: <http://sigmathling.kwarc.info/spotterbase/>
+
+CONSTRUCT WHERE {
+    ?run sb:withSpotter <http://sigmathling.kwarc.info/spotterbase/spotter/simple-units> .
+    ?run ?p1 ?o1 .   # any spotter data
+    
+    ?anno dc:creator ?run .
+
+    ?anno oa:hasBody ?body .
+    # hack: select only one anno (is there a better way?)
+    <http://sigmathling.kwarc.info/spotterbase/spotter/simple-units#anno5> oa:hasBody ?body .
+
+    ?body om:hasNumericalValue ?value .
+    ?body om:hasUnit ?unit .
+
+    ?anno oa:hasTarget ?target .
+
+    ?target oa:hasSource ?source .
+    ?target oa:hasSelector ?selector .
+    ?selector a ?x0 .
+
+    OPTIONAL {
+        ?selector oa:hasStartSelector ?start .
+        ?start a ?x1 .
+        ?start rdf:value ?x2 .
+        ?selector oa:hasEndSelector ?end .
+        ?end a ?x3 .
+        ?end rdf:value ?x4 .
+    }
+}

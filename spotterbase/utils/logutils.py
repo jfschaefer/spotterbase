@@ -9,8 +9,8 @@ class ProgressLogger:
      creating a log message when :meth:`update` is called.
      """
     def __init__(self, logger: logging.Logger, message: str, interval_in_secs: int = 5):
-        """ :param message: should be a string that has a placeholder "progress".
-            For example, :param message: could be
+        """ ``message`` should be a string that has a placeholder ``"progress"``.
+            For example, ``message`` could be
             :code:`"Progress update: {progress} documents were processed"`.
         """
         self.logger = logger
@@ -19,7 +19,7 @@ class ProgressLogger:
         self.last_message = time.time()
 
     def update(self, progress):
-        """ Logs the :param progress: iff enough time has passed since the last log message """
+        """ Logs the ``progress`` iff enough time has passed since the last log message."""
         now = time.time()
         if now - self.last_message > self.interval_in_secs:
             self.last_message = now

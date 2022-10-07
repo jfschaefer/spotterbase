@@ -1,3 +1,13 @@
+""" This module provides a converter for converting to rdflib.
+
+This is largely trivial, but it makes the conversion a more convenient.
+It also maintains a state to make sure that a blank node is always mapped
+to the same blank node.
+
+Since rdflib.term.Node accepts a value argument, we might
+actually be able to do the whole thing without maintaining a state...
+"""
+
 from typing import Iterator
 
 import rdflib

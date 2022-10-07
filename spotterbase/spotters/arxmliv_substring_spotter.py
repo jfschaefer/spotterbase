@@ -13,7 +13,7 @@ from spotterbase.rdf.base import Uri, TripleI, BlankNode
 from spotterbase.rdf.literals import StringLiteral
 from spotterbase.rdf.serializer import TurtleSerializer
 from spotterbase.rdf.vocab import RDF
-from spotterbase.spotters.utils import Annotation, SpotterRun
+from spotterbase.spotters.rdfhelpers import Annotation, SpotterRun
 from spotterbase import __version__
 from spotterbase.utils.logutils import ProgressLogger
 

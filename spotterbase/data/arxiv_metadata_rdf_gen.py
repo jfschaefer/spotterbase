@@ -13,7 +13,7 @@ from spotterbase.data.utils import json_lib
 from spotterbase.rdf.base import TripleI
 from spotterbase.rdf.serializer import TurtleSerializer
 from spotterbase.rdf.vocab import RDF
-from spotterbase.spotters.utils import Annotation, SpotterRun
+from spotterbase.spotters.rdfhelpers import Annotation, SpotterRun
 from spotterbase import __version__
 
 logger = logging.getLogger(__name__)

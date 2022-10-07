@@ -12,7 +12,7 @@ from spotterbase.data.rdf import SB, ArxivUris, ArXMLivUris
 from spotterbase.rdf.base import TripleI
 from spotterbase.rdf.serializer import TurtleSerializer
 from spotterbase.rdf.vocab import RDF
-from spotterbase.spotters.utils import SpotterRun, Annotation
+from spotterbase.spotters.rdfhelpers import SpotterRun, Annotation
 from spotterbase import __version__
 
 logger = logging.getLogger(__name__)

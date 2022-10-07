@@ -33,3 +33,7 @@ Possible solution: gunzip in /tmp first (works without gzip)
 
 
 Also interesting: https://gist.github.com/jonlazaro/6934282
+
+
+Relevant for using sparql endpoint from browser (e.g. javascript):
+https://vos.openlinksw.com/owiki/wiki/VOS/VirtTipsAndTricksCORsEnableSPARQLURLs

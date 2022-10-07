@@ -20,10 +20,10 @@ spotterbase.spotters.arxmliv\_substring\_spotter module
    :undoc-members:
    :show-inheritance:
 
-spotterbase.spotters.utils module
----------------------------------
+spotterbase.spotters.rdfhelpers module
+--------------------------------------
 
-.. automodule:: spotterbase.spotters.utils
+.. automodule:: spotterbase.spotters.rdfhelpers
    :members:
    :undoc-members:
    :show-inheritance:
