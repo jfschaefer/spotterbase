@@ -6,9 +6,9 @@ from pathlib import Path
 from typing import IO
 
 from spotterbase import config_loader
-from spotterbase.data.arxiv import ArxivId, ArxivCategory, USE_CENTI_ARXIV
+from spotterbase.corpora.arxiv import ArxivId, ArxivCategory, USE_CENTI_ARXIV, ArxivUris
 from spotterbase.data.locator import Locator, DataDir
-from spotterbase.data.rdf import SB, ArxivUris
+from spotterbase.sb_vocab import SB
 from spotterbase.data.utils import json_lib
 from spotterbase.rdf.base import TripleI
 from spotterbase.rdf.serializer import TurtleSerializer
@@ -63,14 +63,14 @@ class MetadataRdfGenerator:
         yield ArxivUris.centi_arxiv, SB.subset, ArxivUris.dataset
 
     def triples(self) -> TripleI:
-        # Yielding triples and then discarding built-up data structures reduces the memory requirements
+        # Yielding triples and then discarding built-up corpora structures reduces the memory requirements
 
         yield from self._highlevel()
 
         spotter_run = SpotterRun(SB.NS['spotter/arxivmetadata'], spotter_version=__version__)
         yield from spotter_run.triples()
 
-        # re-arrange data
+        # re-arrange corpora
         cat_to_arxivid: defaultdict[str, list[ArxivId]] = defaultdict(list)
         for arxiv_id, cats in self.accumulator.items():
             for cat in cats:

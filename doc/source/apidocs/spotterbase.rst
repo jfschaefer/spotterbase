@@ -7,6 +7,7 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
+   spotterbase.corpora
    spotterbase.data
    spotterbase.dnm
    spotterbase.rdf
@@ -22,6 +23,14 @@ spotterbase.config\_loader module
 ---------------------------------
 
 .. automodule:: spotterbase.config_loader
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+spotterbase.sb\_vocab module
+----------------------------
+
+.. automodule:: spotterbase.sb_vocab
    :members:
    :undoc-members:
    :show-inheritance:

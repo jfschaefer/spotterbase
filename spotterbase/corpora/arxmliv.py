@@ -4,10 +4,10 @@ from pathlib import Path
 from typing import IO, Iterator, Optional
 
 from spotterbase.config_loader import ConfigExtension, ConfigLoader
-from spotterbase.data.arxiv import ArxivId
-from spotterbase.data.document import Document, Corpus, DocumentNotFoundException
+from spotterbase.corpora.arxiv import ArxivId
+from spotterbase.corpora.interface import Document, Corpus, DocumentNotFoundException
 from spotterbase.data.locator import Locator
-from spotterbase.data.rdf import SB, ArXMLivUris
+from spotterbase.sb_vocab import SB
 from spotterbase.rdf.base import Uri
 from spotterbase.data.zipfilecache import SHARED_ZIP_CACHE
 
@@ -71,16 +71,16 @@ class ArXMLivCorpus(Corpus):
         return ArXMLiv.get_release_uri(self.release)
 
     def _get_yymm_location(self, yymm: str) -> Path:
-        for directory in [self.path / f'{yymm}', self.path / 'data' / f'{yymm}']:
+        for directory in [self.path / f'{yymm}', self.path / 'corpora' / f'{yymm}']:
             if directory.is_dir():
                 return directory
-        for zip_path in [self.path / f'{yymm}.zip', self.path / 'data' / f'{yymm}.zip']:
+        for zip_path in [self.path / f'{yymm}.zip', self.path / 'corpora' / f'{yymm}.zip']:
             if zip_path.is_file():
                 return zip_path
         raise DocumentNotFoundException(f'Failed to find a folder for "{yymm}" in {self.path}')
 
     def _iter_yymm_locations(self) -> Iterator[Path]:
-        if not (path := self.path / 'data').is_dir():
+        if not (path := self.path / 'corpora').is_dir():
             path = self.path
         path_regex = re.compile(r'^[0-9][0-9][0-9][0-9](\.zip)?$')
         for content in path.iterdir():
@@ -142,3 +142,12 @@ class ArXMLiv:
     @classmethod
     def get_graph_uri(cls, release: str) -> Uri:
         return SB.NS[f'graph/arxmliv-meta/' + release]
+
+
+class ArXMLivUris:
+    arxmliv = Uri(f'http://sigmathling.kwarc.info/arxmliv/')
+
+    severity = arxmliv / 'severity/'
+    severity_no_problem = severity / 'noProblem'
+    severity_warning = severity / 'warning'
+    severity_error = severity / 'error'

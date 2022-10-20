@@ -8,8 +8,10 @@ Content
    :maxdepth: 1
 
    contribute
+   config
    rdf
    utils
+   corpora
 
 
 API reference

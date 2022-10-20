@@ -762,7 +762,7 @@ class OA(Vocabulary):
     # 
     #   This relationship is intended to be used both within Linked Data descriptions and as the  rel  type of a Link, via HTTP Link Headers rfc5988 for binary resources and in HTML <link> elements.  For more information about these, please see the Annotation Protocol specification annotation-protocol.
     annotationService: Uri
-    # The object of the predicate is a plain text string to be used as the content of the body of the Annotation.  The value MUST be an  xsd:string  and that data type MUST NOT be expressed in the serialization. Note that language MUST NOT be associated with the value either as a language tag, as that is only available for  rdf:langString .
+    # The object of the predicate is a plain text string to be used as the content of the body of the Annotation.  The value MUST be an  xsd:string  and that corpora type MUST NOT be expressed in the serialization. Note that language MUST NOT be associated with the value either as a language tag, as that is only available for  rdf:langString .
     bodyValue: Uri
     # A object of the relationship is a copy of the Source resource's representation, appropriate for the Annotation.
     cachedSource: Uri
@@ -806,7 +806,7 @@ class OA(Vocabulary):
     sourceDateEnd: Uri
     # The start timestamp of the interval over which the Source resource should be interpreted as being applicable to the Annotation.
     sourceDateStart: Uri
-    # The start position in a 0-based index at which a range of content is selected from the data in the source resource.
+    # The start position in a 0-based index at which a range of content is selected from the corpora in the source resource.
     start: Uri
     # The name of the class used in the CSS description referenced from the Annotation that should be applied to the Specific Resource.
     styleClass: Uri
@@ -828,7 +828,7 @@ class OA(Vocabulary):
     CssSelector: Uri
     # A resource which describes styles for resources participating in the Annotation using CSS.
     CssStyle: Uri
-    # DataPositionSelector describes a range of data by recording the start and end positions of the selection in the stream. Position 0 would be immediately before the first byte, position 1 would be immediately before the second byte, and so on. The start byte is thus included in the list, but the end byte is not.
+    # DataPositionSelector describes a range of corpora by recording the start and end positions of the selection in the stream. Position 0 would be immediately before the first byte, position 1 would be immediately before the second byte, and so on. The start byte is thus included in the list, but the end byte is not.
     DataPositionSelector: Uri
     # A class to encapsulate the different text directions that a textual resource might take.  It is not used directly in the Annotation Model, only its three instances.
     Direction: Uri
@@ -917,7 +917,7 @@ class OWL(Vocabulary):
     assertionProperty: Uri
     # The annotation property that indicates that a given ontology is backward compatible with another ontology.
     backwardCompatibleWith: Uri
-    # The data property that does not relate any individual to any data value.
+    # The corpora property that does not relate any individual to any corpora value.
     bottomDataProperty: Uri
     # The object property that does not relate any two individuals.
     bottomObjectProperty: Uri
@@ -925,7 +925,7 @@ class OWL(Vocabulary):
     cardinality: Uri
     # The property that determines that a given class is the complement of another class.
     complementOf: Uri
-    # The property that determines that a given data range is the complement of another data range with respect to the data domain.
+    # The property that determines that a given corpora range is the complement of another corpora range with respect to the corpora domain.
     datatypeComplementOf: Uri
     # The annotation property that indicates that a given entity has been deprecated.
     deprecated: Uri
@@ -951,7 +951,7 @@ class OWL(Vocabulary):
     imports: Uri
     # The annotation property that indicates that a given ontology is incompatible with another ontology.
     incompatibleWith: Uri
-    # The property that determines the collection of classes or data ranges that build an intersection.
+    # The property that determines the collection of classes or corpora ranges that build an intersection.
     intersectionOf: Uri
     # The property that determines that two given properties are inverse.
     inverseOf: Uri
@@ -967,15 +967,15 @@ class OWL(Vocabulary):
     minQualifiedCardinality: Uri
     # The property that determines the class that a qualified object cardinality restriction refers to.
     onClass: Uri
-    # The property that determines the data range that a qualified data cardinality restriction refers to.
+    # The property that determines the corpora range that a qualified corpora cardinality restriction refers to.
     onDataRange: Uri
     # The property that determines the datatype that a datatype restriction refers to.
     onDatatype: Uri
-    # The property that determines the n-tuple of properties that a property restriction on an n-ary data range refers to.
+    # The property that determines the n-tuple of properties that a property restriction on an n-ary corpora range refers to.
     onProperties: Uri
     # The property that determines the property that a property restriction refers to.
     onProperty: Uri
-    # The property that determines the collection of individuals or data values that build an enumeration.
+    # The property that determines the collection of individuals or corpora values that build an enumeration.
     oneOf: Uri
     # The annotation property that indicates the predecessor ontology of a given ontology.
     priorVersion: Uri
@@ -993,13 +993,13 @@ class OWL(Vocabulary):
     sourceIndividual: Uri
     # The property that determines the object of a negative object property assertion.
     targetIndividual: Uri
-    # The property that determines the value of a negative data property assertion.
+    # The property that determines the value of a negative corpora property assertion.
     targetValue: Uri
-    # The data property that relates every individual to every data value.
+    # The corpora property that relates every individual to every corpora value.
     topDataProperty: Uri
     # The object property that relates every two individuals.
     topObjectProperty: Uri
-    # The property that determines the collection of classes or data ranges that build a union.
+    # The property that determines the collection of classes or corpora ranges that build a union.
     unionOf: Uri
     # The property that identifies the version IRI of an ontology.
     versionIRI: Uri
@@ -1025,9 +1025,9 @@ class OWL(Vocabulary):
     Axiom: Uri
     # The class of OWL classes.
     Class: Uri
-    # The class of OWL data ranges, which are special kinds of datatypes. Note: The use of the IRI owl:DataRange has been deprecated as of OWL 2. The IRI rdfs:Datatype SHOULD be used instead.
+    # The class of OWL corpora ranges, which are special kinds of datatypes. Note: The use of the IRI owl:DataRange has been deprecated as of OWL 2. The IRI rdfs:Datatype SHOULD be used instead.
     DataRange: Uri
-    # The class of data properties.
+    # The class of corpora properties.
     DatatypeProperty: Uri
     # The class of deprecated classes.
     DeprecatedClass: Uri
@@ -1087,7 +1087,7 @@ class SKOS(Vocabulary):
     hiddenLabel: Uri
     historyNote: Uri
     inScheme: Uri
-    # These concept mapping relations mirror semantic relations, and the data model defined below is similar (with the exception of skos:exactMatch) to the data model defined for semantic relations. A distinct vocabulary is provided for concept mapping relations, to provide a convenient way to differentiate links within a concept scheme from links between concept schemes. However, this pattern of usage is not a formal requirement of the SKOS data model, and relies on informal definitions of best practice.
+    # These concept mapping relations mirror semantic relations, and the corpora model defined below is similar (with the exception of skos:exactMatch) to the corpora model defined for semantic relations. A distinct vocabulary is provided for concept mapping relations, to provide a convenient way to differentiate links within a concept scheme from links between concept schemes. However, this pattern of usage is not a formal requirement of the SKOS corpora model, and relies on informal definitions of best practice.
     mappingRelation: Uri
     member: Uri
     # For any resource, every item in the list given as the value of the

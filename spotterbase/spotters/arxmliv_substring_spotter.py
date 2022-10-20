@@ -5,10 +5,10 @@ from typing import Iterator
 
 from spotterbase import config_loader
 from spotterbase.config_loader import ConfigString, ConfigInt
-from spotterbase.data.arxiv import USE_CENTI_ARXIV
-from spotterbase.data.arxmliv import ArXMLivConfig, ArXMLivDocument, ArXMLivCorpus, ArXMLiv
+from spotterbase.corpora.arxiv import USE_CENTI_ARXIV
+from spotterbase.corpora.arxmliv import ArXMLivConfig, ArXMLivDocument, ArXMLivCorpus, ArXMLiv
 from spotterbase.data.locator import DataDir
-from spotterbase.data.rdf import SB
+from spotterbase.sb_vocab import SB
 from spotterbase.rdf.base import Uri, TripleI, BlankNode
 from spotterbase.rdf.literals import StringLiteral
 from spotterbase.rdf.serializer import TurtleSerializer

@@ -1,4 +1,4 @@
-import spotterbase.data.rdf as sb_vocab
+import spotterbase.corpora.arxiv
 from spotterbase.rdf.base import NameSpace, Object, Uri, Literal
 import spotterbase.rdf.vocab as vocab
 import spotterbase.spotters as spotters
@@ -12,8 +12,8 @@ NAMESPACES: list[NameSpace] = [
 
     spotters.simple_unit_spotter.om.OM.NS,
 
-    sb_vocab.ArxivUris.arxiv_cat,
-    sb_vocab.ArxivUris.arxiv_id,
+    spotterbase.corpora.arxiv.ArxivUris.arxiv_cat,
+    spotterbase.corpora.arxiv.ArxivUris.arxiv_id,
 ]
 
 
@@ -42,7 +42,7 @@ def json_binding_to_object(d: dict[str, str]) -> Object:
             else:
                 return Literal(d['value'], vocab.XSD.string)
         case 'typed-literal':
-            # TODO: somewhere creating specialized literals from data types.
+            # TODO: somewhere creating specialized literals from corpora types.
             return Literal(d['value'], Uri(d['datatype']))
         case other:
             raise Exception(f'Unsupported type {other}')

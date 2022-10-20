@@ -3,7 +3,7 @@ import hashlib
 import re
 
 from spotterbase.config_loader import ConfigFlag
-from spotterbase.data.rdf import ArxivUris
+from spotterbase.sb_vocab import SB
 from spotterbase.rdf.base import Uri, NameSpace
 
 USE_CENTI_ARXIV = ConfigFlag('--centi-arxiv', 'use a subset of arxiv (≈ 1 percent)')
@@ -52,3 +52,15 @@ class ArxivCategory:
 
     def as_uri(self) -> Uri:
         return ArxivUris.arxiv_cat[self.category]
+
+
+class ArxivUris:
+    """ Namespaces and URIs for arXiv. Note that we are trying to use valid arxiv URLs where possible. """
+    meta_graph = SB.NS['graph/arxiv-meta']
+
+    topic_system = Uri('https://arxiv.org/category_taxonomy/')
+    dataset = Uri('https://arxiv.org/')
+    centi_arxiv = Uri('http://sigmathling.kwarc.info/centi-arxiv')
+
+    arxiv_id = NameSpace('https://arxiv.org/abs/', 'arxiv:')
+    arxiv_cat = NameSpace('https://arxiv.org/archive/', 'arxivcat:')

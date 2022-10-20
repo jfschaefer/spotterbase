@@ -53,3 +53,4 @@ class TokenBasedDnm(Dnm):
         token = self.tokens[self.back_refs[offset][0]]
         rel_offset = self.back_refs[offset][1]
         return token.to_range(rel_offset)
+

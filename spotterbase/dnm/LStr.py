@@ -13,7 +13,7 @@ class LStr:
         self.backrefs = backrefs
 
     def new(self: T, new_string: str, new_backrefs: list[int]) -> T:
-        """ Intended to be overwritten in subclasses if more data has to be copied (e.g. a source document) """
+        """ Intended to be overwritten in subclasses if more corpora has to be copied (e.g. a source document) """
         return self.__class__(new_string, new_backrefs)
 
     def __len__(self) -> int:

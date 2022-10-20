@@ -3,11 +3,11 @@ import abc
 import dataclasses
 from typing import Optional, TypeVar
 
-from lxml.etree import _Element, _ElementTree
+from lxml.etree import _Element, _ElementTree, _ElementUnicodeResult
 
-from spotterbase.data.rdf import SB
+from spotterbase.sb_vocab import SB
 from spotterbase.dnm.LStr import LStr
-from spotterbase.rdf.base import TripleI, BlankNode, Literal, Subject, Triple
+from spotterbase.rdf.base import BlankNode, Subject, Triple
 from spotterbase.rdf.literals import StringLiteral
 from spotterbase.rdf.vocab import RDF, OA, DCTERMS
 

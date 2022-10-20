@@ -6,9 +6,9 @@ from lxml import etree
 
 import spotterbase.utils.xml_match as xm
 from spotterbase import config_loader, __version__
-from spotterbase.data.arxiv import ArxivId
-from spotterbase.data.arxmliv import ArXMLiv
-from spotterbase.data.rdf import SB
+from spotterbase.corpora.arxiv import ArxivId
+from spotterbase.corpora.arxmliv import ArXMLiv
+from spotterbase.sb_vocab import SB
 from spotterbase.dnm.dnm import DnmStr, DnmRange
 from spotterbase.dnm.token_dnm import TokenBasedDnm
 from spotterbase.dnm.token_generator import DefaultGenerators
@@ -19,7 +19,7 @@ from spotterbase.rdf.vocab import OA, RDF
 from spotterbase.spotters.rdfhelpers import SpotterRun, Annotation
 from spotterbase.spotters.simple_unit_spotter import patterns, all_units
 from spotterbase.spotters.simple_unit_spotter.om_vocab import OM
-from spotterbase.spotters.simple_unit_spotter.patterns import unit_to_unit_notation, scalar_to_scalars
+from spotterbase.spotters.simple_unit_spotter.patterns import scalar_to_scalars
 
 
 def main():

@@ -5,7 +5,7 @@ import rdflib
 import rdflib.compare
 from lxml import etree
 
-from spotterbase.data.rdf import SB
+from spotterbase.sb_vocab import SB
 from spotterbase.dnm.dnm import DomRange
 from spotterbase.dnm.token_dnm import TokenBasedDnm
 from spotterbase.dnm.token_generator import SimpleTokenGenerator

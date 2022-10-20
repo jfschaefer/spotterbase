@@ -63,18 +63,18 @@ class Locator(ConfigExtension):
 
 
 class DataDir:
-    data_locator = Locator('--data-path', 'the data directory', [])
+    data_locator = Locator('--corpora-path', 'the corpora directory', [])
 
     @classmethod
     def get(cls, rel_path: Path | str) -> Path:
-        path = cls.data_locator.location_opt() or Path('~/spotterbase-data')
+        path = cls.data_locator.location_opt() or Path('~/spotterbase-corpora')
         if not path.exists():
             path.mkdir()
         return path / rel_path
 
 
 class TmpDir:
-    locator = Locator('--tmp-dir', 'directory for temporary data', [])
+    locator = Locator('--tmp-dir', 'directory for temporary corpora', [])
 
     _tmp_path: Optional[Path] = None
 
