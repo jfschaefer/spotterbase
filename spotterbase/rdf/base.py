@@ -70,8 +70,23 @@ class Uri:
     def with_namespace_from(self, namespaces: list[NameSpace]) -> Optional[Uri]:
         for namespace in sorted(namespaces, key=lambda ns: len(ns.uri.full_uri()), reverse=True):
             if self.full_uri().startswith(namespace.uri.full_uri()):
-                return Uri(self.full_uri()[len(namespace.uri.full_uri()):], namespace)
+                return Uri(self.relative_to(namespace), namespace)
         return None
+
+    def relative_to(self, other: NameSpace | str | Uri) -> str:
+        other_as_str: str
+        match other:
+            case str():
+                other_as_str = Uri(other).full_uri()
+            case Uri():
+                other_as_str = other.full_uri()
+            case NameSpace():
+                other_as_str = other.uri.full_uri()
+            case _:
+                raise NotImplementedError(f'Unsupported type of other: {type(other)}')
+        if not self.full_uri().startswith(other_as_str):
+            raise Exception(f'{self.full_uri()} does not start with {other_as_str}')
+        return self.full_uri()[len(other_as_str):]
 
     def __truediv__(self, other) -> Uri:
         if self._suffix.endswith('/'):

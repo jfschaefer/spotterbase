@@ -70,6 +70,9 @@ class ArXMLivCorpus(Corpus):
     def get_uri(self) -> Uri:
         return ArXMLiv.get_release_uri(self.release)
 
+    def get_document_from_uri(self, uri: Uri) -> Document:
+        return self.get_document(ArxivId(uri.relative_to(self.get_uri())))
+
     def _get_yymm_location(self, yymm: str) -> Path:
         for directory in [self.path / f'{yymm}', self.path / 'corpora' / f'{yymm}']:
             if directory.is_dir():
