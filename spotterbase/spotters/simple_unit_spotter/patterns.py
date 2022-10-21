@@ -2,7 +2,7 @@ import enum
 import json
 import unicodedata
 from dataclasses import dataclass
-from typing import Union, Tuple, Optional
+from typing import Union, Tuple, Optional, Any
 
 from lxml.etree import _Element
 
@@ -132,7 +132,9 @@ class UnitNotation(object):
     def __hash__(self):
         return hash(self._jsonstr)
 
-    def __eq__(self, other: 'UnitNotation') -> bool:
+    def __eq__(self, other) -> bool:
+        if not isinstance(other, UnitNotation):
+            raise NotImplementedError()
         return self._jsonstr == other._jsonstr
 
 
@@ -165,7 +167,8 @@ base = xm.tag('math') / xm.tag('semantics')
 # * NUMBERS AND SCALARS *
 # ***********************
 
-def mn_to_number(mn_text: str) -> Union[float, int]:
+def mn_to_number(mn_text: Optional[str]) -> Union[float, int]:
+    assert mn_text
     reduced = ''
     for c in mn_text:
         if c.isnumeric():
@@ -191,6 +194,7 @@ scientific_number = (mrow / xm.seq(simple_number ** 'factor', mtext.with_text('[
 def tree_to_number(lt: xm.MatchTree) -> Tuple[Union[int, float], str]:
     if lt.label == 'simplenumber':
         sign = -1 if 'negative' in lt else 1
+        assert lt['numeral'].node is not None
         return sign * mn_to_number(lt['numeral'].node.text), 'simple'
     elif lt.label == 'scientific':
         return tree_to_number(lt['factor'])[0] * tree_to_number(lt['powerof10'])[0], 'scientific'
@@ -233,15 +237,15 @@ symbol = simple_symbol | complex_symbol
 def symbol_to_notation(node: _Element) -> Notation:
     # TODO: Invisible characters?
     if node.tag in {'mi', 'mn', 'mo'}:
-        attr = {'val': node.text}
+        attr: dict[str, Any] = {'val': node.text}
         if node.tag == 'mi' and node.text and len(node.text) == 1 and node.get('mathvariant') != 'normal':
             attr['isitalic'] = True
         return Notation('i', attr, [])
     elif node.tag in {'msup', 'msub', 'msubsup'}:
-        return Notation(node.tag[1:], {}, [symbol_to_notation(child) for child in node.getchildren()])
+        return Notation(node.tag[1:], {}, [symbol_to_notation(child) for child in node.iterchildren()])
     elif node.tag == 'mrow':
         # TODO: We need some kind of normalization (merge consecutive identifiers etc.)
-        return Notation('seq', {}, [symbol_to_notation(child) for child in node.getchildren()])
+        return Notation('seq', {}, [symbol_to_notation(child) for child in node.iterchildren()])
     raise Exception('Unsupported symbol node: ' + node.tag)
 
 
@@ -258,7 +262,7 @@ simple_unit = (simple_symbol | (xm.tag('msub') / xm.seq(simple_symbol, xm.any_ta
 def simple_unit_to_notation(lt: xm.MatchTree) -> Notation:
     assert lt.label == 'simpleunit'
     # TODO: This will get much more complex
-    node = lt.node
+    assert (node := lt.node) is not None
     return symbol_to_notation(node)
 
 
@@ -279,7 +283,7 @@ def unit_to_unit_notation(lt: xm.MatchTree) -> UnitNotation:
     elif lt.label == 'unitpower':
         notation = simple_unit_to_notation(lt['simpleunit'])
         exponent = tree_to_number(lt['exponent'])[0]
-        if exponent not in range(-10, 10):
+        if exponent not in range(-10, 10) or not isinstance(exponent, int):
             raise UndesirableMatchException(f'Bad exponent for a unit: {exponent}')
         return UnitNotation([(notation, exponent)])
     elif lt.label == 'unittimes':

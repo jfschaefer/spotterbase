@@ -10,9 +10,11 @@ from spotterbase.dnm.LStr import LStr
 
 
 class Dnm(abc.ABC):
+    @abc.abstractmethod
     def get_dnm_str(self) -> DnmStr:
         raise NotImplementedError()
 
+    @abc.abstractmethod
     def offset_to_range(self, offset: int) -> DomRange:
         raise NotImplementedError()
 

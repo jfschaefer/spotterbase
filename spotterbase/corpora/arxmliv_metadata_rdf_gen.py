@@ -8,7 +8,7 @@ from spotterbase.config_loader import ConfigString
 from spotterbase.corpora.arxiv import USE_CENTI_ARXIV, ArxivUris
 from spotterbase.corpora.arxmliv import ArXMLivConfig, ArXMLivUris, ArXMLivCorpus, ArXMLiv
 from spotterbase.data.locator import DataDir
-from spotterbase.sb_vocab import SB, ArXMLivUris
+from spotterbase.sb_vocab import SB
 from spotterbase.rdf.base import TripleI
 from spotterbase.rdf.serializer import TurtleSerializer
 from spotterbase.rdf.vocab import RDF

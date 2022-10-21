@@ -5,9 +5,11 @@ from spotterbase.rdf.base import Uri
 
 
 class Document(abc.ABC):
+    @abc.abstractmethod
     def get_uri(self) -> Uri:
         raise NotImplementedError()
 
+    @abc.abstractmethod
     def open(self, *args, **kwargs) -> IO:
         raise NotImplementedError()
 
@@ -24,11 +26,14 @@ class DocumentNotFoundException(Exception):
 
 
 class Corpus(abc.ABC):
+    @abc.abstractmethod
     def get_uri(self) -> Uri:
         raise NotImplementedError()
 
+    @abc.abstractmethod
     def get_document_from_uri(self, uri: Uri) -> Document:
         raise NotImplementedError()
 
+    @abc.abstractmethod
     def __iter__(self) -> Iterator[Document]:
         raise NotImplementedError()

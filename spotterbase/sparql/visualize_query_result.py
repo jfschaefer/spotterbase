@@ -2,8 +2,9 @@ import io
 import logging
 from pathlib import Path
 
-import matplotlib.pyplot as plt
-import networkx as nx
+# no reason to have type stubs installed for libraries used only here
+import matplotlib.pyplot as plt  # type: ignore
+import networkx as nx            # type: ignore
 import rdflib
 from rdflib.extras.external_graph_libs import rdflib_to_networkx_multidigraph
 

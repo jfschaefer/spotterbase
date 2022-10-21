@@ -265,7 +265,7 @@ class MatcherNodeWithChildren(NodeMatcher):
 
     def _match(self, node: _Element) -> Iterator[_Match]:
         for match in self.node_matcher._match(node):
-            for submatch, remaining in self.seq_matcher._match(node.getchildren()):
+            for submatch, remaining in self.seq_matcher._match(list(node.iterchildren())):
                 if self.allow_remainder or not remaining:
                     yield match.with_children(submatch)
 

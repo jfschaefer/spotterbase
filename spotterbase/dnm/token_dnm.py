@@ -33,7 +33,7 @@ class TokenBasedDnm(Dnm):
 
         self.tokens: list[Token] = tokens
 
-        # BACK REFERENCES
+        # BACK REFERENCES (offset -> token)
         self.back_refs: list[tuple[int, int]] = []    # token number, relative offset
         for token_number, token in enumerate(self.tokens):
             for rel_offset in range(len(token.string)):
