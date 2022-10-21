@@ -5,6 +5,7 @@ import rdflib
 import rdflib.compare
 from lxml import etree
 
+from spotterbase.dnm.selectors import SbRangeSelector
 from spotterbase.sb_vocab import SB
 from spotterbase.dnm.dnm import DomRange
 from spotterbase.dnm.token_dnm import TokenBasedDnm
@@ -32,17 +33,16 @@ class TestDnm(unittest.TestCase):
         self.assertEqual(dnmstr, 't1t2t3Ct4t5')
         self.assertEqual(dnmstr[5], '3')
 
-    def test_point_range(self):
+    def test_point_range_selector(self):
         for dnm, index, docfrag in [
-            (DNM_1, 5, 'char(/a/text()[2],1)')
+            (DNM_1, 5, 'char(/a,5)')
         ]:
             dnmstr = dnm.get_dnm_str()
             dom_range: DomRange = dnmstr[index].as_range().to_dom()
             point = dom_range.as_point()
             self.assertIsNotNone(point)
-            self.assertEqual(point.to_docfrag_str(), docfrag)
 
-            generated_graph = to_rdflib.Converter.convert_to_graph(dom_range.to_position()[1])
+            generated_graph = to_rdflib.Converter.convert_to_graph(SbRangeSelector.from_dom_range(dom_range).to_triples()[1])
             expected_graph = rdflib.Graph().parse(data=f'''
                 {RDF.NS:turtle} {OA.NS:turtle} {DCTERMS.NS:turtle} {SB.NS:turtle}
                 _:sel a {OA.FragmentSelector::} ;
@@ -51,15 +51,15 @@ class TestDnm(unittest.TestCase):
             ''')
             self.assert_equal_graphs(generated_graph, expected_graph)
 
-    def test_nonpoint_range(self):
+    def test_nonpoint_range_selector(self):
         for dnm, index, substring, start_docfrag, end_docfrag in [
-            (DNM_1, slice(6, 8), 'Ct', 'node(/a/c)', 'char(/a/text()[3],1)')
+            (DNM_1, slice(6, 8), 'Ct', 'node(/a/c)', 'char(/a,6)')
         ]:
             dnmstr = dnm.get_dnm_str()
             self.assertEqual(dnmstr[index], substring)
             dom_range: DomRange = dnmstr[index].as_range().to_dom()
 
-            generated_graph = to_rdflib.Converter.convert_to_graph(dom_range.to_position()[1])
+            generated_graph = to_rdflib.Converter.convert_to_graph(SbRangeSelector.from_dom_range(dom_range).to_triples()[1])
             expected_graph = rdflib.Graph().parse(data=f'''
                 {RDF.NS:turtle} {OA.NS:turtle} {DCTERMS.NS:turtle} {SB.NS:turtle}
                 _:sel a {OA.RangeSelector::} ;
