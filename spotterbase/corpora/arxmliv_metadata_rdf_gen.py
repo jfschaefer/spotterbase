@@ -6,7 +6,8 @@ from typing import Optional
 from spotterbase import config_loader
 from spotterbase.config_loader import ConfigString
 from spotterbase.corpora.arxiv import USE_CENTI_ARXIV, ArxivUris
-from spotterbase.corpora.arxmliv import ArXMLivConfig, ArXMLivUris, ArXMLivCorpus, ArXMLiv
+from spotterbase.corpora.arxmliv import ArXMLivUris, ArXMLivCorpus, RELEASES
+from spotterbase.corpora.resolver import Resolver
 from spotterbase.data.locator import DataDir
 from spotterbase.sb_vocab import SB
 from spotterbase.rdf.base import TripleI
@@ -17,12 +18,11 @@ from spotterbase import __version__
 
 logger = logging.getLogger(__name__)
 
-RELEASE_VERSION = ConfigString('--arxmliv-release', description='arXMLiv release', choices=ArXMLivConfig.releases,
-                               default=ArXMLivConfig.releases[-1])
+RELEASE_VERSION = ConfigString('--arxmliv-release', description='arXMLiv release', choices=RELEASES, default=RELEASES)
 
 
 def _get_severities_lists(corpus: ArXMLivCorpus) -> Optional[tuple[list[str], list[str], list[str]]]:
-    if (path := corpus.path / 'meta' / 'grouped_by_severity.zip').is_file():
+    if (path := corpus.get_path() / 'meta' / 'grouped_by_severity.zip').is_file():
         with zipfile.ZipFile(path) as zf:
             with zf.open('no-problem-tasks.txt', 'r') as fp:
                 np = [l.decode('utf-8').strip() for l in fp]
@@ -35,13 +35,13 @@ def _get_severities_lists(corpus: ArXMLivCorpus) -> Optional[tuple[list[str], li
 
 
 def iter_triples(corpus: ArXMLivCorpus) -> TripleI:
-    dataset_uri = ArXMLiv.get_release_uri(corpus.release)
+    dataset_uri = ArXMLivUris.get_corpus_uri(corpus.release)
     yield dataset_uri, RDF.type, SB.dataset
     yield dataset_uri, SB.basedOn, ArxivUris.dataset
 
     if USE_CENTI_ARXIV:
         logger.info(f'Note: Since `{USE_CENTI_ARXIV.name}` was set, most documents will be ignored')
-    logger.info(f'Iterating over documents in {corpus.path}')
+    logger.info(f'Iterating over documents in {corpus.get_path()}')
     for document in corpus:
         if USE_CENTI_ARXIV and not document.arxivid.is_in_centi_arxiv():
             continue
@@ -72,15 +72,15 @@ def iter_triples(corpus: ArXMLivCorpus) -> TripleI:
                     logger.warning(f'Unexpected file name in severity data: {doc}')
             yield from annotation.triples()
     else:
-        logger.warning(f'No severity data found in {corpus.path}')
+        logger.warning(f'No severity data found in {corpus.get_path()}')
 
 
 def main():
-    arxmliv = ArXMLiv()
-    corpus = arxmliv.get_corpus(RELEASE_VERSION.value)
+    corpus = Resolver.get_corpus(ArXMLivUris.get_corpus_uri(RELEASE_VERSION.value))
+    assert isinstance(corpus, ArXMLivCorpus)
     dest = DataDir.get(('centi-' if USE_CENTI_ARXIV else '') + f'arxmliv-{corpus.release}.ttl.gz')
     with gzip.open(dest, 'wt') as fp:
-        fp.write(f'# Graph: {ArXMLiv.get_graph_uri(RELEASE_VERSION.value):<>}\n')
+        fp.write(f'# Graph: {ArXMLivUris.get_metadata_graph_uri(RELEASE_VERSION.value):<>}\n')
         with TurtleSerializer(fp) as serializer:
             serializer.add_from_iterable(iter_triples(corpus))
     logger.info(f'The graph has successfully been written to {dest}.')

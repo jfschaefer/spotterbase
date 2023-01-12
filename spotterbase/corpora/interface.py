@@ -19,9 +19,14 @@ class DocumentNotInCorpusException(Exception):
     pass
 
 
-class DocumentNotFoundException(Exception):
-    """ The requested document might be part of the corpus,
-    but it cannot be found right now (e.g. the file does not exist)"""
+class DocumentNotFoundError(Exception):
+    """ If the document exists, it is part of the corpus,
+    but it cannot be found right now (e.g. the file does not exist). """
+    pass
+
+
+class CannotLocateCorpusDataError(Exception):
+    """ The corpus data cannot be found (e.g. because no path was provided) """
     pass
 
 
@@ -32,6 +37,7 @@ class Corpus(abc.ABC):
 
     @abc.abstractmethod
     def get_document_from_uri(self, uri: Uri) -> Document:
+        """ Should throw DocumentNotInCorpusException if necessary! """
         raise NotImplementedError()
 
     @abc.abstractmethod

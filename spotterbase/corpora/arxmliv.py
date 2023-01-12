@@ -3,13 +3,15 @@ import re
 from pathlib import Path
 from typing import IO, Iterator, Optional
 
-from spotterbase.config_loader import ConfigExtension, ConfigLoader
 from spotterbase.corpora.arxiv import ArxivId
-from spotterbase.corpora.interface import Document, Corpus, DocumentNotFoundException
-from spotterbase.data.locator import Locator
-from spotterbase.sb_vocab import SB
-from spotterbase.rdf.base import Uri
+from spotterbase.corpora.interface import Document, Corpus, DocumentNotFoundError, CannotLocateCorpusDataError
+from spotterbase.corpora.resolver import Resolver
+from spotterbase.data.locator import Locator, LocatorFailedException
 from spotterbase.data.zipfilecache import SHARED_ZIP_CACHE
+from spotterbase.rdf.base import Uri
+from spotterbase.sb_vocab import SB
+
+RELEASES: list[str] = ['08.2017', '08.2018', '08.2019', '2020']
 
 
 class ArXMLivDocument(Document, abc.ABC):
@@ -21,7 +23,7 @@ class ArXMLivDocument(Document, abc.ABC):
         self.release = release
 
     def get_uri(self) -> Uri:
-        return ArXMLiv.get_release_uri(self.release) + self.arxivid.identifier
+        return ArXMLivUris.get_corpus_uri(self.release) + self.arxivid.identifier
 
     def open(self, *args, **kwargs) -> IO:
         raise NotImplementedError()
@@ -47,7 +49,7 @@ class ZipArXMLivDocument(ArXMLivDocument):
         try:
             return zf.open(self.filename, *args, **kwargs)
         except KeyError as e:
-            missing = DocumentNotFoundException(f'Failed to find {self.filename} in {self.path_to_zipfile}: {e}')
+            missing = DocumentNotFoundError(f'Failed to find {self.filename} in {self.path_to_zipfile}: {e}')
             missing.__suppress_context__ = True
             raise missing
 
@@ -55,9 +57,12 @@ class ZipArXMLivDocument(ArXMLivDocument):
 class ArXMLivCorpus(Corpus):
     filename_regex = re.compile(f'^(?P<oldprefix>[a-z-]+)?(?P<digits>[0-9.]+).html$')
 
-    def __init__(self, release: str, path: Path):
+    def __init__(self, release: str):
         self.release = release
-        self.path = path
+        self._locator: Locator = Locator(f'--arxmliv-{release}-path',
+                                         description=f'path to the {release} arXMLiv release',
+                                         default_rel_locations=[f'arxmliv-{release}'],
+                                         how_to_get=f'SIGMathLing members can download the arXMLiv copora from https://sigmathling.kwarc.info/resources/')
 
     def get_document(self, arxivid: ArxivId) -> ArXMLivDocument:
         location = self._get_yymm_location(arxivid.yymm)
@@ -68,23 +73,30 @@ class ArXMLivCorpus(Corpus):
             return SimpleArXMLivDocument(arxivid, self.release, location)
 
     def get_uri(self) -> Uri:
-        return ArXMLiv.get_release_uri(self.release)
+        return ArXMLivUris.get_corpus_uri(self.release)
 
     def get_document_from_uri(self, uri: Uri) -> Document:
         return self.get_document(ArxivId(uri.relative_to(self.get_uri())))
 
+    def get_path(self) -> Path:
+        try:
+            return self._locator.require()
+        except LocatorFailedException as e:
+            raise CannotLocateCorpusDataError(e)
+
     def _get_yymm_location(self, yymm: str) -> Path:
-        for directory in [self.path / f'{yymm}', self.path / 'corpora' / f'{yymm}']:
+        path = self.get_path()
+        for directory in [path / f'{yymm}', path / 'data' / f'{yymm}']:
             if directory.is_dir():
                 return directory
-        for zip_path in [self.path / f'{yymm}.zip', self.path / 'corpora' / f'{yymm}.zip']:
+        for zip_path in [path / f'{yymm}.zip', path / 'data' / f'{yymm}.zip']:
             if zip_path.is_file():
                 return zip_path
-        raise DocumentNotFoundException(f'Failed to find a folder for "{yymm}" in {self.path}')
+        raise DocumentNotFoundError(f'Failed to find a folder for "{yymm}" in {path}')
 
     def _iter_yymm_locations(self) -> Iterator[Path]:
-        if not (path := self.path / 'corpora').is_dir():
-            path = self.path
+        if not (path := self.get_path() / 'corpora').is_dir():
+            path = self.get_path()
         path_regex = re.compile(r'^[0-9][0-9][0-9][0-9](\.zip)?$')
         for content in path.iterdir():
             if path_regex.match(content.name):
@@ -112,41 +124,6 @@ class ArXMLivCorpus(Corpus):
                         yield ZipArXMLivDocument(arxivid, self.release, yymm_location, name)
 
 
-class ArXMLivConfig(ConfigExtension):
-    # All supported arXMLiv releases (ordered by release date)
-    releases: list[str] = ['08.2017', '08.2018', '08.2019', '2020']
-
-    def __init__(self):
-        self.locators: dict[str, Locator] = {}
-        for release in self.releases:
-            self.locators[release] = Locator(f'--arxmliv-{release}-path',
-                                             description=f'path to the {release} arXMLiv release',
-                                             default_rel_locations=[f'arxmliv-{release}', f'arxmliv-{release}.tar.gz'],
-                                             how_to_get=f'SIGMathLing members can download the arXMLiv copora from https://sigmathling.kwarc.info/resources/')
-
-
-#     def prepare_argparser(self, argparser: argparse.ArgumentParser):
-#         argparser.add_argument('--default-arxmliv-release', help='default release of the arXMLiv corpus',
-#                                choices=self.releases, default=self.releases[-1])
-
-
-class ArXMLiv:
-    config = ArXMLivConfig()
-    ConfigLoader.default_extensions.append(config)
-
-    def get_corpus(self, release: str) -> ArXMLivCorpus:
-        assert release in ArXMLivConfig.releases, f'Unknown arXMLiv release "{release}"'
-        return ArXMLivCorpus(release, self.config.locators[release].require())
-
-    @classmethod
-    def get_release_uri(cls, release: str) -> Uri:
-        return ArXMLivUris.arxmliv / release
-
-    @classmethod
-    def get_graph_uri(cls, release: str) -> Uri:
-        return SB.NS[f'graph/arxmliv-meta/' + release]
-
-
 class ArXMLivUris:
     arxmliv = Uri(f'http://sigmathling.kwarc.info/arxmliv/')
 
@@ -154,3 +131,23 @@ class ArXMLivUris:
     severity_no_problem = severity / 'noProblem'
     severity_warning = severity / 'warning'
     severity_error = severity / 'error'
+
+    @classmethod
+    def get_corpus_uri(cls, release: str) -> Uri:
+        return ArXMLivUris.arxmliv / release
+
+    @classmethod
+    def get_metadata_graph_uri(cls, release: str) -> Uri:
+        return SB.NS[f'graph/arxmliv-meta/' + release]
+
+
+def get_arxmliv_corpora():
+    return [ArXMLivCorpus(release=release) for release in RELEASES]
+
+
+def _add_arxmliv_corpora_to_resolver():
+    for corpus in get_arxmliv_corpora():
+        Resolver.register_corpus(corpus)
+
+
+_add_arxmliv_corpora_to_resolver()
