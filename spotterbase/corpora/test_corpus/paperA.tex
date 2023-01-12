@@ -1,0 +1,36 @@
+\documentclass{article}
+\usepackage{amsthm,amsmath,amsfonts}
+\newtheorem{definition}{Definition}
+\newtheorem{theorem}{Theorem}
+\newtheorem{corollary}{Corollary}
+\author{Nota Mathematician}
+\title{Test Document: There are interesting triangles}
+\begin{document}
+\maketitle
+\section{Introduction}
+In this paper, we will prove that interesting triangles exist in two-dimensional Euclidean space.
+
+\begin{definition}
+    A \textbf{triangle in $n$-dimensional Euclidean space} is a set $T$ of cardinality 3, where $P \in \mathbb{R}^n$ for all $P \in T$.
+\end{definition}
+
+\begin{definition}
+    We call a triangle $T = \{P_1, P_2, P_3\}$ \textbf{interesting} iff there is no $t \in \mathbb{R}$ such that $P_1 + t (P_2-P_1) = P_3$.
+\end{definition}
+
+Note that interestingness is well-defined (does not depend on the ``order'' of $P_1$, $P_2$ and $P_3$).
+The proof of this is left as an exercise.
+
+\begin{theorem}
+    Both $T_1 := \{(0, 0), (1, 0), (1, 1)\}$ and $T_2 := \{(1, -1), (0, 1), (1, 0)\}$ are interesting triangles.
+\end{theorem}
+
+\begin{proof}
+    Trivial.
+\end{proof}
+
+\begin{corollary}
+    It follows that interesting triangles exist in $\mathbb{R}^2$.
+\end{corollary}
+
+\end{document}
