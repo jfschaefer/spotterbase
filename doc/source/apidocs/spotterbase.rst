@@ -7,6 +7,7 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
+   spotterbase.annotations
    spotterbase.corpora
    spotterbase.data
    spotterbase.dnm
@@ -27,18 +28,26 @@ spotterbase.config\_loader module
    :undoc-members:
    :show-inheritance:
 
-spotterbase.sb\_vocab module
-----------------------------
+spotterbase.dnm\_example module
+-------------------------------
 
-.. automodule:: spotterbase.sb_vocab
+.. automodule:: spotterbase.dnm_example
    :members:
    :undoc-members:
    :show-inheritance:
 
-spotterbase.test module
------------------------
+spotterbase.experiment module
+-----------------------------
 
-.. automodule:: spotterbase.test
+.. automodule:: spotterbase.experiment
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+spotterbase.sb\_vocab module
+----------------------------
+
+.. automodule:: spotterbase.sb_vocab
    :members:
    :undoc-members:
    :show-inheritance:

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import itertools
-from typing import Iterable
+from typing import Iterable, Optional
 
 from spotterbase.dnm.dnm import DomRange, DomPoint
 from spotterbase.dnm.text_offset_tracker import TextOffsetTracker
@@ -31,7 +31,7 @@ class SbPointSelector:
         if dp.text_offset is not None:
             return f'char({roottree.getpath(dp.node)},{dp.text_offset})'
         elif dp.tail_offset is not None:
-            get_offset = TextOffsetTracker.get_offset_with_tracker
+            get_offset = TextOffsetTracker.get_text_offset_with_tracker
             parent = dp.node.getparent()
             assert parent is not None   # can't be because of the tail
             # Note: on optimizing the offset computation:
@@ -91,3 +91,59 @@ class SbRangeSelector:
                 (selector, OA.hasEndSelector, end_selector)
             ]
             return selector, itertools.chain(other_triples, start_triples, end_triples)
+
+
+class TextRangeSelector:
+    """ Selector for a range using offsets """
+    _start: int
+    _end: int
+    _tracker: TextOffsetTracker
+
+    def __init__(self, start, end, tracker):
+        """ Note: Signature might change """
+        self._start = start
+        self._end = end
+        self._tracker = tracker
+
+    @classmethod
+    def from_dom_range(self, dom_range: DomRange, tracker: Optional[TextOffsetTracker]) -> TextRangeSelector:
+        tracker = tracker or TextOffsetTracker(dom_range.from_.node.getroottree().getroot())
+        start_point = dom_range.from_
+        end_point = dom_range.to
+        start_offset: int
+        end_offset: int
+
+        # TODO: The following code is somewhat hacky and contains errors (in particular if Comment nodes are present)
+        # The SbPointSelector has a comment on improving the efficiency.
+        # That might be a good idea here as well and should be implemented along with rigorous unit tests.
+
+        if start_point.text_offset is not None:
+            start_offset = tracker.get_node_text_offset(start_point.node) + start_point.text_offset
+        elif end_point.tail_offset is not None:
+            start_offset = (tracker.get_node_text_offset(start_point.node) +
+                            sum(len(t) for t in start_point.node.itertext()) +
+                            sum(1 for _ in start_point.node.iterdescendants()) +
+                            start_point.tail_offset)
+        else:
+            start_offset = tracker.get_node_text_offset(end_point.node)
+
+        if end_point.text_offset is not None:
+            end_offset = tracker.get_node_text_offset(end_point.node) + end_point.text_offset + 1
+        elif end_point.tail_offset is not None:
+            end_offset = (tracker.get_node_text_offset(end_point.node) +
+                          sum(len(t) for t in end_point.node.itertext()) +
+                          sum(1 for _ in end_point.node.iterdescendants()) +
+                          end_point.tail_offset + 1)
+        else:
+            end_offset = (tracker.get_node_text_offset(end_point.node) +
+                          sum(len(t) for t in end_point.node.itertext()) +
+                          sum(1 for _ in end_point.node.iterdescendants()) +
+                          end_point.tail_offset + 1)
+
+        return TextRangeSelector(start_offset, end_offset, tracker)
+
+#     def to_dom_range(self) -> DomRange:
+#         return self._dom_range
+
+#    def to_triples(self) -> tuple[Subject, Iterable[Triple]]:
+#        # returns selector and triples

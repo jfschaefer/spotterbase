@@ -20,6 +20,22 @@ spotterbase.dnm.dnm module
    :undoc-members:
    :show-inheritance:
 
+spotterbase.dnm.selectors module
+--------------------------------
+
+.. automodule:: spotterbase.dnm.selectors
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+spotterbase.dnm.text\_offset\_tracker module
+--------------------------------------------
+
+.. automodule:: spotterbase.dnm.text_offset_tracker
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 spotterbase.dnm.token\_dnm module
 ---------------------------------
 

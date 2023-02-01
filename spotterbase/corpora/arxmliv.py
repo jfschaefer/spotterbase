@@ -4,14 +4,31 @@ from pathlib import Path
 from typing import IO, Iterator, Optional
 
 from spotterbase.corpora.arxiv import ArxivId
-from spotterbase.corpora.interface import Document, Corpus, DocumentNotFoundError, CannotLocateCorpusDataError
-from spotterbase.corpora.resolver import Resolver
+from spotterbase.corpora.interface import Document, Corpus, DocumentNotFoundError, CannotLocateCorpusDataError, \
+    DocumentNotInCorpusException
 from spotterbase.data.locator import Locator, LocatorFailedException
 from spotterbase.data.zipfilecache import SHARED_ZIP_CACHE
 from spotterbase.rdf.base import Uri
 from spotterbase.sb_vocab import SB
 
-RELEASES: list[str] = ['08.2017', '08.2018', '08.2019', '2020']
+ARXMLIV_RELEASES: list[str] = ['08.2017', '08.2018', '08.2019', '2020']
+
+
+class ArXMLivUris:
+    arxmliv = Uri(f'http://sigmathling.kwarc.info/arxmliv/')
+
+    severity = arxmliv / 'severity/'
+    severity_no_problem = severity / 'noProblem'
+    severity_warning = severity / 'warning'
+    severity_error = severity / 'error'
+
+    @classmethod
+    def get_corpus_uri(cls, release: str) -> Uri:
+        return ArXMLivUris.arxmliv / release
+
+    @classmethod
+    def get_metadata_graph_uri(cls, release: str) -> Uri:
+        return SB.NS[f'graph/arxmliv-meta/' + release]
 
 
 class ArXMLivDocument(Document, abc.ABC):
@@ -63,8 +80,9 @@ class ArXMLivCorpus(Corpus):
                                          description=f'path to the {release} arXMLiv release',
                                          default_rel_locations=[f'arxmliv-{release}'],
                                          how_to_get=f'SIGMathLing members can download the arXMLiv copora from https://sigmathling.kwarc.info/resources/')
+        self._uri: Uri = ArXMLivUris.get_corpus_uri(release)
 
-    def get_document(self, arxivid: ArxivId) -> ArXMLivDocument:
+    def get_document_by_id(self, arxivid: ArxivId) -> ArXMLivDocument:
         location = self._get_yymm_location(arxivid.yymm)
         if location.name.endswith('.zip'):
             return ZipArXMLivDocument(arxivid, self.release, location,
@@ -73,10 +91,12 @@ class ArXMLivCorpus(Corpus):
             return SimpleArXMLivDocument(arxivid, self.release, location)
 
     def get_uri(self) -> Uri:
-        return ArXMLivUris.get_corpus_uri(self.release)
+        return self._uri
 
-    def get_document_from_uri(self, uri: Uri) -> Document:
-        return self.get_document(ArxivId(uri.relative_to(self.get_uri())))
+    def get_document(self, uri: Uri) -> Document:
+        if not uri.starts_with(self._uri):
+            raise DocumentNotInCorpusException()
+        return self.get_document_by_id(ArxivId(uri.relative_to(self._uri)))
 
     def get_path(self) -> Path:
         try:
@@ -124,30 +144,6 @@ class ArXMLivCorpus(Corpus):
                         yield ZipArXMLivDocument(arxivid, self.release, yymm_location, name)
 
 
-class ArXMLivUris:
-    arxmliv = Uri(f'http://sigmathling.kwarc.info/arxmliv/')
-
-    severity = arxmliv / 'severity/'
-    severity_no_problem = severity / 'noProblem'
-    severity_warning = severity / 'warning'
-    severity_error = severity / 'error'
-
-    @classmethod
-    def get_corpus_uri(cls, release: str) -> Uri:
-        return ArXMLivUris.arxmliv / release
-
-    @classmethod
-    def get_metadata_graph_uri(cls, release: str) -> Uri:
-        return SB.NS[f'graph/arxmliv-meta/' + release]
-
-
-def get_arxmliv_corpora():
-    return [ArXMLivCorpus(release=release) for release in RELEASES]
-
-
-def _add_arxmliv_corpora_to_resolver():
-    for corpus in get_arxmliv_corpora():
-        Resolver.register_corpus(corpus)
-
-
-_add_arxmliv_corpora_to_resolver()
+ARXMLIV_CORPORA: dict[str, ArXMLivCorpus] = {
+    release: ArXMLivCorpus(release=release) for release in ARXMLIV_RELEASES
+}

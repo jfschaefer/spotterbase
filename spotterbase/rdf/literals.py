@@ -13,6 +13,11 @@ class StringLiteral(Literal):
         return repr(self.string)   # does this always work?
 
 
+class NonNegativeIntLiteral(Literal):
+    def __init__(self, value: int):
+        Literal.__init__(self, string=str(value), datatype=XSD.nonNegativeInteger)
+
+
 class DateTimeLiteral(Literal):
     def __init__(self, dt: datetime.datetime):
         self.dt = dt

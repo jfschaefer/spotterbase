@@ -88,6 +88,17 @@ class Uri:
             raise Exception(f'{self.full_uri()} does not start with {other_as_str}')
         return self.full_uri()[len(other_as_str):]
 
+    def starts_with(self, prefix: str | Uri | NameSpace) -> bool:
+        match prefix:
+            case str():
+                return self.full_uri().startswith(prefix)
+            case Uri():
+                return self.full_uri().startswith(prefix.full_uri())
+            case NameSpace():
+                return self.full_uri().startswith(prefix.uri.full_uri())
+            case _:
+                raise TypeError(f'Unsupported type {type(prefix)}')
+
     def __truediv__(self, other) -> Uri:
         if self._suffix.endswith('/'):
             return Uri(self._suffix + other, self.namespace)

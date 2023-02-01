@@ -1,4 +1,4 @@
-The :mod:`spotterbase.utils` package
+:mod:`~spotterbase.utils` package
 ====================================
 
 The :mod:`spotterbase.utils` provides various tools that

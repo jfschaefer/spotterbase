@@ -6,7 +6,7 @@ from typing import Optional
 from spotterbase import config_loader
 from spotterbase.config_loader import ConfigString
 from spotterbase.corpora.arxiv import USE_CENTI_ARXIV, ArxivUris
-from spotterbase.corpora.arxmliv import ArXMLivUris, ArXMLivCorpus, RELEASES
+from spotterbase.corpora.arxmliv import ArXMLivUris, ArXMLivCorpus, ARXMLIV_RELEASES
 from spotterbase.corpora.resolver import Resolver
 from spotterbase.data.locator import DataDir
 from spotterbase.sb_vocab import SB
@@ -18,7 +18,7 @@ from spotterbase import __version__
 
 logger = logging.getLogger(__name__)
 
-RELEASE_VERSION = ConfigString('--arxmliv-release', description='arXMLiv release', choices=RELEASES, default=RELEASES)
+RELEASE_VERSION = ConfigString('--arxmliv-release', description='arXMLiv release', choices=ARXMLIV_RELEASES, default=ARXMLIV_RELEASES)
 
 
 def _get_severities_lists(corpus: ArXMLivCorpus) -> Optional[tuple[list[str], list[str], list[str]]]:
@@ -67,7 +67,7 @@ def iter_triples(corpus: ArXMLivCorpus) -> TripleI:
                 if arxivid:
                     if USE_CENTI_ARXIV and not arxivid.is_in_centi_arxiv():
                         continue
-                    annotation.add_target(corpus.get_document(arxivid).get_uri())
+                    annotation.add_target(corpus.get_document_by_id(arxivid).get_uri())
                 else:
                     logger.warning(f'Unexpected file name in severity data: {doc}')
             yield from annotation.triples()

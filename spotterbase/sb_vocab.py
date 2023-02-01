@@ -2,9 +2,9 @@ from spotterbase.rdf.base import Vocabulary, NameSpace, Uri
 
 
 class SB(Vocabulary):
-    NS = NameSpace('http://sigmathling.kwarc.info/spotterbase/', 'sb:')
+    NS: NameSpace = NameSpace('http://sigmathling.kwarc.info/spotterbase/', 'sb:')
 
-    # spotter info
+    # SPOTTER INFO
     spotter: Uri
     spotterRun: Uri
 
@@ -12,8 +12,15 @@ class SB(Vocabulary):
     runDate: Uri
     spotterVersion: Uri
 
-    # selection
-    docFrag: Uri
+    # SELECTORS
+    docFrag: Uri   # TODO: Remove this
+
+    PathSelector: Uri
+    startPath: Uri
+    endPath: Uri
+
+    ListSelector: Uri
+    OffsetSelector: Uri
 
     # datasets (TODO: can this replaced with dublin core?)
     dataset: Uri

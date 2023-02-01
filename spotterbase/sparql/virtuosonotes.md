@@ -14,7 +14,9 @@ virtuoso-t -fd
 Conductor interface: http://localhost:8890/conductor/
 (by default on port 8890)
 
+Formerly:
 Default admin credentials: `dba`, `dba`.
+Now: Admin password was set to `dba` manually.
 
 To allow `LOAD` queries, give user `SPARQL` the `SPARQL_UPDATE` role (in Conductor/System Admin/User Accounts).
 Furthermore, add the directory containing the RDF files to `DirsAllowed` in the `virtuoso.ini`.

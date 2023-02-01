@@ -9,6 +9,7 @@ Content
 
    contribute
    config
+   annotations
    rdf
    utils
    corpora

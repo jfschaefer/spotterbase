@@ -1,0 +1,44 @@
+https://issemantic.net/rdf-visualizer
+https://ar5iv.labs.arxiv.org/html/hep-ph/9803374
+
+<?xml version="1.0" encoding="utf-8" ?>
+<rdf:RDF
+	xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+	xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+	xmlns:ns2="http://www.ontology-of-units-of-measure.org/resource/om-2/"
+	xmlns:ns3="http://sigmathling.kwarc.info/spotterbase/"
+	xmlns:ns4="http://www.w3.org/ns/oa#"
+	xmlns:dc="http://purl.org/dc/elements/1.1/" >
+  <rdf:Description rdf:about="http://sigmathling.kwarc.info/spotterbase/spotter/simple-units#anno5">
+    <ns4:hasBody rdf:nodeID="b16476" />
+    <dc:creator rdf:nodeID="b16454" />
+    <ns4:hasTarget rdf:nodeID="b16475" />
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="b16454">
+    <rdf:type rdf:resource="http://sigmathling.kwarc.info/spotterbase/spotterRun" />
+    <ns3:runDate rdf:datatype="http://www.w3.org/2001/XMLSchema#dateTime">2022-10-04T19:02:19.550465</ns3:runDate>
+    <ns3:spotterVersion>0.0.1</ns3:spotterVersion>
+    <ns3:withSpotter rdf:resource="http://sigmathling.kwarc.info/spotterbase/spotter/simple-units" />
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="b16475">
+    <ns4:hasSelector rdf:nodeID="b16477" />
+    <ns4:hasSource rdf:resource="http://sigmathling.kwarc.info/arxmliv/2020hep-ph/9803374" />
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="b16476">
+    <ns2:hasNumericalValue rdf:datatype="http://www.w3.org/2001/XMLSchema#double">1e+32</ns2:hasNumericalValue>
+    <ns2:hasUnit rdf:resource="http://www.ontology-of-units-of-measure.org/resource/om-2/erg" />
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="b16477">
+    <rdf:type rdf:resource="http://www.w3.org/ns/oa#RangeSelector" />
+    <ns4:hasEndSelector rdf:nodeID="b16479" />
+    <ns4:hasStartSelector rdf:nodeID="b16478" />
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="b16478">
+    <rdf:type rdf:resource="http://www.w3.org/ns/oa#FragmentSelector" />
+    <rdf:value>node(/html/body/div/div/article/div[34]/p/math[6])</rdf:value>
+  </rdf:Description>
+  <rdf:Description rdf:nodeID="b16479">
+    <rdf:type rdf:resource="http://www.w3.org/ns/oa#FragmentSelector" />
+    <rdf:value>char(/html/body/div/div/article/div[34]/p/text()[7],4)</rdf:value>
+  </rdf:Description>
+</rdf:RDF>

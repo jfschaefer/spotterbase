@@ -35,6 +35,8 @@ class Converter:
                 # see e.g. https://github.com/RDFLib/rdflib/issues/2123
                 rdflib_dt = node.datatype.full_uri() if node.datatype not in {XSD.string, RDF.langString} else None
                 return rdflib.Literal(node.string, lang=node.lang_tag, datatype=rdflib_dt)
+            case _:
+                raise Exception('cannot support node type ', type(node))
 
     @classmethod
     def convert_triple(cls, triple: Triple) -> _rdflib_triple_T:

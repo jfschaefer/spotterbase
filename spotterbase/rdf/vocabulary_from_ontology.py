@@ -7,11 +7,18 @@ import sys
 import rdflib
 import requests
 
+
+WITH_COMMENTS: bool = False
+
 VOCABULARIES = [
     ('AS', 'https://raw.githubusercontent.com/w3c/activitystreams/master/vocabulary/activitystreams2.owl',
      'http://www.w3.org/ns/activitystreams#'),
     ('DC', 'https://www.dublincore.org/specifications/dublin-core/dcmi-terms/dublin_core_elements.ttl',
      'http://purl.org/dc/elements/1.1/'),
+    ('DCTerms', 'https://www.dublincore.org/specifications/dublin-core/dcmi-terms/dublin_core_terms.nt',
+     'http://purl.org/dc/terms/'),
+    ('DCTypes', 'https://www.dublincore.org/specifications/dublin-core/dcmi-terms/dublin_core_type.nt',
+     'http://purl.org/dc/dcmitype/'),
     ('DCAM', 'https://www.dublincore.org/specifications/dublin-core/dcmi-terms/dublin_core_abstract_model.ttl',
      'http://purl.org/dc/dcam/'),
     ('DCTERMS', 'http://dublincore.org/2020/01/20/dublin_core_terms.ttl', 'http://purl.org/dc/terms/'),
@@ -27,7 +34,6 @@ VOCABULARIES = [
 ]
 
 PREFIXES = '''
-    PREFIX dc: <http://purl.org/dc/elements/1.1/>
     PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
     PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     PREFIX owl: <http://www.w3.org/2002/07/owl#>
@@ -39,7 +45,12 @@ def create_from(ontology: str, namespace: str):
     response = requests.get(ontology)
     assert response.status_code == 200, f'Bad response code ({response.status_code}): {response.text}'
     # graph.parse(ontology, format='xml' if ontology.endswith('.rdf') else 'ttl')
-    graph.parse(data=response.text, format='xml' if response.text.startswith('<') else 'ttl')
+    format = 'ttl'
+    if response.text.startswith('<'):
+        format = 'xml'
+    if ontology.endswith('.nt'):
+        format = 'nt'
+    graph.parse(data=response.text, format=format)
 
     # PROPERTIES
     property_results = graph.query(PREFIXES + '''
@@ -59,7 +70,7 @@ def create_from(ontology: str, namespace: str):
         # assert prop.startswith(namespace), f'{prop} does not start with {namespace}'
         if not prop.startswith(namespace):
             continue
-        if prop in comments:
+        if WITH_COMMENTS and prop in comments:
             print('    # ' + comments[prop])
         print('    ' + prop[len(namespace):] + ': Uri')
 
@@ -81,7 +92,7 @@ def create_from(ontology: str, namespace: str):
             # assert class_.startswith(namespace), f'{class_} does not start with {namespace}'
             if not class_.startswith(namespace):
                 continue
-            if class_ in comments:
+            if WITH_COMMENTS and class_ in comments:
                 print('    # ' + comments[class_])
             print('    ' + class_[len(namespace):] + ': Uri')
 
@@ -107,11 +118,14 @@ def create_from(ontology: str, namespace: str):
         if not printed_other:
             print('\n    # OTHER')
             printed_other = True
-        if result.thing in comments:
+        if WITH_COMMENTS and result.thing in comments:
             print('    # ' + comments[result.thing])
         covered.add(result.thing)
         name = result.thing[len(namespace):]
-        print('    ' + name + ': Uri ' + max(0, 30 - len(name)) * ' ' + '# a ' + str(result.type))
+        if WITH_COMMENTS:
+            print('    ' + name + ': Uri ' + max(0, 30 - len(name)) * ' ' + '# a ' + str(result.type))
+        else:
+            print('    ' + name + ': Uri')
 
 
 def main():

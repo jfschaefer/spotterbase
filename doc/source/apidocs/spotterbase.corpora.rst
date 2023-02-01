@@ -44,6 +44,22 @@ spotterbase.corpora.interface module
    :undoc-members:
    :show-inheritance:
 
+spotterbase.corpora.resolver module
+-----------------------------------
+
+.. automodule:: spotterbase.corpora.resolver
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+spotterbase.corpora.test\_corpus module
+---------------------------------------
+
+.. automodule:: spotterbase.corpora.test_corpus
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Module contents
 ---------------
 

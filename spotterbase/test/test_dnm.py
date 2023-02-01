@@ -12,7 +12,7 @@ from spotterbase.dnm.token_dnm import TokenBasedDnm
 from spotterbase.dnm.token_generator import SimpleTokenGenerator
 from spotterbase.rdf import to_rdflib
 from spotterbase.rdf.vocab import RDF, OA, DCTERMS
-
+from spotterbase.test.mixins import GraphTestMixin
 
 # Example Dnm's:
 DNM_1: TokenBasedDnm = TokenBasedDnm.from_token_generator(
@@ -21,13 +21,7 @@ DNM_1: TokenBasedDnm = TokenBasedDnm.from_token_generator(
                          classes_to_replace={'skip': ''}))
 
 
-class TestDnm(unittest.TestCase):
-    def assert_equal_graphs(self, got: rdflib.Graph, expected: rdflib.Graph):
-        # note: using rdflib.compare.graph_diff instead of rdflib.compare.isomorphic to support debugging
-        in_both, in_first, in_second = rdflib.compare.graph_diff(got, expected)
-        self.assertEqual(len(in_first), 0, f'The following triples were unexpected: {in_first.serialize()}')
-        self.assertEqual(len(in_second), 0, f'The following triples missing: {in_second.serialize()}')
-
+class TestDnm(GraphTestMixin, unittest.TestCase):
     def test_basic_string(self):
         dnmstr = DNM_1.get_dnm_str()
         self.assertEqual(dnmstr, 't1t2t3Ct4t5')

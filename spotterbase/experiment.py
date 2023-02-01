@@ -1,3 +1,7 @@
+import logging
+from warnings import warn
+
+from spotterbase import config_loader
 from spotterbase.rdf.base import Uri
 from spotterbase.sparql.endpoint import get_endpoint
 from spotterbase.sparql.query import PREFIXES, json_binding_to_object, NAMESPACES
@@ -42,4 +46,5 @@ def main():
         symbols[u.symbol] = u
 
 if __name__ == '__main__':
-    main()
+    # main()
+    print('Hello world')

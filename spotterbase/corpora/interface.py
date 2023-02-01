@@ -36,7 +36,7 @@ class Corpus(abc.ABC):
         raise NotImplementedError()
 
     @abc.abstractmethod
-    def get_document_from_uri(self, uri: Uri) -> Document:
+    def get_document(self, uri: Uri) -> Document:
         """ Should throw DocumentNotInCorpusException if necessary! """
         raise NotImplementedError()
 

@@ -8,6 +8,7 @@ import spotterbase.utils.xml_match as xm
 from spotterbase import config_loader, __version__
 from spotterbase.corpora.arxiv import ArxivId
 from spotterbase.corpora.arxmliv import ArXMLiv
+from spotterbase.dnm.selectors import SbRangeSelector
 from spotterbase.sb_vocab import SB
 from spotterbase.dnm.dnm import DnmStr, DnmRange
 from spotterbase.dnm.token_dnm import TokenBasedDnm
@@ -31,7 +32,7 @@ def main():
         fp.write(f'# Graph: {SB.NS["graph/simple-unit-spotter"]:<>}\n')
         serializer = TurtleSerializer(fp)
 
-        spotter_run = SpotterRun(SB.NS._suffix / 'spotter' / 'simple-units', spotter_version=__version__)
+        spotter_run = SpotterRun(SB.NS.uri / 'spotter' / 'simple-units', spotter_version=__version__)
 
         serializer.add_from_iterable(spotter_run.triples())
 
@@ -77,12 +78,12 @@ def main():
                         unit = remainder[1:i]
                 if not unit:
                     continue
+                print(list(SbRangeSelector(DnmRange(substr.as_range().from_, unit.as_range().to).to_dom()).to_triples()[1]))
                 if str(unit) not in om_units:
                     print('do not know', unit)
                     continue
-                # print(scalar, unit)
 
-                selector, triples = DnmRange(substr.as_range().from_, unit.as_range().to).to_dom().to_position()
+                selector, triples = DnmRange(substr.as_range().from_, unit.as_range().to).to_dom()
                 annotation = Annotation(spotter_run)
                 target = BlankNode()
                 body = BlankNode()

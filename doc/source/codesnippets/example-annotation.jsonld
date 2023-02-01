@@ -1,0 +1,35 @@
+{
+    "id": "http://example.org/myanno29",
+    "type": "Annotation",
+    "creator": "http://spotterbase.kwarc.info/quantityspotter/run-15",
+    "target": {
+        "id": "http://example.org/myanno29.target",
+        "source": "http://example.org/mydocument",
+        "selector": [
+            {
+                "type": "PathSelector",
+                "startPath": "node(/html/body/p[2]/math[3])",
+                "endPath": "after-node(/html/body/p[2]/math[5])",
+                "refinedBy": {
+                    "type": "ListSelector",
+                    "selectors": [
+                        {
+                            "type": "PathSelector",
+                            "startPath": "node(/html/body/p[2]/math[3])",
+                            "endPath": "after-node(/html/body/p[2]/math[3])"
+                        }, {
+                            "type": "PathSelector",
+                            "startPath": "node(/html/body/p[2]/math[4])",
+                            "endPath": "after-node(/html/body/p[2]/math[5])"
+                        }
+                    ]
+                }
+            },
+            {
+                "type": "OffsetSelector",
+                "start": 153,
+                "end": 192
+            }
+        ]
+    }
+}

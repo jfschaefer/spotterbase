@@ -4,6 +4,14 @@ spotterbase.test package
 Submodules
 ----------
 
+spotterbase.test.test\_corpora module
+-------------------------------------
+
+.. automodule:: spotterbase.test.test_corpora
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 spotterbase.test.test\_dnm module
 ---------------------------------
 
