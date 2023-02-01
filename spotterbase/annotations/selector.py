@@ -3,21 +3,15 @@ from __future__ import annotations
 import abc
 from typing import Any, Optional
 
-from spotterbase.annotations.conversion_base_classes import JsonExportable, JsonImportable, TripleExportable
-from spotterbase.rdf.base import TripleI, Subject, BlankNode, Uri
+from spotterbase.annotations.conversion_base_classes import Portable
+from spotterbase.annotations.utils import RdfNodeMixin
+from spotterbase.rdf.base import TripleI, BlankNode
 from spotterbase.rdf.literals import StringLiteral, NonNegativeIntLiteral
 from spotterbase.rdf.vocab import RDF, OA
 from spotterbase.sb_vocab import SB
 
 
-class Selector(JsonExportable, JsonImportable, TripleExportable, abc.ABC):
-    _node: Optional[Subject] = None
-
-    def get_rdf_node(self) -> Subject:
-        if self._node is None:
-            self._node = BlankNode()
-        return self._node
-
+class Selector(Portable, RdfNodeMixin, abc.ABC):
     @classmethod
     def from_json(cls, json: Any) -> Selector:
         match json['type']:

@@ -3,7 +3,7 @@ from __future__ import annotations
 import abc
 from typing import Any
 
-from spotterbase.annotations.conversion_base_classes import JsonExportable, JsonImportable, TripleExportable
+from spotterbase.annotations.conversion_base_classes import Portable
 from spotterbase.annotations.selector import Selector
 from spotterbase.annotations.utils import as_list
 from spotterbase.rdf.base import Uri, TripleI
@@ -11,11 +11,12 @@ from spotterbase.rdf.vocab import RDF, OA
 from spotterbase.sb_vocab import SB
 
 
-class Target(JsonExportable, JsonImportable, TripleExportable, abc.ABC):
+class Target(Portable, abc.ABC):
     uri: Uri    # Must have URI to allow secondary spotters to attach another annotation
 
     @classmethod
     def from_json(cls, json: Any) -> Target:
+        # TODO: Follow approach used by selectors instead
         match json:
             case str():
                 return ExistingTarget(Uri(json))

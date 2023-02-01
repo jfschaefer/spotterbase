@@ -1,11 +1,15 @@
 {
     "@context": {
         "sb": "http://sigmathling.kwarc.info/spotterbase/",
+
         "selectors": {"@type": "@id", "@id": "rdf:value", "@container": "@list"},
         "PathSelector": "sb:PathSelector",
         "startPath": "sb:startPath",
         "endPath": "sb:endPath",
         "ListSelector": "sb:ListSelector",
-        "OffsetSelector": "sb:OffsetSelector"
+        "OffsetSelector": "sb:OffsetSelector",
+
+        "SimpleTagBody": "sb:SimpleTagBody",
+        "hasTag": {"@type": "@id", "@id": "rdf:value"}
     }
 }

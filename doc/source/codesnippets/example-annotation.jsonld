@@ -31,5 +31,9 @@
                 "end": 192
             }
         ]
+    },
+    "body": {
+        "type": "SimpleTagBody",
+        "hasTag": "http://example.org/myexampletag"
     }
 }

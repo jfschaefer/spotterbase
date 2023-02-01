@@ -22,6 +22,9 @@ class SB(Vocabulary):
     ListSelector: Uri
     OffsetSelector: Uri
 
+    # BODIES
+    SimpleTagBody: Uri
+
     # datasets (TODO: can this replaced with dublin core?)
     dataset: Uri
     document: Uri
