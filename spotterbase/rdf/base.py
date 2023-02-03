@@ -149,7 +149,7 @@ class Uri:
         return self._full_uri
 
     def __repr__(self) -> str:
-        return format(self, '<>')
+        return f'{self.__class__.__name__}({self.full_uri()!r})'
 
     def __eq__(self, other) -> bool:
         return self.full_uri() == str(other)

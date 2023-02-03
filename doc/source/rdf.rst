@@ -30,9 +30,9 @@ Let's create some URIs:
 >>> from spotterbase.rdf.base import Uri, NameSpace, Vocabulary
 >>> example = Uri('http://example.org')
 >>> example
-<http://example.org>
+Uri('http://example.org')
 >>> example / 'helloWorld'
-<http://example.org/helloWorld>
+Uri('http://example.org/helloWorld')
 >>> (example / 'helloWorld').to_rdflib()
 rdflib.term.URIRef('http://example.org/helloWorld')
 
@@ -40,19 +40,19 @@ And the same with Namespaces:
 
 >>> ns = NameSpace('http://example.org/', prefix='ex:')
 >>> ns['helloWorld']
-<http://example.org/helloWorld>
+Uri('http://example.org/helloWorld')
 >>> # IDEs support class attributes better than strings - the following is also possible:
 >>> class Example(Vocabulary):
 ...     NS = NameSpace('http://example.org/', prefix='ex:')
 ...     helloWorld: Uri
 >>> Example.helloWorld
-<http://example.org/helloWorld>
+Uri('http://example.org/helloWorld')
 
 Some commonly use vocabularies are already in the library:
 
 >>> import spotterbase.rdf.vocab as vocab
 >>> vocab.RDF.type
-<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>
+Uri('http://www.w3.org/1999/02/22-rdf-syntax-ns#type')
 
 Here is a literal:
 

@@ -16,6 +16,6 @@ if __name__ == '__main__':
 
     # dnm_str[2910:2913] belongs to a math node
 
-    math_node = dnm_str[2910:2913].as_range().to_dom().from_.node
+    math_node = dnm_str[2910:2913].as_range().to_dom().start.node
 
     print(etree.tostring(math_node))

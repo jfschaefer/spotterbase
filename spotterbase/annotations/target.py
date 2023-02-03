@@ -63,8 +63,8 @@ class FragmentTarget(Target):
 
     def to_json(self) -> dict[str, Any]:
         return {
-            'id': self.uri,
-            'source': self.document_uri,
+            'id': str(self.uri),
+            'source': str(self.document_uri),
             'selector': [selector.to_json() for selector in self.selectors]
         }
 

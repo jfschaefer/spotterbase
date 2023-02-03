@@ -7,7 +7,8 @@ from lxml.etree import _Element
 
 from spotterbase.annotations.dom_range import DomRange, DomPoint
 from spotterbase.annotations.offset_converter import OffsetConverter, OffsetType
-from spotterbase.annotations.selector import PathSelector, SimpleSelector, DiscontinuousSelector
+from spotterbase.annotations.selector import PathSelector, SimpleSelector, DiscontinuousSelector, Selector, \
+    OffsetSelector, ListSelector
 from spotterbase.rdf.base import Uri
 
 
@@ -27,12 +28,12 @@ class SelectorConverter:
             self._offset_converter = OffsetConverter(self._dom)
         return self._offset_converter
 
-    def selector_to_dom(self, selector: SimpleSelector) -> tuple[DomRange, list[DomRange]]:
+    def selector_to_dom(self, selector: SimpleSelector) -> tuple[DomRange, Optional[list[DomRange]]]:
         main_range: DomRange = self._simple_selector_to_dom(selector)
         if selector.refinement is not None:
             return main_range, self._complex_selector_to_dom(selector.refinement)
         else:
-            return main_range, [main_range]
+            return main_range, None
 
     def _simple_selector_to_dom(self, selector: SimpleSelector) -> DomRange:
         """ Like selector_to_dom, but ignores refinements and cannot handle non-continuous ranges """
@@ -67,3 +68,39 @@ class SelectorConverter:
             raise Exception(f'No offset provided for path reference of type {type_}')
         total_text_offset = int(offset) + self.offset_converter.get_offset(node, OffsetType.Text)
         return self.offset_converter.get_dom_point(total_text_offset, OffsetType.Text)
+
+    def dom_to_selectors(self, dom_range: DomRange, sub_ranges: Optional[list[DomRange]] = None) -> list[Selector]:
+        path_selector = self._dom_range_to_path_selector(dom_range)
+        if sub_ranges:
+            path_selector.refinement = ListSelector(
+                [self._dom_range_to_path_selector(sub_range) for sub_range in sub_ranges]
+            )
+        offset_selector = self._dom_range_to_offset_selector(dom_range)
+        return [path_selector, offset_selector]
+
+    def _dom_range_to_offset_selector(self, dom_range: DomRange) -> OffsetSelector:
+        return OffsetSelector(
+            start=self.offset_converter.get_offset(dom_range.start, offset_type=OffsetType.NodeText),
+            end=self.offset_converter.get_offset(dom_range.end, offset_type=OffsetType.NodeText)
+        )
+
+    def _dom_range_to_path_selector(self, dom_range: DomRange) -> PathSelector:
+        return PathSelector(
+            start=self._dom_point_to_path(dom_range.start),
+            end=self._dom_point_to_path(dom_range.end)
+        )
+
+    def _dom_point_to_path(self, dom_point: DomPoint) -> str:
+        roottree = dom_point.node.getroottree()
+        if dom_point.text_offset is not None:
+            return f'char({roottree.getpath(dom_point.node)},{dom_point.text_offset + int(dom_point.after)})'
+        elif dom_point.tail_offset is not None:
+            offset = self.offset_converter.get_offset_data(dom_point.node).text_offset_after + dom_point.tail_offset
+            parent = dom_point.node.getparent()
+            parent_offset = self.offset_converter.get_offset_data(parent).text_offset
+            return f'char({roottree.getpath(parent)},{offset - parent_offset + int(dom_point.after)})'
+        else:
+            if dom_point.after:
+                return f'after-node({roottree.getpath(dom_point.node)})'
+            else:
+                return f'node({roottree.getpath(dom_point.node)})'

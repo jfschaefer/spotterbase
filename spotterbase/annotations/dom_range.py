@@ -62,18 +62,37 @@ class DomPoint:
 class DomRange:
     def __init__(self, from_: DomPoint | DomRange, to: DomPoint | DomRange):
         if isinstance(from_, DomPoint):
-            self.from_ = from_
+            self.start = from_
         else:
-            self.from_ = from_.from_
+            self.start = from_.start
         if isinstance(to, DomPoint):
-            self.to = to
+            self.end = to
         else:
-            self.to = to.to
+            self.end = to.end
 
     def __eq__(self, other):
         if not isinstance(other, DomRange):
             raise NotImplementedError()
-        return self.from_ == other.from_ and self.to == other.to
+        return self.start == other.start and self.end == other.end
 
     def __repr__(self) -> str:
-        return f'DomRange({self.from_!r}, {self.to!r})'
+        return f'DomRange({self.start!r}, {self.end!r})'
+
+    def get_containing_node(self) -> _Element:
+        """ Note: This does not cover edge cases yet... """
+        from_node = self.start.node
+        to_node = self.end.node
+        if self.end.tail_offset is not None:
+            to_node = to_node.getparent()
+
+        from_parents = set()
+        n = from_node
+        while n is not None:
+            from_parents.add(n)
+            n = n.getparent()
+
+        n = to_node
+        while n not in from_parents:
+            n = n.getparent()
+            assert n is not None
+        return n

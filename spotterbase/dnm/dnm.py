@@ -5,7 +5,7 @@ import dataclasses
 from typing import TypeVar
 
 from spotterbase.annotations.dom_range import DomRange
-from spotterbase.dnm.LStr import LStr
+from spotterbase.dnm.l_str import LStr
 
 
 class Dnm(abc.ABC):
@@ -56,3 +56,18 @@ class DnmStr(LStr):
 
     def as_range(self) -> DnmRange:
         return DnmRange(DnmPoint(self.backrefs[0], self.dnm), DnmPoint(self.backrefs[-1], self.dnm))
+
+    def normalize_spaces(self) -> DnmStr:
+        """ replace sequences of whitespaces with a single one."""
+        # TODO: clean the code up and potentially move it into LStr
+        new_string = ''
+        new_backrefs = []
+        for i in range(len(self)):
+            if not self.string[i].isspace():
+                new_string += self.string[i]
+                new_backrefs.append(self.backrefs[i])
+            else:
+                if not (i >= 1 and self.string[i - 1].isspace()):
+                    new_string += ' '
+                    new_backrefs.append(self.backrefs[i])
+        return DnmStr(string=new_string, backrefs=new_backrefs, dnm=self.dnm)

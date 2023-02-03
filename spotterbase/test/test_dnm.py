@@ -31,6 +31,6 @@ class TestDnm(GraphTestMixin, unittest.TestCase):
             dnmstr = dnm.get_dnm_str()
             self.assertEqual(dnmstr[index], substring)
             dom_range: DomRange = dnmstr[index].as_range().to_dom()
-            conv = SelectorConverter(Uri('http://example.org'), dom_range.from_.node.getroottree().getroot())
+            conv = SelectorConverter(Uri('http://example.org'), dom_range.start.node.getroottree().getroot())
             selector_range = conv.selector_to_dom(selector)[0]
             self.assertEqual(dom_range, selector_range)

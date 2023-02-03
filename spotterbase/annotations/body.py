@@ -21,7 +21,7 @@ class Body(Portable, RdfNodeMixin, abc.ABC):
 
 
 class SimpleTagBody(Body):
-    def __init__(self, tag: Uri, body_uri: Optional[Uri]):
+    def __init__(self, tag: Uri, body_uri: Optional[Uri] = None):
         self.tag: Uri = tag
         if body_uri:
             self.set_rdf_node(body_uri)

@@ -1,8 +1,7 @@
-
-__all__ = ['LStr']
-
 import re
 from typing import TypeVar
+
+__all__ = ['LStr']
 
 T = TypeVar('T', bound='LStr')   # TODO: Replace with ``typing.Self'' in Python 3.11
 
@@ -39,3 +38,16 @@ class LStr:
 
     def __eq__(self, other) -> bool:
         return self.string == str(other)
+
+    def strip(self: T) -> T:
+        str_start = 0
+        str_end = 0
+        for i in range(len(self.string)):
+            if not self.string[i].isspace():
+                str_start = i
+                break
+        for i in range(len(self.string) - 1, -1, -1):
+            if not self.string[i].isspace():
+                str_end = i + 1
+                break
+        return self[str_start:str_end]

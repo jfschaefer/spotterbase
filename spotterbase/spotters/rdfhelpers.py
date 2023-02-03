@@ -1,3 +1,5 @@
+raise Warning('This code is deprecated and will be removed soon')
+
 import datetime
 from typing import Optional
 

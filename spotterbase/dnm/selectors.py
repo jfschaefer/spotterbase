@@ -84,8 +84,8 @@ class SbRangeSelector:
         if point := self._dom_range.as_point():
             return point_selector(point).to_triples()
         else:
-            start_selector, start_triples = point_selector(self._dom_range.from_).to_triples()
-            end_selector, end_triples = point_selector(self._dom_range.to).to_triples()
+            start_selector, start_triples = point_selector(self._dom_range.start).to_triples()
+            end_selector, end_triples = point_selector(self._dom_range.end).to_triples()
             selector = BlankNode()
             other_triples: list[Triple] = [
                 (selector, RDF.type, OA.RangeSelector),
@@ -109,9 +109,9 @@ class TextRangeSelector:
 
     @classmethod
     def from_dom_range(self, dom_range: DomRange, tracker: Optional[OffsetConverter]) -> TextRangeSelector:
-        tracker = tracker or OffsetConverter(dom_range.from_.node.getroottree().getroot())
-        start_point = dom_range.from_
-        end_point = dom_range.to
+        tracker = tracker or OffsetConverter(dom_range.start.node.getroottree().getroot())
+        start_point = dom_range.start
+        end_point = dom_range.end
         start_offset: int
         end_offset: int
 
