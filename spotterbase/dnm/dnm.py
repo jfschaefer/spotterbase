@@ -2,10 +2,9 @@ from __future__ import annotations
 
 import abc
 import dataclasses
-from typing import Optional, TypeVar
+from typing import TypeVar
 
-from lxml.etree import _Element
-
+from spotterbase.annotations.dom_range import DomRange
 from spotterbase.dnm.LStr import LStr
 
 
@@ -17,47 +16,6 @@ class Dnm(abc.ABC):
     @abc.abstractmethod
     def offset_to_range(self, offset: int) -> DomRange:
         raise NotImplementedError()
-
-
-class DomPoint:
-    def __init__(self, node: _Element, *, text_offset: Optional[int] = None, tail_offset: Optional[int] = None, after: bool = False):
-        # after indicates that it refer actually refers to the location right after what is specified
-        assert text_offset is None or tail_offset is None
-        self.node = node
-        self.text_offset = text_offset
-        self.tail_offset = tail_offset
-        self.after = after
-
-    def is_element(self) -> bool:
-        return self.text_offset is None and self.tail_offset is None
-
-    def as_range(self) -> DomRange:
-        return DomRange(self, self.as_after())
-
-    def as_after(self) -> DomPoint:
-        return DomPoint(self.node, text_offset=self.text_offset, tail_offset=self.tail_offset, after=True)
-
-    def __eq__(self, other):
-        if not isinstance(other, DomPoint):
-            raise NotImplementedError()
-        return self.node == other.node and self.text_offset == other.text_offset and self.tail_offset == other.tail_offset
-
-
-class DomRange:
-    def __init__(self, from_: DomPoint | DomRange, to: DomPoint | DomRange):
-        if isinstance(from_, DomPoint):
-            self.from_ = from_
-        else:
-            self.from_ = from_.from_
-        if isinstance(to, DomPoint):
-            self.to = to
-        else:
-            self.to = to.to
-
-    def as_point(self) -> Optional[DomPoint]:
-        if not self.from_.after and self.from_.as_after() == self.to:
-            return self.from_
-        return None
 
 
 @dataclasses.dataclass

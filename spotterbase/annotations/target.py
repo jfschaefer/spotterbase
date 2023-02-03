@@ -3,8 +3,8 @@ from __future__ import annotations
 import abc
 from typing import Any
 
-from spotterbase.annotations.conversion_base_classes import Portable
-from spotterbase.annotations.selector import Selector
+from spotterbase.annotations.serialization_abc import Portable
+from spotterbase.annotations.selector import Selector, SimpleSelector
 from spotterbase.annotations.utils import as_list
 from spotterbase.rdf.base import Uri, TripleI
 from spotterbase.rdf.vocab import RDF, OA
@@ -25,7 +25,7 @@ class Target(Portable, abc.ABC):
             case {'id': target_uri, 'source': doc_uri, 'selector': selectors}:
                 return FragmentTarget(target_uri=Uri(target_uri),
                                       document_uri=Uri(doc_uri),
-                                      selectors=[Selector.from_json(selector) for selector in as_list(selectors)])
+                                      selectors=[SimpleSelector.from_json(selector) for selector in as_list(selectors)])
             case _:
                 raise Exception('Unsupported JSON content for target')
 

@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any, Optional
 
 from spotterbase.annotations.body import Body
-from spotterbase.annotations.conversion_base_classes import Portable
+from spotterbase.annotations.serialization_abc import Portable
 from spotterbase.annotations.target import Target
 from spotterbase.rdf.base import Uri, TripleI
 from spotterbase.rdf.vocab import RDF, OA, DCTerms

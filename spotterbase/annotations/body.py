@@ -3,7 +3,7 @@ from __future__ import annotations
 import abc
 from typing import Optional, Any
 
-from spotterbase.annotations.conversion_base_classes import Portable
+from spotterbase.annotations.serialization_abc import Portable
 from spotterbase.annotations.utils import RdfNodeMixin
 from spotterbase.rdf.base import Uri, TripleI
 from spotterbase.rdf.vocab import RDF
@@ -29,10 +29,10 @@ class SimpleTagBody(Body):
     @classmethod
     def from_json(cls, json: Any) -> SimpleTagBody:
         assert json['type'] == 'SimpleTagBody'
-        return SimpleTagBody(Uri(json['hasTag']), body_uri=Uri(json['id']) if 'id' in json else None)
+        return SimpleTagBody(Uri(json['val']), body_uri=Uri(json['id']) if 'id' in json else None)
 
     def to_json(self) -> dict[str, str]:
-        d = {'type': 'SimpleTagBody', 'hasTag': str(self.tag)}
+        d = {'type': 'SimpleTagBody', 'val': str(self.tag)}
         if self.has_rdf_uri():
             d['id'] = str(self.get_rdf_node())
         return d

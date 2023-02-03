@@ -1,17 +1,14 @@
-import unittest
 import io
+import unittest
 
-import rdflib
-import rdflib.compare
 from lxml import etree
 
-from spotterbase.dnm.selectors import SbRangeSelector
-from spotterbase.sb_vocab import SB
-from spotterbase.dnm.dnm import DomRange
+from spotterbase.annotations.dom_range import DomRange
+from spotterbase.annotations.selector import PathSelector
+from spotterbase.annotations.selector_converter import SelectorConverter
 from spotterbase.dnm.token_dnm import TokenBasedDnm
 from spotterbase.dnm.token_generator import SimpleTokenGenerator
-from spotterbase.rdf import to_rdflib
-from spotterbase.rdf.vocab import RDF, OA, DCTERMS
+from spotterbase.rdf.base import Uri
 from spotterbase.test.mixins import GraphTestMixin
 
 # Example Dnm's:
@@ -27,45 +24,13 @@ class TestDnm(GraphTestMixin, unittest.TestCase):
         self.assertEqual(dnmstr, 't1t2t3Ct4t5')
         self.assertEqual(dnmstr[5], '3')
 
-    def test_point_range_selector(self):
-        for dnm, index, docfrag in [
-            (DNM_1, 5, 'char(/a,5)')
-        ]:
-            dnmstr = dnm.get_dnm_str()
-            dom_range: DomRange = dnmstr[index].as_range().to_dom()
-            point = dom_range.as_point()
-            self.assertIsNotNone(point)
-
-            generated_graph = to_rdflib.Converter.convert_to_graph(SbRangeSelector.from_dom_range(dom_range).to_triples()[1])
-            expected_graph = rdflib.Graph().parse(data=f'''
-                {RDF.NS:turtle} {OA.NS:turtle} {DCTERMS.NS:turtle} {SB.NS:turtle}
-                _:sel a {OA.FragmentSelector::} ;
-                    {RDF.value::} "{docfrag}" ;
-                    {DCTERMS.conformsTo::} {SB.docFrag::} .
-            ''')
-            self.assert_equal_graphs(generated_graph, expected_graph)
-
     def test_nonpoint_range_selector(self):
-        for dnm, index, substring, start_docfrag, end_docfrag in [
-            (DNM_1, slice(6, 8), 'Ct', 'node(/a/c)', 'char(/a,6)')
+        for dnm, index, substring, selector in [
+            (DNM_1, slice(6, 8), 'Ct', PathSelector('node(/a/c)', 'char(/a,7)'))
         ]:
             dnmstr = dnm.get_dnm_str()
             self.assertEqual(dnmstr[index], substring)
             dom_range: DomRange = dnmstr[index].as_range().to_dom()
-
-            generated_graph = to_rdflib.Converter.convert_to_graph(SbRangeSelector.from_dom_range(dom_range).to_triples()[1])
-            expected_graph = rdflib.Graph().parse(data=f'''
-                {RDF.NS:turtle} {OA.NS:turtle} {DCTERMS.NS:turtle} {SB.NS:turtle}
-                _:sel a {OA.RangeSelector::} ;
-                    {OA.hasStartSelector::} [
-                        a {OA.FragmentSelector::} ;
-                        {RDF.value::} "{start_docfrag}" ;
-                        {DCTERMS.conformsTo::} {SB.docFrag::}
-                    ];
-                    {OA.hasEndSelector::} [
-                        a {OA.FragmentSelector::} ;
-                        {RDF.value::} "{end_docfrag}" ;
-                        {DCTERMS.conformsTo::} {SB.docFrag::}
-                    ] .
-            ''')
-            self.assert_equal_graphs(generated_graph, expected_graph)
+            conv = SelectorConverter(Uri('http://example.org'), dom_range.from_.node.getroottree().getroot())
+            selector_range = conv.selector_to_dom(selector)[0]
+            self.assertEqual(dom_range, selector_range)

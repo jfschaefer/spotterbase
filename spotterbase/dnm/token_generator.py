@@ -2,7 +2,7 @@ from typing import Optional, Iterable
 
 from lxml.etree import _Element
 
-from spotterbase.dnm.dnm import DomPoint, DomRange
+from spotterbase.annotations.dom_range import DomPoint, DomRange
 from spotterbase.dnm.token_dnm import Token, TokenGenerator
 from spotterbase.dnm.xml_util import XmlNode, get_node_classes
 

@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+raise Warning('This code is deprecated and will be removed soon')
+
 import itertools
 from typing import Iterable, Optional
 
-from spotterbase.dnm.dnm import DomRange, DomPoint
-from spotterbase.dnm.text_offset_tracker import TextOffsetTracker
+from spotterbase.annotations.dom_range import DomPoint, DomRange
+from spotterbase.annotations.offset_converter import OffsetConverter
 from spotterbase.rdf.base import Subject, Triple, BlankNode
 from spotterbase.rdf.literals import StringLiteral
 from spotterbase.rdf.vocab import RDF, OA, DCTERMS
@@ -31,7 +33,7 @@ class SbPointSelector:
         if dp.text_offset is not None:
             return f'char({roottree.getpath(dp.node)},{dp.text_offset})'
         elif dp.tail_offset is not None:
-            get_offset = TextOffsetTracker.get_text_offset_with_tracker
+            get_offset = OffsetConverter.get_text_offset_with_tracker
             parent = dp.node.getparent()
             assert parent is not None   # can't be because of the tail
             # Note: on optimizing the offset computation:
@@ -97,7 +99,7 @@ class TextRangeSelector:
     """ Selector for a range using offsets """
     _start: int
     _end: int
-    _tracker: TextOffsetTracker
+    _tracker: OffsetConverter
 
     def __init__(self, start, end, tracker):
         """ Note: Signature might change """
@@ -106,8 +108,8 @@ class TextRangeSelector:
         self._tracker = tracker
 
     @classmethod
-    def from_dom_range(self, dom_range: DomRange, tracker: Optional[TextOffsetTracker]) -> TextRangeSelector:
-        tracker = tracker or TextOffsetTracker(dom_range.from_.node.getroottree().getroot())
+    def from_dom_range(self, dom_range: DomRange, tracker: Optional[OffsetConverter]) -> TextRangeSelector:
+        tracker = tracker or OffsetConverter(dom_range.from_.node.getroottree().getroot())
         start_point = dom_range.from_
         end_point = dom_range.to
         start_offset: int

@@ -3,7 +3,8 @@ from typing import Iterable, TypeVar
 
 from lxml.etree import _ElementTree, _Element
 
-from spotterbase.dnm.dnm import Dnm, DnmStr, DomRange
+from spotterbase.dnm.dnm import Dnm, DnmStr
+from spotterbase.annotations.dom_range import DomRange
 from spotterbase.dnm.xml_util import XmlNode
 
 
