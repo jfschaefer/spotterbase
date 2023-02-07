@@ -15,7 +15,7 @@ class TestAnnotationSerialization(GraphTestMixin, unittest.TestCase):
         with open(package_root / 'resources' / 'sb-context.jsonld') as fp:
             sb_context = json.load(fp)
         for path, class_ in [
-            (package_root.parent/'doc'/'source'/'codesnippets'/'example-annotation.jsonld', Annotation)
+            (package_root.parent / 'doc' / 'source' / 'codesnippets' / 'example-annotation.jsonld', Annotation)
         ]:
             with self.subTest(file=path, class_=class_):
                 with open(path) as fp:
@@ -34,4 +34,3 @@ class TestAnnotationSerialization(GraphTestMixin, unittest.TestCase):
                     my_graph,
                     json_ld_graph,
                 )
-

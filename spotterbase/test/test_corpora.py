@@ -14,5 +14,5 @@ class TestDnm(unittest.TestCase):
         self.assertIsNone(Resolver.get_corpus(Uri('http://not-a-real-corpus.org')))
 
     def test_resolver_get_document(self):
-        self.assertIsInstance(Resolver.get_document(TEST_CORPUS_URI/'paperA'), Document)
+        self.assertIsInstance(Resolver.get_document(TEST_CORPUS_URI / 'paperA'), Document)
         self.assertIsNone(Resolver.get_document(Uri('http://not-a-real-corpus.org/not-a-real-document')))

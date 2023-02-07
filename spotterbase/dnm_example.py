@@ -7,7 +7,6 @@ from spotterbase.dnm.token_generator import DefaultGenerators
 if __name__ == '__main__':
     tree = lxml.html.parse('1910.06709.html')
 
-
     dnm = TokenBasedDnm.from_token_generator(tree, DefaultGenerators.ARXMLIV_TEXT_ONLY)
 
     dnm_str = dnm.get_dnm_str()

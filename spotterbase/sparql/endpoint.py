@@ -1,5 +1,5 @@
 import abc
-from typing import Optional, Iterator, Iterable
+from typing import Optional, Iterable
 
 import requests as requests
 from requests.auth import HTTPBasicAuth

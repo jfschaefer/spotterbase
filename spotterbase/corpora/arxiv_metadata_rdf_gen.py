@@ -18,9 +18,10 @@ from spotterbase import __version__
 
 logger = logging.getLogger(__name__)
 
-arxiv_raw_metadata_locator = Locator('--arxiv-raw-metadata', 'path to the arxiv metadata OAI snapshot',
-                                     ['arxiv-metadata-oai-snapshot.json', 'arxiv-metadata-oai-snapshot.json.zip'],
-                                     'You can download it from https://www.kaggle.com/datasets/Cornell-University/arxiv')
+arxiv_raw_metadata_locator = Locator(
+    '--arxiv-raw-metadata', 'path to the arxiv metadata OAI snapshot',
+    ['arxiv-metadata-oai-snapshot.json', 'arxiv-metadata-oai-snapshot.json.zip'],
+    'You can download it from https://www.kaggle.com/datasets/Cornell-University/arxiv')
 arxiv_rdf_metadata_locator = Locator('--arxiv-rdf-gen-metadata', 'path to the arxiv metadata RDF file',
                                      ['arxiv-metadata.ttl.gz', 'centi-arxiv-metadata.ttl.gz'])
 

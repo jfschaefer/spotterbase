@@ -42,7 +42,8 @@ class MatchTree(object):
 
 
 class _Match(object):
-    def __init__(self, node: Optional[_Element], label: Optional[str] = None, children: Optional[List['_Match']] = None):
+    def __init__(self, node: Optional[_Element], label: Optional[str] = None,
+                 children: Optional[List['_Match']] = None):
         self.node = node
         self.label = label
         self.children: List['_Match'] = children if children is not None else []
@@ -74,7 +75,7 @@ class _Match(object):
 
 class Matcher(object):
     def _as_seq_matcher(self) -> 'SeqMatcher':
-        raise NotImplemented
+        raise NotImplementedError()
 
     def __add__(self, other: 'Matcher') -> 'SeqMatcher':
         if isinstance(other, MatcherSeqConcat):
@@ -86,7 +87,7 @@ class SeqMatcher(Matcher):
     def _match(self, nodes: List[_Element]) -> Iterator[Tuple[List[_Match], List[_Element]]]:
         """ Matches some of the `nodes` and yields pairs (`matches`, `rest`),
             where `matches` is the found matches and `rest` are the remaining nodes that still have to be matched. """
-        raise NotImplemented
+        raise NotImplementedError()
 
     def _as_seq_matcher(self) -> 'SeqMatcher':
         return self
@@ -103,7 +104,7 @@ class NodeMatcher(Matcher):
             yield match.to_match_tree()
 
     def _match(self, node: _Element) -> Iterator[_Match]:
-        raise NotImplemented
+        raise NotImplementedError()
 
     def _as_seq_matcher(self) -> 'SeqMatcher':
         return MatcherNodeAsSeq(self)
@@ -274,7 +275,7 @@ class MatcherNodeWithChildren(NodeMatcher):
             return MatcherNodeWithChildren(self.node_matcher, MatcherSeqAny(self.seq_matcher.node_matcher / other),
                                            self.allow_remainder)
         else:
-            raise Exception(f'Cannot use / in this case (left-hand-side is not a simple path)')
+            raise Exception('Cannot use / in this case (left-hand-side is not a simple path)')
 
 
 class MatcherLabelled(NodeMatcher):

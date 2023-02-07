@@ -43,7 +43,8 @@ class TokenBasedDnm(Dnm):
         self.string = ''.join(token.string for token in self.tokens)
 
     @classmethod
-    def from_token_generator(cls: type[TokenBasedDnm_T], tree: _ElementTree, generator: TokenGenerator) -> TokenBasedDnm_T:
+    def from_token_generator(cls: type[TokenBasedDnm_T], tree: _ElementTree, generator: TokenGenerator)\
+            -> TokenBasedDnm_T:
         tokens = list(generator.process(tree.getroot()))
         return cls(tree, tokens)
 
@@ -54,4 +55,3 @@ class TokenBasedDnm(Dnm):
         token = self.tokens[self.back_refs[offset][0]]
         rel_offset = self.back_refs[offset][1]
         return token.to_range(rel_offset)
-

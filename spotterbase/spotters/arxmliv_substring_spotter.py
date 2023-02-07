@@ -69,7 +69,7 @@ def process(corpus: ArXMLivCorpus) -> TripleI:
             uri, substrings = result
             for substring in substrings:
                 annos[substring].add_target(uri)
-            progress_logger.update(i+1)
+            progress_logger.update(i + 1)
     logger.info(f'Processed a total of {i} documents')
 
     for anno in annos.values():

@@ -3,7 +3,9 @@ from setuptools import setup
 setup(
     name='spotterbase',
     version='',
-    packages=['spotterbase', 'spotterbase.corpora', 'spotterbase.rdf', 'spotterbase.sparql', 'spotterbase.spotters', 'spotterbase.test'],
+    packages=['spotterbase', 'spotterbase.annotations', 'spotterbase.corpora', 'spotterbase.data',
+              'spotterbase.dnm', 'spotterbase.dnm_nlp', 'spotterbase.rdf', 'spotterbase.sparql', 'spotterbase.spotters',
+              'spotterbase.test', 'spotterbase.utils'],
     url='',
     license='',
     author='Jan Frederik Schaefer',

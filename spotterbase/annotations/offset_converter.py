@@ -107,8 +107,8 @@ class OffsetConverter:
         if node in self._node_to_offset:
             return self._node_to_offset[node]
         if node.getroottree().getroot() != self.root:
-            raise Exception(f'Node does not belong to the tree used by this tracker')
-        raise Exception(f'The node could not be found (maybe you added it to the DOM after creating the tracker?)')
+            raise Exception('Node does not belong to the tree used by this tracker')
+        raise Exception('The node could not be found (maybe you added it to the DOM after creating the tracker?)')
 
     def get_offset(self, point: _Element | DomPoint, offset_type: OffsetType) -> int:
         if isinstance(point, _Element):
@@ -146,9 +146,9 @@ class OffsetConverter:
         if offsets[1] >= offset and node.text:   # it's indeed a text (not a tail)
             if offset_type == OffsetType.NodeText and offset == offsets[0]:  # actually, it's the node
                 return DomPoint(node)
-            return DomPoint(node, text_offset=offset-offsets[0]-1)
+            return DomPoint(node, text_offset=offset - offsets[0] - 1)
         # option 2: it's a tail
         index = bisect.bisect_right(self._nodes_post_order, offset,
                                     key=lambda entry: entry[1].get_offsets_of_type(offset_type)[1]) - 1
         node, offset_data = self._nodes_post_order[index]
-        return DomPoint(node, tail_offset=offset-offset_data.get_offsets_of_type(offset_type)[1]-1)
+        return DomPoint(node, tail_offset=offset - offset_data.get_offsets_of_type(offset_type)[1] - 1)

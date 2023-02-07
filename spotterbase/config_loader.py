@@ -1,7 +1,7 @@
 """ Code extensible for configuration and configuration management.
 
 Both, configuration files and (optionally) command line arguments are supported (using :mod:`configargparse`).
-The configuration can be extended with custom :class:`ConfigExtension`\s.
+The configuration can be extended with custom :class:`ConfigExtension`.
 
 The configuration can be loaded with the :class:`ConfigLoader`.
 """
@@ -45,9 +45,10 @@ class ConfigLoader:
             config_paths = DEFAULT_CONFIG_PATHS
 
         self.used_default_config_paths: list[Path] = [path for path in config_paths if path.is_file()]
-        self.argparser = configargparse.ArgumentParser(default_config_files=list(map(str, self.used_default_config_paths)),
-                                                       add_help=False, ignore_unknown_config_file_keys=True)
-        #, ignore_unknown_config_file_keys=True)
+        self.argparser = configargparse.ArgumentParser(
+            default_config_files=list(map(str, self.used_default_config_paths)),
+            add_help=False,
+            ignore_unknown_config_file_keys=True)
         self.argparser.add_argument('-c', '--config', is_config_file=True, help='config file path')
         for extension in self.extensions:
             extension.prepare_argparser(self.argparser)

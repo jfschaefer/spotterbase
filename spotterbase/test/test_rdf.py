@@ -1,7 +1,7 @@
 import io
 import unittest
 
-from spotterbase.rdf.base import Vocabulary, NameSpace, Uri, Triple
+from spotterbase.rdf.base import Vocabulary, NameSpace, Uri
 from spotterbase.rdf.literals import StringLiteral
 from spotterbase.rdf.serializer import TurtleSerializer
 from spotterbase.rdf.vocab import RDF
@@ -41,4 +41,3 @@ mv:thingA a mv:someClass ;
         self.assertEqual(format(uri, ':'), 'ex:abc')
         self.assertEqual(format(uri, '<>'), '<http://example.com/abc>')
         self.assertEqual(str(uri), 'http://example.com/abc')
-

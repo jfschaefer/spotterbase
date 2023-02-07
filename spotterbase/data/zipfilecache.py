@@ -42,13 +42,12 @@ class ZipFileCache(object):
         assert max_open > 0
         self.max_open = max_open
 
-        self.zipfiles: Dict[str, OpenedZipFile] = {}   # file name -> opened zip file
+        self.zipfiles: Dict[str, OpenedZipFile] = {}  # file name -> opened zip file
 
         # zipfiledeque records expiry dates for opened zip files.
         # Files on the left expire earliest.
         # If the expiry is increased, a new record is appended (i.e. it may contain outdated records).
-        self.zipfiledeque: Deque[Tuple[str, int]] = deque()   # pairs (file name, expiry)
-
+        self.zipfiledeque: Deque[Tuple[str, int]] = deque()  # pairs (file name, expiry)
 
         # STATISTICS
         # how often a zip file was requested
@@ -66,7 +65,7 @@ class ZipFileCache(object):
             name, expiry = self.zipfiledeque.popleft()
             ozf = self.zipfiles[name]
             ozf.clean()
-            if ozf.expiry == expiry:    # otherwise it's an outdated record
+            if ozf.expiry == expiry:  # otherwise it's an outdated record
                 if not ozf.opened_files:
                     self.zipfiles[name].close()
                     del self.zipfiles[name]

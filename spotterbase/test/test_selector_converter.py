@@ -15,5 +15,3 @@ class TestSelectorConverter(unittest.TestCase):
         converter = SelectorConverter(Uri('http://example.org'), dom.getroot())
         selector = converter.dom_to_path_selector(dom_range)
         self.assertEqual(selector.start, 'char(/a,0)')
-
-

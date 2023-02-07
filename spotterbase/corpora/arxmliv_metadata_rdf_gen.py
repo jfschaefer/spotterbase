@@ -18,7 +18,8 @@ from spotterbase import __version__
 
 logger = logging.getLogger(__name__)
 
-RELEASE_VERSION = ConfigString('--arxmliv-release', description='arXMLiv release', choices=ARXMLIV_RELEASES, default=ARXMLIV_RELEASES)
+RELEASE_VERSION = ConfigString('--arxmliv-release', description='arXMLiv release', choices=ARXMLIV_RELEASES,
+                               default=ARXMLIV_RELEASES)
 
 
 def _get_severities_lists(corpus: ArXMLivCorpus) -> Optional[tuple[list[str], list[str], list[str]]]:
@@ -51,7 +52,7 @@ def iter_triples(corpus: ArXMLivCorpus) -> TripleI:
 
     spotter_run = SpotterRun(SB.NS['spotter/arxmlivmetadata'], spotter_version=__version__)
     yield from spotter_run.triples()
-    logger.info(f'Loading severity data')
+    logger.info('Loading severity data')
     severities = _get_severities_lists(corpus)
     if severities:
         np, w, e = severities

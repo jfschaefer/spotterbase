@@ -15,7 +15,7 @@ ARXMLIV_RELEASES: list[str] = ['08.2017', '08.2018', '08.2019', '2020']
 
 
 class ArXMLivUris:
-    arxmliv = Uri(f'http://sigmathling.kwarc.info/arxmliv/')
+    arxmliv = Uri('http://sigmathling.kwarc.info/arxmliv/')
 
     severity = arxmliv / 'severity/'
     severity_no_problem = severity / 'noProblem'
@@ -28,7 +28,7 @@ class ArXMLivUris:
 
     @classmethod
     def get_metadata_graph_uri(cls, release: str) -> Uri:
-        return SB.NS[f'graph/arxmliv-meta/' + release]
+        return SB.NS['graph/arxmliv-meta/' + release]
 
 
 class ArXMLivDocument(Document, abc.ABC):
@@ -72,14 +72,16 @@ class ZipArXMLivDocument(ArXMLivDocument):
 
 
 class ArXMLivCorpus(Corpus):
-    filename_regex = re.compile(f'^(?P<oldprefix>[a-z-]+)?(?P<digits>[0-9.]+).html$')
+    filename_regex = re.compile(r'^(?P<oldprefix>[a-z-]+)?(?P<digits>[0-9.]+).html$')
 
     def __init__(self, release: str):
         self.release = release
-        self._locator: Locator = Locator(f'--arxmliv-{release}-path',
-                                         description=f'path to the {release} arXMLiv release',
-                                         default_rel_locations=[f'arxmliv-{release}'],
-                                         how_to_get=f'SIGMathLing members can download the arXMLiv copora from https://sigmathling.kwarc.info/resources/')
+        self._locator: Locator = Locator(
+            f'--arxmliv-{release}-path',
+            description=f'path to the {release} arXMLiv release',
+            default_rel_locations=[f'arxmliv-{release}'],
+            how_to_get='SIGMathLing members can download the arXMLiv copora from ' +
+                       'https://sigmathling.kwarc.info/resources/')
         self._uri: Uri = ArXMLivUris.get_corpus_uri(release)
 
     def get_document_by_id(self, arxivid: ArxivId) -> ArXMLivDocument:
