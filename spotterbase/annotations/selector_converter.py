@@ -66,25 +66,25 @@ class SelectorConverter:
         assert type_ == 'char'
         if offset is None:
             raise Exception(f'No offset provided for path reference of type {type_}')
-        total_text_offset = int(offset) + self.offset_converter.get_offset(node, OffsetType.Text)
+        total_text_offset = int(offset) + self.offset_converter.get_offset(node, OffsetType.Text) + 1
         return self.offset_converter.get_dom_point(total_text_offset, OffsetType.Text)
 
     def dom_to_selectors(self, dom_range: DomRange, sub_ranges: Optional[list[DomRange]] = None) -> list[Selector]:
-        path_selector = self._dom_range_to_path_selector(dom_range)
+        path_selector = self.dom_to_path_selector(dom_range)
         if sub_ranges:
             path_selector.refinement = ListSelector(
-                [self._dom_range_to_path_selector(sub_range) for sub_range in sub_ranges]
+                [self.dom_to_path_selector(sub_range) for sub_range in sub_ranges]
             )
-        offset_selector = self._dom_range_to_offset_selector(dom_range)
+        offset_selector = self.dom_to_offset_selector(dom_range)
         return [path_selector, offset_selector]
 
-    def _dom_range_to_offset_selector(self, dom_range: DomRange) -> OffsetSelector:
+    def dom_to_offset_selector(self, dom_range: DomRange) -> OffsetSelector:
         return OffsetSelector(
             start=self.offset_converter.get_offset(dom_range.start, offset_type=OffsetType.NodeText),
             end=self.offset_converter.get_offset(dom_range.end, offset_type=OffsetType.NodeText)
         )
 
-    def _dom_range_to_path_selector(self, dom_range: DomRange) -> PathSelector:
+    def dom_to_path_selector(self, dom_range: DomRange) -> PathSelector:
         return PathSelector(
             start=self._dom_point_to_path(dom_range.start),
             end=self._dom_point_to_path(dom_range.end)

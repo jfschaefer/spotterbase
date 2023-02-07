@@ -35,7 +35,7 @@ class DnmPoint:
 class DnmRange:
     def __init__(self, from_: DnmPoint, to: DnmPoint):
         self.from_ = from_
-        self.to = to
+        self.to = to   # NOTE: `to` is included in the range (unlike DomRange etc.)
 
         assert self.to.dnm == self.from_.dnm
 

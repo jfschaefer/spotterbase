@@ -38,7 +38,7 @@ class DomPoint:
 
     def get_after(self) -> DomPoint:
         assert not self.after, '`after` already set'
-        return DomPoint(self.node, text_offset=self.text_offset, tail_offset=self.tail_offset, after=self.after)
+        return DomPoint(self.node, text_offset=self.text_offset, tail_offset=self.tail_offset, after=True)
 
     def __eq__(self, other):
         """ compares with another DomPoint. Note that the equality is incomplete,

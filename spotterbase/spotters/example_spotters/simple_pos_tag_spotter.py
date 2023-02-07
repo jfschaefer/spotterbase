@@ -38,6 +38,7 @@ class SimplePosTagSpotter(UriGeneratorMixin, Spotter):
             pos_tagged = nltk.tag.pos_tag([str(word) for word in words], tagset='universal')
             assert len(words) == len(pos_tagged)
             for dnm_word, tagged_word in zip(words, pos_tagged):
+                # print(dnm_word.as_range().to_dom(), dnm_word.as_range().to.to_dom())
                 uri = next(uri_generator)
                 yield Annotation(
                     uri=uri('anno'),

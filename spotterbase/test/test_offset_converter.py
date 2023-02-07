@@ -29,6 +29,7 @@ class TestOffsetConverter(unittest.TestCase):
             # after
             (DomPoint(node_v, after=True), 6),
             (DomPoint(node_w, after=True), 9),
+            (DomPoint(node_v, text_offset=0, after=True), 5),
             (DomPoint(node_v, text_offset=1, after=True), 6),
             (DomPoint(node_v, tail_offset=1, after=True), 8),
         ]:

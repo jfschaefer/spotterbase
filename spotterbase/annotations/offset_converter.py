@@ -29,6 +29,10 @@ class NodeOffsetData:
     The node text offsets allows targeting nodes directly.
     That way, it's possible to target e.g. an <img .../> node or to distinguish
     whether the <mrow>, the <mi> or the n is targeted in <mrow><mi>n</mi>....
+
+    Details:
+    * text_offset is the offset of the last character before the node
+    * node_text_offset is the offset of the node itself
     """
     text_offset: int
     node_text_offset: int
@@ -64,8 +68,8 @@ class OffsetConverter:
         node_to_offset = {}
         nodes_pre_order = []
         nodes_post_order = []
-        text_counter: int = 0
-        node_counter: int = 0
+        text_counter: int = -1
+        node_counter: int = 1
 
         def recurse(node: _Element):
             nonlocal text_counter, node_counter
@@ -88,8 +92,8 @@ class OffsetConverter:
             node_to_offset[node] = NodeOffsetData(
                 text_offset=text_counter_start,
                 node_text_offset=text_counter_start + node_counter_start,
-                text_offset_after=text_counter + 1,
-                node_text_offset_after=text_counter + node_counter + 1
+                text_offset_after=text_counter,
+                node_text_offset_after=text_counter + node_counter
             )
 
         recurse(root)
@@ -112,20 +116,20 @@ class OffsetConverter:
         node_offsets = self.get_offset_data(point.node).get_offsets_of_type(offset_type)
 
         if point.text_offset is not None:
-            offset = node_offsets[0] + point.text_offset
-            if offset_type == OffsetType.NodeText:
-                offset += 1
+            offset = node_offsets[0] + point.text_offset + 1
+#             if offset_type == OffsetType.NodeText:
+#                 offset += 1
             if point.after:
                 offset += 1
             return offset
         elif point.tail_offset is not None:
-            offset = node_offsets[1] + point.tail_offset
+            offset = node_offsets[1] + point.tail_offset + 1
             if point.after:
                 offset += 1
             return offset
         else:   # simply a node
             if point.after:
-                return node_offsets[1]
+                return node_offsets[1] + 1
             else:
                 return node_offsets[0]
 
@@ -134,19 +138,17 @@ class OffsetConverter:
         if offset > self._nodes_post_order[-1][1].get_offsets_of_type(offset_type)[1] + 1:
             raise Exception('Offset is too large for this DOM. Maybe it refers to a different document?')
         # option 1: it's a text (not a tail)
+        _shift: int = 1 if offset_type == OffsetType.Text else 0
         index = bisect.bisect_right(self._nodes_pre_order, offset,
-                                    key=lambda entry: entry[1].get_offsets_of_type(offset_type)[0]) - 1
+                                    key=lambda entry: entry[1].get_offsets_of_type(offset_type)[0] + _shift) - 1
         node, offset_data = self._nodes_pre_order[index]
         offsets = offset_data.get_offsets_of_type(offset_type)
-        if offsets[1] > offset and node.text:   # it's indeed a text (not a tail)
+        if offsets[1] >= offset and node.text:   # it's indeed a text (not a tail)
             if offset_type == OffsetType.NodeText and offset == offsets[0]:  # actually, it's the node
                 return DomPoint(node)
-            if offset_type == OffsetType.NodeText:
-                # `offsets[0] += 1` because the node counts, but for simplicity we do the equivalent `offset -= 1`
-                offset -= 1
-            return DomPoint(node, text_offset=offset-offsets[0])
+            return DomPoint(node, text_offset=offset-offsets[0]-1)
         # option 2: it's a tail
         index = bisect.bisect_right(self._nodes_post_order, offset,
                                     key=lambda entry: entry[1].get_offsets_of_type(offset_type)[1]) - 1
         node, offset_data = self._nodes_post_order[index]
-        return DomPoint(node, tail_offset=offset-offset_data.get_offsets_of_type(offset_type)[1])
+        return DomPoint(node, tail_offset=offset-offset_data.get_offsets_of_type(offset_type)[1]-1)
