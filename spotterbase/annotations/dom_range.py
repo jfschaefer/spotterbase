@@ -4,6 +4,8 @@ from typing import Optional
 
 from lxml.etree import _Element
 
+from spotterbase.annotations.utils import get_parent_asserted
+
 
 class DomPoint:
     """ References a point in the DOM.
@@ -83,10 +85,10 @@ class DomRange:
         from_node = self.start.node
         to_node = self.end.node
         if self.end.tail_offset is not None:
-            to_node = to_node.getparent()
+            to_node = get_parent_asserted(to_node)
 
         from_parents = set()
-        n = from_node
+        n: Optional[_Element] = from_node
         while n is not None:
             from_parents.add(n)
             n = n.getparent()

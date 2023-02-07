@@ -76,11 +76,13 @@ def iter_triples(corpus: ArXMLivCorpus) -> TripleI:
 
 
 def main():
-    corpus = Resolver.get_corpus(ArXMLivUris.get_corpus_uri(RELEASE_VERSION.value))
+    release_version = RELEASE_VERSION.value
+    assert release_version is not None
+    corpus = Resolver.get_corpus(ArXMLivUris.get_corpus_uri(release_version))
     assert isinstance(corpus, ArXMLivCorpus)
     dest = DataDir.get(('centi-' if USE_CENTI_ARXIV else '') + f'arxmliv-{corpus.release}.ttl.gz')
     with gzip.open(dest, 'wt') as fp:
-        fp.write(f'# Graph: {ArXMLivUris.get_metadata_graph_uri(RELEASE_VERSION.value):<>}\n')
+        fp.write(f'# Graph: {ArXMLivUris.get_metadata_graph_uri(release_version):<>}\n')
         with TurtleSerializer(fp) as serializer:
             serializer.add_from_iterable(iter_triples(corpus))
     logger.info(f'The graph has successfully been written to {dest}.')

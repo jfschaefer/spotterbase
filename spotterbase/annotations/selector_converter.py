@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import re
-from typing import Optional
+from typing import Optional, Any
 
 from lxml.etree import _Element
 
@@ -44,13 +44,13 @@ class SelectorConverter:
             raise Exception(f'Unsupported selector {type(selector)}')
 
     def _complex_selector_to_dom(self, selector: DiscontinuousSelector) -> list[DomRange]:
-        ...
+        raise NotImplementedError()
 
     def _path_to_dom_point(self, path: str) -> DomPoint:
         match = self._path_regex.fullmatch(path)
         if match is None:
             raise Exception(f'Invalid path: {path!r}')
-        node = self._dom.xpath(match.group('xpath'))
+        node: Any = self._dom.xpath(match.group('xpath'))
         if isinstance(node, list):
             if len(node) != 1:
                 raise Exception(f'XPath does not yield unique node (yields {len(node)} nodes)')
@@ -97,6 +97,7 @@ class SelectorConverter:
         elif dom_point.tail_offset is not None:
             offset = self.offset_converter.get_offset_data(dom_point.node).text_offset_after + dom_point.tail_offset
             parent = dom_point.node.getparent()
+            assert parent is not None
             parent_offset = self.offset_converter.get_offset_data(parent).text_offset
             return f'char({roottree.getpath(parent)},{offset - parent_offset + int(dom_point.after)})'
         else:

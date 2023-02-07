@@ -1,7 +1,6 @@
 import spotterbase.corpora.arxiv
-from spotterbase.rdf.base import NameSpace, Object, Uri, Literal
 import spotterbase.rdf.vocab as vocab
-import spotterbase.spotters as spotters
+from spotterbase.rdf.base import NameSpace, Object, Uri, Literal
 
 NAMESPACES: list[NameSpace] = [
     vocab.RDF.NS,
@@ -9,8 +8,6 @@ NAMESPACES: list[NameSpace] = [
     vocab.DCTERMS.NS,
     vocab.XSD.NS,
     vocab.OA.NS,
-
-    spotters.simple_unit_spotter.om.OM.NS,
 
     spotterbase.corpora.arxiv.ArxivUris.arxiv_cat,
     spotterbase.corpora.arxiv.ArxivUris.arxiv_id,

@@ -6,7 +6,7 @@ from typing import Iterator
 from spotterbase import config_loader
 from spotterbase.config_loader import ConfigString, ConfigInt
 from spotterbase.corpora.arxiv import USE_CENTI_ARXIV
-from spotterbase.corpora.arxmliv import ArXMLivConfig, ArXMLivDocument, ArXMLivCorpus, ArXMLiv
+from spotterbase.corpora.arxmliv import ArXMLivDocument, ArXMLivCorpus, ARXMLIV_RELEASES
 from spotterbase.data.locator import DataDir
 from spotterbase.sb_vocab import SB
 from spotterbase.rdf.base import Uri, TripleI, BlankNode
@@ -20,8 +20,8 @@ from spotterbase.utils.logutils import ProgressLogger
 logger = logging.getLogger(__name__)
 
 
-RELEASE_VERSION = ConfigString('--arxmliv-release', description='arXMLiv release', choices=ArXMLivConfig.releases,
-                               default=ArXMLivConfig.releases[-1])
+RELEASE_VERSION = ConfigString('--arxmliv-release', description='arXMLiv release', choices=ARXMLIV_RELEASES,
+                               default=ARXMLIV_RELEASES[-1])
 NUMBER_OF_PROCESSES = ConfigInt('--number-of-processes', description='number of processes', default=4)
 
 
@@ -77,8 +77,9 @@ def process(corpus: ArXMLivCorpus) -> TripleI:
 
 
 def main():
-    arxmliv = ArXMLiv()
-    corpus = arxmliv.get_corpus(RELEASE_VERSION.value)
+    version = RELEASE_VERSION.value
+    assert version is not None
+    corpus = ArXMLivCorpus(version)
     dest = DataDir.get(('centi-' if USE_CENTI_ARXIV else '') + f'arxmliv-substrings-{corpus.release}.ttl.gz')
 
     with gzip.open(dest, 'wt') as fp:

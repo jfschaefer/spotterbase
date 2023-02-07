@@ -2,9 +2,18 @@ import io
 import unittest
 
 from lxml import etree
+from lxml.etree import _Element, _ElementTree
 
 from spotterbase.annotations.dom_range import DomPoint
 from spotterbase.annotations.offset_converter import OffsetConverter, OffsetType
+
+
+def get_xpath_node(tree: _ElementTree, xpath: str) -> _Element:
+    result = tree.xpath(xpath)
+    assert isinstance(result, list)
+    node = result[0]
+    assert isinstance(node, _Element)
+    return node
 
 
 class TestOffsetConverter(unittest.TestCase):
@@ -13,10 +22,9 @@ class TestOffsetConverter(unittest.TestCase):
         # offsets:                       0 12 3 45    67 8  910111213 1415
         conv = OffsetConverter(tree.getroot())
 
-        node_u = tree.xpath('/u[1]')[0]
-        node_v = tree.xpath('/u/v[1]')[0]
-        node_w = tree.xpath('/u/w[1]')[0]
-        # node_x = tree.xpath('/u/x[1]')[0]
+        node_u = get_xpath_node(tree, '/u[1]')
+        node_v = get_xpath_node(tree, '/u/v[1]')
+        node_w = get_xpath_node(tree, '/u/w[1]')
 
         for dom_point, node_offset in [
             (DomPoint(node_u), 0),

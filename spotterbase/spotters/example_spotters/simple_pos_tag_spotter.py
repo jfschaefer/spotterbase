@@ -38,7 +38,6 @@ class SimplePosTagSpotter(UriGeneratorMixin, Spotter):
             pos_tagged = nltk.tag.pos_tag([str(word) for word in words], tagset='universal')
             assert len(words) == len(pos_tagged)
             for dnm_word, tagged_word in zip(words, pos_tagged):
-                # print(dnm_word.as_range().to_dom(), dnm_word.as_range().to.to_dom())
                 uri = next(uri_generator)
                 yield Annotation(
                     uri=uri('anno'),
@@ -54,6 +53,7 @@ if __name__ == '__main__':
         config_loader.auto()
         spotter = SimplePosTagSpotter(Uri('http://example.org/mytestrun'))
         document = Resolver.get_document(ArXMLivUris.get_corpus_uri('2020')  + '1910.06709')
+        assert document is not None, 'Document not found'
         annotations = list(spotter.process_document(document))
             # / 'http://sigmathling.kwarc.info/arxmliv/2020quant-ph/0206041'
         with document.open() as doc_fp:

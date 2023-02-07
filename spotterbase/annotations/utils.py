@@ -1,8 +1,10 @@
 from typing import TypeVar, Optional
 
+from lxml.etree import _Element
+
 from spotterbase.rdf.base import Subject, BlankNode, Uri
 
-_T: TypeVar = TypeVar('_T')
+_T = TypeVar('_T')
 
 
 def as_list(arg: _T | list[_T]) -> list[_T]:
@@ -12,12 +14,10 @@ def as_list(arg: _T | list[_T]) -> list[_T]:
     return [arg]
 
 
-def extract_if_singleton(list_: list[_T]) -> _T | list[_T]:
-    """ If the argument is a singleton list, it returns its argument,
-        otherwise, it returns the entire list """
-    if len(list_) == 1:
-        return list_[0]
-    return list_
+def get_parent_asserted(node: _Element) -> _Element:
+    parent = node.getparent()
+    assert parent is not None
+    return parent
 
 
 class RdfNodeMixin:
