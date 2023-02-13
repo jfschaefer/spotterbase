@@ -180,6 +180,7 @@ class Literal:
         self.lang_tag = lang_tag
 
     def __str__(self) -> str:
+        # TODO: change to double quotation marks!
         # Does repr(self.string) always work?
         if self.lang_tag:
             return f'{self.string!r}@{self.lang_tag}'  # datatype must be rdf:langString and can be omitted

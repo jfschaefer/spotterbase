@@ -14,6 +14,9 @@ class Serializer(abc.ABC):
         for triple in triples:
             self.add(*triple)
 
+    def write_comment(self, s: str):
+        raise NotImplementedError()
+
     def flush(self):
         pass
 
@@ -32,6 +35,10 @@ class TurtleSerializer(Serializer):
         self.cur_buffer_size = 0
         self.buffer: OrderedDict[Subject, list[tuple[Predicate, Object]]] = OrderedDict()
         self.used_prefixes: dict[str, str] = {}
+
+    def write_comment(self, s: str):
+        self.flush()
+        self.fp.write('# ' + s + '\n')
 
     def add(self, s: Subject, p: Predicate, o: Object):
         if s in self.buffer:
@@ -116,6 +123,9 @@ class TurtleSerializer(Serializer):
 class NTriplesSerializer(Serializer):
     def __init__(self, fp: TextIO):
         self.fp = fp
+
+    def write_comment(self, s: str):
+        self.fp.write('# ' + s + '\n')
 
     def add(self, s: Subject, p: Predicate, o: Object):
         self._write_node(s)
