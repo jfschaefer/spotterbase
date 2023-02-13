@@ -111,3 +111,28 @@ class TurtleSerializer(Serializer):
     def __del__(self):
         if self.buffer:
             raise Exception('Not all triples were written to the file (consider calling flush())')
+
+
+class NTriplesSerializer(Serializer):
+    def __init__(self, fp: TextIO):
+        self.fp = fp
+
+    def add(self, s: Subject, p: Predicate, o: Object):
+        self._write_node(s)
+        self.fp.write(' ')
+        self._write_node(p)
+        self.fp.write(' ')
+        self._write_node(o)
+        self.fp.write(' .\n')
+
+    def _write_node(self, node: Subject | Predicate | Object):
+        # TODO: almost same as in TurtleSerializer
+        match node:
+            case Uri():
+                self.fp.write(format(node, '<>'))
+            case BlankNode():
+                self.fp.write(f'_:{node.value}')
+            case Literal():
+                self.fp.write(str(node))
+            case _:
+                raise NotImplementedError(f'Unsupported node type {type(node)}')

@@ -1,9 +1,9 @@
 import io
 import unittest
 
-from spotterbase.rdf.base import Vocabulary, NameSpace, Uri
+from spotterbase.rdf.base import Vocabulary, NameSpace, Uri, BlankNode
 from spotterbase.rdf.literals import StringLiteral
-from spotterbase.rdf.serializer import TurtleSerializer
+from spotterbase.rdf.serializer import TurtleSerializer, NTriplesSerializer
 from spotterbase.rdf.vocab import RDF
 
 
@@ -16,7 +16,7 @@ class MyVocab(Vocabulary):
 
 
 class TestRdf(unittest.TestCase):
-    def test_serialize(self):
+    def test_turtle_serialize(self):
         stringio = io.StringIO()
         serializer = TurtleSerializer(stringio)
         serializer.add_from_iterable([
@@ -41,3 +41,19 @@ mv:thingA a mv:someClass ;
         self.assertEqual(format(uri, ':'), 'ex:abc')
         self.assertEqual(format(uri, '<>'), '<http://example.com/abc>')
         self.assertEqual(str(uri), 'http://example.com/abc')
+
+    def test_ntriples_serialize(self):
+        BlankNode.counter = 1
+        stringio = io.StringIO()
+        serializer = NTriplesSerializer(stringio)
+        serializer.add_from_iterable([
+            (MyVocab.thingA, MyVocab.someRel, MyVocab.thingA),
+            (MyVocab.thingA, MyVocab.someRel, StringLiteral('some string')),
+            (BlankNode(), MyVocab.someRel, StringLiteral('some string')),
+        ])
+        serializer.flush()
+        self.assertEqual(stringio.getvalue().strip(), '''
+<http://example.com/myvocabthingA> <http://example.com/myvocabsomeRel> <http://example.com/myvocabthingA> .
+<http://example.com/myvocabthingA> <http://example.com/myvocabsomeRel> 'some string' .
+_:1 <http://example.com/myvocabsomeRel> 'some string' .
+'''.strip())
