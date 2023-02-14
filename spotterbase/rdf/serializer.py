@@ -1,5 +1,6 @@
 import abc
 from collections import OrderedDict, defaultdict
+from pathlib import Path
 from typing import TextIO, Iterable, Optional
 
 from spotterbase.rdf.base import Triple, Uri, Object, NameSpace, Subject, BlankNode, Predicate, Literal
@@ -24,7 +25,40 @@ class Serializer(abc.ABC):
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
+
+    def close(self):
         self.flush()
+
+
+class FileSerializer(Serializer):
+    def __init__(self, path: Path):
+        self.path = path
+        self.fp = open(path, 'w')
+        self.serializer: Serializer
+        if self.path.name.endswith('.ttl'):
+            self.serializer = TurtleSerializer(self.fp)
+        elif self.path.name.endswith('.nt'):
+            self.serializer = NTriplesSerializer(self.fp)
+        else:
+            self.fp.close()
+            raise Exception('Unsupported file extension')
+
+    def close(self):
+        self.serializer.close()
+        self.fp.close()
+
+    def add(self, s: Subject, p: Predicate, o: Object):
+        self.serializer.add(s, p, o)
+
+    def add_from_iterable(self, triples: Iterable[Triple]):
+        self.serializer.add_from_iterable(triples)
+
+    def write_comment(self, s: str):
+        self.serializer.write_comment(s)
+
+    def flush(self):
+        self.serializer.flush()
 
 
 class TurtleSerializer(Serializer):
