@@ -1,4 +1,5 @@
 import abc
+import gzip
 from collections import OrderedDict, defaultdict
 from pathlib import Path
 from typing import TextIO, Iterable, Optional
@@ -34,11 +35,18 @@ class Serializer(abc.ABC):
 class FileSerializer(Serializer):
     def __init__(self, path: Path):
         self.path = path
-        self.fp = open(path, 'w')
         self.serializer: Serializer
-        if self.path.name.endswith('.ttl'):
+        name = self.path.name
+
+        if name.endswith('.gz'):
+            self.fp = gzip.open(path, 'wt')
+            name = name[:-3]
+        else:
+            self.fp = open(path, 'w')
+
+        if name.endswith('.ttl'):
             self.serializer = TurtleSerializer(self.fp)
-        elif self.path.name.endswith('.nt'):
+        elif name.endswith('.nt'):
             self.serializer = NTriplesSerializer(self.fp)
         else:
             self.fp.close()
