@@ -5,7 +5,7 @@ from pathlib import Path
 
 from spotterbase.config_loader import ConfigLoader
 from spotterbase.data.locator import TmpDir
-from spotterbase.rdf.base import Uri
+from spotterbase.rdf.uri import Uri
 from spotterbase.sparql.endpoint import get_endpoint
 
 logger = logging.getLogger(__name__)

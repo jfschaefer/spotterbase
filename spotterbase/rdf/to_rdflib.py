@@ -12,7 +12,8 @@ from typing import Iterator
 
 import rdflib
 
-from spotterbase.rdf.base import TripleI, BlankNode, Triple, Uri, Literal
+from spotterbase.rdf.base import TripleI, BlankNode, Triple, Literal
+from spotterbase.rdf.uri import Uri
 from spotterbase.rdf.vocab import RDF, XSD
 
 _rdflib_triple_T = tuple[rdflib.term.Node, rdflib.term.Node, rdflib.term.Node]

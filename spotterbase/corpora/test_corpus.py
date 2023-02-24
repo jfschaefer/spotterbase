@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import IO, Iterator
 
 from spotterbase.corpora.interface import Corpus, DocumentNotInCorpusException, Document, DocumentNotFoundError
-from spotterbase.rdf.base import Uri
+from spotterbase.rdf.uri import Uri
 from spotterbase.sb_vocab import SB
 
 TEST_CORPUS_URI: Uri = SB.NS['test-corpus/']

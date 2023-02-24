@@ -4,7 +4,7 @@ from spotterbase.corpora.arxmliv import ArXMLivUris
 from spotterbase.corpora.interface import Corpus, Document
 from spotterbase.corpora.resolver import Resolver
 from spotterbase.corpora.test_corpus import TEST_CORPUS_URI
-from spotterbase.rdf.base import Uri
+from spotterbase.rdf.uri import Uri
 
 
 class TestDnm(unittest.TestCase):

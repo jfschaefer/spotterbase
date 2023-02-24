@@ -8,7 +8,7 @@ from spotterbase.annotations.selector import PathSelector
 from spotterbase.annotations.selector_converter import SelectorConverter
 from spotterbase.dnm.token_dnm import TokenBasedDnm
 from spotterbase.dnm.token_generator import SimpleTokenGenerator
-from spotterbase.rdf.base import Uri
+from spotterbase.rdf.uri import Uri
 from spotterbase.test.mixins import GraphTestMixin
 
 # Example Dnm's:

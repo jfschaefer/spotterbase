@@ -5,7 +5,7 @@ from lxml import etree
 
 from spotterbase.annotations.dom_range import DomPoint
 from spotterbase.annotations.selector_converter import SelectorConverter
-from spotterbase.rdf.base import Uri
+from spotterbase.rdf.uri import Uri
 
 
 class TestSelectorConverter(unittest.TestCase):

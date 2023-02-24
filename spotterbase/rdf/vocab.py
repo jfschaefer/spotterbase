@@ -1,6 +1,6 @@
 """ Commonly used RDF vocabularies (automatically generated) """
 
-from spotterbase.rdf.base import Vocabulary, NameSpace, Uri
+from spotterbase.rdf.uri import NameSpace, Vocabulary, Uri
 
 
 class AS(Vocabulary):

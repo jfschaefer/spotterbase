@@ -5,7 +5,8 @@ from typing import Any, Optional
 from spotterbase.annotations.body import Body
 from spotterbase.annotations.serialization_abc import Portable
 from spotterbase.annotations.target import Target
-from spotterbase.rdf.base import Uri, TripleI
+from spotterbase.rdf.base import TripleI
+from spotterbase.rdf.uri import Uri
 from spotterbase.rdf.vocab import RDF, OA, DCTerms
 
 

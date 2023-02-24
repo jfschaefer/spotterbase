@@ -9,7 +9,7 @@ from spotterbase.annotations.dom_range import DomRange, DomPoint
 from spotterbase.annotations.offset_converter import OffsetConverter, OffsetType
 from spotterbase.annotations.selector import PathSelector, SimpleSelector, DiscontinuousSelector, Selector, \
     OffsetSelector, ListSelector
-from spotterbase.rdf.base import Uri
+from spotterbase.rdf.uri import Uri
 
 
 class SelectorConverter:

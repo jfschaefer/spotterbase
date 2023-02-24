@@ -27,7 +27,7 @@ The basics: URIs, literals, namespaces
 
 Let's create some URIs:
 
->>> from spotterbase.rdf.base import Uri, NameSpace, Vocabulary
+>>> from spotterbase.rdf.uri import Uri, NameSpace, Vocabulary
 >>> example = Uri('http://example.org')
 >>> example
 Uri('http://example.org')

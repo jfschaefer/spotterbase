@@ -3,7 +3,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from spotterbase.rdf.base import Vocabulary, NameSpace, Uri, BlankNode
+from spotterbase.rdf.base import BlankNode
+from spotterbase.rdf.uri import NameSpace, Vocabulary, Uri
 from spotterbase.rdf.literals import StringLiteral
 from spotterbase.rdf.serializer import TurtleSerializer, NTriplesSerializer, FileSerializer
 from spotterbase.rdf.vocab import RDF
@@ -64,8 +65,8 @@ mv:thingA a mv:someClass ;
         self.assertEqual(stringio.getvalue().strip(), '''
 # this is a comment for ntriples
 <http://example.com/myvocabthingA> <http://example.com/myvocabsomeRel> <http://example.com/myvocabthingA> .
-<http://example.com/myvocabthingA> <http://example.com/myvocabsomeRel> 'some string' .
-_:1 <http://example.com/myvocabsomeRel> 'some string' .
+<http://example.com/myvocabthingA> <http://example.com/myvocabsomeRel> "some string" .
+_:1 <http://example.com/myvocabsomeRel> "some string" .
 # this is another comment for ntriples
 '''.strip())
 

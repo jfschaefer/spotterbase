@@ -4,7 +4,8 @@ from collections import OrderedDict, defaultdict
 from pathlib import Path
 from typing import TextIO, Iterable, Optional
 
-from spotterbase.rdf.base import Triple, Uri, Object, NameSpace, Subject, BlankNode, Predicate, Literal
+from spotterbase.rdf.base import Triple, Object, Subject, BlankNode, Predicate, Literal
+from spotterbase.rdf.uri import NameSpace, Uri
 from spotterbase.rdf.vocab import RDF
 
 
@@ -185,6 +186,6 @@ class NTriplesSerializer(Serializer):
             case BlankNode():
                 self.fp.write(f'_:{node.value}')
             case Literal():
-                self.fp.write(str(node))
+                self.fp.write(node.to_ntriples())
             case _:
                 raise NotImplementedError(f'Unsupported node type {type(node)}')

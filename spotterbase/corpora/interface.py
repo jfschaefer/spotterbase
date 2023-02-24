@@ -1,7 +1,7 @@
 import abc
 from typing import IO, Iterator
 
-from spotterbase.rdf.base import Uri
+from spotterbase.rdf.uri import Uri
 
 
 class Document(abc.ABC):

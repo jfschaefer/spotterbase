@@ -1,6 +1,7 @@
 import spotterbase.corpora.arxiv
 import spotterbase.rdf.vocab as vocab
-from spotterbase.rdf.base import NameSpace, Object, Uri, Literal
+from spotterbase.rdf.base import Object, Literal
+from spotterbase.rdf.uri import NameSpace, Uri
 
 NAMESPACES: list[NameSpace] = [
     vocab.RDF.NS,

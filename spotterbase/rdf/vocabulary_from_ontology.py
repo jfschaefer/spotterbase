@@ -130,7 +130,7 @@ def create_from(ontology: str, namespace: str):
 
 def main():
     print('""" Commonly used RDF vocabularies (automatically generated) """\n')
-    print('from spotterbase.rdf.base import Vocabulary, NameSpace, Uri\n')
+    print('from spotterbase.rdf.uri import Vocabulary, NameSpace, Uri\n')
     for classname, ontology, namespace in VOCABULARIES:
         print(f'Processing {ontology}', file=sys.stderr)
         print(f'\nclass {classname}(Vocabulary):')

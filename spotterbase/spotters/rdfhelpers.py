@@ -4,7 +4,8 @@ import datetime
 from typing import Optional
 
 from spotterbase.sb_vocab import SB
-from spotterbase.rdf.base import Uri, TripleI, Object, BlankNode
+from spotterbase.rdf.base import TripleI, Object, BlankNode
+from spotterbase.rdf.uri import Uri
 from spotterbase.rdf.literals import DateTimeLiteral, StringLiteral
 from spotterbase.rdf.vocab import OA, RDF, DC
 

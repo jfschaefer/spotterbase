@@ -5,7 +5,8 @@ from typing import Optional, Any
 
 from spotterbase.annotations.serialization_abc import Portable
 from spotterbase.annotations.utils import RdfNodeMixin
-from spotterbase.rdf.base import Uri, TripleI
+from spotterbase.rdf.base import TripleI
+from spotterbase.rdf.uri import Uri
 from spotterbase.rdf.vocab import RDF
 from spotterbase.sb_vocab import SB
 

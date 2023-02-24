@@ -5,7 +5,7 @@ from typing import Iterator, Callable
 
 from spotterbase.annotations.annotation import Annotation
 from spotterbase.corpora.interface import Document
-from spotterbase.rdf.base import Uri
+from spotterbase.rdf.uri import Uri
 
 
 class Spotter(abc.ABC):

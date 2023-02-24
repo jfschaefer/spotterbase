@@ -4,7 +4,7 @@ from typing import Optional
 from spotterbase.corpora.arxmliv import ARXMLIV_CORPORA
 from spotterbase.corpora.interface import Corpus, Document, DocumentNotInCorpusException
 from spotterbase.corpora.test_corpus import TestCorpus
-from spotterbase.rdf.base import Uri
+from spotterbase.rdf.uri import Uri
 
 
 class _Resolver:

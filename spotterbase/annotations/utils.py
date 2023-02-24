@@ -2,7 +2,8 @@ from typing import TypeVar, Optional
 
 from lxml.etree import _Element
 
-from spotterbase.rdf.base import Subject, BlankNode, Uri
+from spotterbase.rdf.base import Subject, BlankNode
+from spotterbase.rdf.uri import Uri
 
 _T = TypeVar('_T')
 

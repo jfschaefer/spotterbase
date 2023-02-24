@@ -6,7 +6,8 @@ from typing import Any
 from spotterbase.annotations.serialization_abc import Portable
 from spotterbase.annotations.selector import Selector, SimpleSelector
 from spotterbase.annotations.utils import as_list
-from spotterbase.rdf.base import Uri, TripleI
+from spotterbase.rdf.base import TripleI
+from spotterbase.rdf.uri import Uri
 from spotterbase.rdf.vocab import RDF, OA
 from spotterbase.sb_vocab import SB
 

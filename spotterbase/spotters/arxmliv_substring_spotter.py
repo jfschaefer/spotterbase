@@ -9,7 +9,8 @@ from spotterbase.corpora.arxiv import USE_CENTI_ARXIV
 from spotterbase.corpora.arxmliv import ArXMLivDocument, ArXMLivCorpus, ARXMLIV_RELEASES
 from spotterbase.data.locator import DataDir
 from spotterbase.sb_vocab import SB
-from spotterbase.rdf.base import Uri, TripleI, BlankNode
+from spotterbase.rdf.base import TripleI, BlankNode
+from spotterbase.rdf.uri import Uri
 from spotterbase.rdf.literals import StringLiteral
 from spotterbase.rdf.serializer import TurtleSerializer
 from spotterbase.rdf.vocab import RDF

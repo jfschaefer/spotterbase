@@ -1,4 +1,4 @@
-from spotterbase.rdf.base import Uri
+from spotterbase.rdf.uri import Uri
 
 
 class AnnotationCreator:
