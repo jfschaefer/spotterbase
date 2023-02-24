@@ -3,7 +3,7 @@ A small library for RDF triples.
 """
 from __future__ import annotations
 
-from typing import Optional, Iterable
+from typing import Optional, Iterable, Callable, Any
 
 from spotterbase.rdf.uri import Uri
 from spotterbase.rdf.vocab import XSD
@@ -24,6 +24,15 @@ class BlankNode:
         return f'_:{self.value}'
 
 
+LIT2PY_FUN: dict[Uri, Callable[[str], Any]] = {
+    XSD.string: lambda s: s,
+    XSD.integer: int,
+    XSD.decimal: float,
+    XSD.double: float,
+    XSD.boolean: lambda s: {'false': False, 'true': True, '0': False, '1': True}[s],
+}
+
+
 class Literal:
     def __init__(self, string: str, datatype: Uri, lang_tag: Optional[str] = None):
         self.string = string
@@ -31,10 +40,10 @@ class Literal:
         self.lang_tag = lang_tag
 
     def _prepare_string(self) -> str:
-        return '"' + self.string.replace('\\', '\\\\')\
-                                .replace('"', '\\"')\
-                                .replace('\n', '\\n')\
-                                .replace('\r', '\\r') + '"'
+        return '"' + self.string.replace('\\', '\\\\') \
+            .replace('"', '\\"') \
+            .replace('\n', '\\n') \
+            .replace('\r', '\\r') + '"'
 
     def to_ntriples(self):
         if self.lang_tag is not None:
@@ -43,6 +52,15 @@ class Literal:
             return self._prepare_string()
         else:
             return f'{self._prepare_string()}^^{self.datatype:<>}'
+
+    def to_turtle(self):
+        if self.datatype in {XSD.integer, XSD.decimal, XSD.double, XSD.boolean}:
+            return self.string
+        else:
+            return self.to_ntriples()
+
+    def get_py_val(self):
+        return LIT2PY_FUN[self.datatype](self.string)
 
     def __str__(self) -> str:
         # TODO: change to double quotation marks!

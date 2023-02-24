@@ -139,7 +139,7 @@ class TurtleSerializer(Serializer):
             case BlankNode():
                 self.fp.write(f'_:{node.value}')
             case Literal():
-                self.fp.write(str(node))
+                self.fp.write(node.to_turtle())
             case _:
                 raise NotImplementedError(f'Unsupported node type {type(node)}')
 

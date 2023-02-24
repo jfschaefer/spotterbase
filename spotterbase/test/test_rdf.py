@@ -3,11 +3,11 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from spotterbase.rdf.base import BlankNode
+from spotterbase.rdf.base import BlankNode, Literal
 from spotterbase.rdf.uri import NameSpace, Vocabulary, Uri
 from spotterbase.rdf.literals import StringLiteral
 from spotterbase.rdf.serializer import TurtleSerializer, NTriplesSerializer, FileSerializer
-from spotterbase.rdf.vocab import RDF
+from spotterbase.rdf.vocab import RDF, XSD
 
 
 class MyVocab(Vocabulary):
@@ -40,7 +40,7 @@ mv:thingB a mv:someClass .
 mv:thingA a mv:someClass ;
   mv:someRel mv:thingA,
     mv:thingB,
-    'some string' .
+    "some string" .
 # this is another comment for turtle
 '''.strip())
 
@@ -92,3 +92,7 @@ mv:thingA mv:someRel mv:thingA,
                     serializer.write_comment('test test')
                 with open(testfile) as fp:
                     self.assertEqual(fp.read().strip(), output.strip())
+
+    def test_literal(self):
+        l = Literal(string='42', datatype=XSD.integer)
+        self.assertEqual(l.get_py_val(), 42)
