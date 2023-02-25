@@ -58,7 +58,7 @@ Here is a literal:
 
 >>> from spotterbase.rdf.literals import FloatLiteral
 >>> FloatLiteral(5.3)
-'5.300000e+00'^^xsd:double
+"5.300000e+00"^^<http://www.w3.org/2001/XMLSchema#double>
 
 If a :class:`~spotterbase.rdf.base.NameSpace` has a prefix,
 we can format it and its derived URIs nicely:
