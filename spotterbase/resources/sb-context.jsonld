@@ -6,6 +6,7 @@
         "val": {"@type": "@id", "@id": "rdf:value"},
 
         "PathSelector": "sb:PathSelector",
+        "FragmentTarget": "sb:FragmentTarget",
         "startPath": "sb:startPath",
         "endPath": "sb:endPath",
         "ListSelector": "sb:ListSelector",

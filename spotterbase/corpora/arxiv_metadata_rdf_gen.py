@@ -1,20 +1,22 @@
 import gzip
 import logging
 import zipfile
-from collections import defaultdict
+from datetime import datetime
 from pathlib import Path
 from typing import IO
 
+from spotterbase import __version__
 from spotterbase import config_loader
+from spotterbase.annotations.annotation import Annotation
+from spotterbase.annotations.annotation_creator import SpotterRun
+from spotterbase.annotations.tag_body import Tag, MultiTagBody, TagSet
 from spotterbase.corpora.arxiv import ArxivId, ArxivCategory, USE_CENTI_ARXIV, ArxivUris
 from spotterbase.data.locator import Locator, DataDir
-from spotterbase.sb_vocab import SB
 from spotterbase.data.utils import json_lib
-from spotterbase.rdf.base import TripleI
+from spotterbase.rdf.base import TripleI, Uri
 from spotterbase.rdf.serializer import TurtleSerializer
 from spotterbase.rdf.vocab import RDF
-from spotterbase.spotters.rdfhelpers import Annotation, SpotterRun
-from spotterbase import __version__
+from spotterbase.sb_vocab import SB
 
 logger = logging.getLogger(__name__)
 
@@ -27,6 +29,8 @@ arxiv_rdf_metadata_locator = Locator('--arxiv-rdf-gen-metadata', 'path to the ar
 
 
 class MetatdataAccumulator(dict[ArxivId, list[str]]):
+    # Note: accumulating all the data before creating the triples is not necessary anymore.
+    # The current implementation could simply work on an entry-by-entry basis.
     def __init__(self):
         super().__init__()
 
@@ -58,49 +62,44 @@ class MetadataRdfGenerator:
     def __init__(self, accumulator: MetatdataAccumulator):
         self.accumulator = accumulator
 
-    def _highlevel(self) -> TripleI:
-        yield ArxivUris.dataset, RDF.type, SB.dataset
-        yield ArxivUris.centi_arxiv, RDF.type, SB.dataset
-        yield ArxivUris.centi_arxiv, SB.subset, ArxivUris.dataset
-
     def triples(self) -> TripleI:
-        # Yielding triples and then discarding built-up corpora structures reduces the memory requirements
+        yield ArxivUris.dataset, RDF.type, SB.Dataset
+        yield ArxivUris.centi_arxiv, RDF.type, SB.Dataset
+        yield ArxivUris.centi_arxiv, SB.isSubsetOf, ArxivUris.dataset
 
-        yield from self._highlevel()
+        spotter_run = SpotterRun(uri=Uri.uuid(), spotter_uri=SB.NS['spotter/arxivmetadata'],
+                                 spotter_version=__version__, date=datetime.now())
+        yield from spotter_run.to_triples()
 
-        spotter_run = SpotterRun(SB.NS['spotter/arxivmetadata'], spotter_version=__version__)
-        yield from spotter_run.triples()
+        tag_set = TagSet(uri=ArxivUris.topic_system)
+        yield from tag_set.to_triples()
 
-        # re-arrange corpora
-        cat_to_arxivid: defaultdict[str, list[ArxivId]] = defaultdict(list)
+        known_cats: set[str] = set()
         for arxiv_id, cats in self.accumulator.items():
-            for cat in cats:
-                cat_to_arxivid[cat].append(arxiv_id)
-
-        for cat in cat_to_arxivid:
-            cat_uri = ArxivCategory(cat).as_uri()
-            yield cat_uri, RDF.type, SB.topic
-            yield cat_uri, SB.belongsTo, ArxivUris.topic_system
-            if '.' in cat:
-                assert cat.count('.') == 1
-                supercat = cat.split('.')[0]
-                yield cat_uri, SB.subtopicOf, ArxivCategory(supercat).as_uri()
-
-        # annotations
-        for cat, arxiv_ids in cat_to_arxivid.items():
-            # Single annotation with lots of targets to reduce number of triples
-            annotation = Annotation(spotter_run)
-            for arxiv_id in arxiv_ids:
-                annotation.add_target(arxiv_id.as_uri())
-            annotation.add_body(ArxivCategory(cat).as_uri())
-            yield from annotation.triples()
-
-        for arxiv_id in self.accumulator:
+            # link to corpus
             uri = arxiv_id.as_uri()
-            yield uri, RDF.type, SB.document
+            yield uri, RDF.type, SB.Document
             yield uri, SB.belongsTo, ArxivUris.dataset
             if arxiv_id.is_in_centi_arxiv():
                 yield uri, SB.belongsTo, ArxivUris.centi_arxiv
+
+            # deal with cats
+            cat_set = set(cats)
+            for cat in cats:
+                if '.' in cat:
+                    assert cat.count('.') == 1
+                    cat_set.add(cat.split('.')[0])   # add super category
+            for cat in cat_set:
+                if cat not in known_cats:
+                    yield from Tag(ArxivCategory(cat).as_uri(), belongs_to=tag_set.uri).to_triples()
+                    known_cats.add(cat)
+
+            # make annotation
+            annotation = Annotation(arxiv_id.as_uri() + '#meta.cat.anno',
+                                    target_uri=arxiv_id.as_uri(),
+                                    body=MultiTagBody([ArxivCategory(cat).as_uri() for cat in cat_set]),
+                                    creator_uri=spotter_run.uri)
+            yield from annotation.to_triples()
 
 
 def _get_rdf_dest() -> Path:

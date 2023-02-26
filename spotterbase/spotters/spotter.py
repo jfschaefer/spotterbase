@@ -3,9 +3,17 @@ from __future__ import annotations
 import abc
 from typing import Iterator, Callable
 
-from spotterbase.annotations.annotation import Annotation
+from spotterbase.concept_graphs.concept_graph import Concept
 from spotterbase.corpora.interface import Document
+from spotterbase.rdf.base import TripleI
 from spotterbase.rdf.uri import Uri
+
+
+class SpotterContext:
+    run_uri: Uri
+
+    def __init__(self, run_uri: Uri):
+        self.run_uri = run_uri
 
 
 class Spotter(abc.ABC):
@@ -13,13 +21,17 @@ class Spotter(abc.ABC):
     spotter_short_id: str     # short id of spotter (e.g. to make unique URIs for annotations)
 
     # These are set by the constructor
-    run_uri: Uri
+    ctx: SpotterContext
 
-    def __init__(self, run_uri: Uri):
-        self.run_uri = run_uri
+    def __init__(self, ctx: SpotterContext):
+        self.ctx = ctx
+
+    @classmethod
+    def setup_run(cls, **kwargs) -> tuple[SpotterContext, TripleI]:
+        return SpotterContext(run_uri=Uri.uuid()), iter(())
 
     @abc.abstractmethod
-    def process_document(self, document: Document) -> Iterator[Annotation]:
+    def process_document(self, document: Document) -> Iterator[Concept]:
         ...
 
 

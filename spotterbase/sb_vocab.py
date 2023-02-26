@@ -5,36 +5,35 @@ class SB(Vocabulary):
     NS: NameSpace = NameSpace('http://sigmathling.kwarc.info/spotterbase/', 'sb:')
 
     # SPOTTER INFO
-    spotter: Uri
-    spotterRun: Uri
-
+    SpotterRun: Uri
     withSpotter: Uri
     runDate: Uri
     spotterVersion: Uri
 
-    # SELECTORS
-    docFrag: Uri   # TODO: Remove this
+    # SELECTORS AND TARGETS
+    FragmentTarget: Uri   # type of targets that use selectors
 
     PathSelector: Uri
     startPath: Uri
     endPath: Uri
 
     ListSelector: Uri
+
     OffsetSelector: Uri
 
     # BODIES
     SimpleTagBody: Uri
+    MultiTagBody: Uri
+    TagSet: Uri
+    Tag: Uri
 
-    # datasets (TODO: can this replaced with dublin core?)
-    dataset: Uri
-    document: Uri
+    # DATASETS (TODO: can this replaced with dublin core?)
+    Dataset: Uri
+    Document: Uri
 
-    subset: Uri
+    isBasedOn: Uri
+
+    # GENERAL-PURPOSE
+    isSubsetOf: Uri
     belongsTo: Uri
-    basedOn: Uri
-
-    # topics/categories (TODO: can this replaced with dublin core?)
-    html5doc: Uri
-    topic: Uri
-    hasTopic: Uri
-    subtopicOf: Uri
+    contains: Uri

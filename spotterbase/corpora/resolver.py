@@ -1,7 +1,7 @@
 from collections import OrderedDict
 from typing import Optional
 
-from spotterbase.corpora.arxmliv import ARXMLIV_CORPORA
+from spotterbase.corpora.arxmliv import ARXMLIV_CORPORA, CENTI_ARXMLIV_CORPORA
 from spotterbase.corpora.interface import Corpus, Document, DocumentNotInCorpusException
 from spotterbase.corpora.test_corpus import TestCorpus
 from spotterbase.rdf.uri import Uri
@@ -38,6 +38,8 @@ class _Resolver:
 def _register_standard_corpora(resolver: _Resolver):
     resolver.register_corpus(TestCorpus())
     for corpus in ARXMLIV_CORPORA.values():
+        resolver.register_corpus(corpus)
+    for corpus in CENTI_ARXMLIV_CORPORA.values():
         resolver.register_corpus(corpus)
 
 

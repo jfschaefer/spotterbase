@@ -23,7 +23,9 @@ class ArXMLivUris:
     severity_error = severity / 'error'
 
     @classmethod
-    def get_corpus_uri(cls, release: str) -> Uri:
+    def get_corpus_uri(cls, release: str, centi: bool = False) -> Uri:
+        if centi:
+            return ArXMLivUris.arxmliv / 'centi' / release
         return ArXMLivUris.arxmliv / release
 
     @classmethod
@@ -74,7 +76,7 @@ class ZipArXMLivDocument(ArXMLivDocument):
 class ArXMLivCorpus(Corpus):
     filename_regex = re.compile(r'^(?P<oldprefix>[a-z-]+)?(?P<digits>[0-9.]+).html$')
 
-    def __init__(self, release: str):
+    def __init__(self, release: str, centi: bool = False):
         self.release = release
         self._locator: Locator = Locator(
             f'--arxmliv-{release}-path',
@@ -82,9 +84,14 @@ class ArXMLivCorpus(Corpus):
             default_rel_locations=[f'arxmliv-{release}'],
             how_to_get='SIGMathLing members can download the arXMLiv copora from ' +
                        'https://sigmathling.kwarc.info/resources/')
-        self._uri: Uri = ArXMLivUris.get_corpus_uri(release)
+        self._centi = centi
+        self._uri: Uri = ArXMLivUris.get_corpus_uri(release, centi)
 
     def get_document_by_id(self, arxivid: ArxivId) -> ArXMLivDocument:
+        if self._centi and not arxivid.is_in_centi_arxiv():
+            raise DocumentNotInCorpusException(
+                'The document may be in the arXMLiv corpus, but it is not in the centi arXMLiv corpus'
+            )
         location = self._get_yymm_location(arxivid.yymm)
         if location.name.endswith('.zip'):
             return ZipArXMLivDocument(arxivid, self.release, location,
@@ -138,14 +145,22 @@ class ArXMLivCorpus(Corpus):
             if yymm_location.is_dir():
                 for path in yymm_location.iterdir():
                     if arxivid := self.filename_to_arxivid_or_none(path.name):
+                        if self._centi and not arxivid.is_in_centi_arxiv():
+                            continue
                         yield SimpleArXMLivDocument(arxivid, self.release, path)
             else:
                 assert yymm_location.name.endswith('.zip')
                 for name in SHARED_ZIP_CACHE[yymm_location].namelist():
                     if arxivid := self.filename_to_arxivid_or_none(name.split('/')[-1]):
+                        if self._centi and not arxivid.is_in_centi_arxiv():
+                            continue
                         yield ZipArXMLivDocument(arxivid, self.release, yymm_location, name)
 
 
 ARXMLIV_CORPORA: dict[str, ArXMLivCorpus] = {
     release: ArXMLivCorpus(release=release) for release in ARXMLIV_RELEASES
+}
+
+CENTI_ARXMLIV_CORPORA: dict[str, ArXMLivCorpus] = {
+    release: ArXMLivCorpus(release=release, centi=True) for release in ARXMLIV_RELEASES
 }

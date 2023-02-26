@@ -35,6 +35,6 @@ class TestCorpus(Corpus):
 
     def __iter__(self) -> Iterator[Document]:
         directory = Path(__file__).parent / 'test_corpus_data'
-        for path in directory.glob('*.html'):
+        for path in sorted(directory.glob('*.html')):
             uri = TEST_CORPUS_URI / path.name.removesuffix('.html')
             yield TestDocument(uri, path)

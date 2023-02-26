@@ -4,7 +4,8 @@ A small library for RDF triples.
 from __future__ import annotations
 
 import datetime
-from typing import Optional, Iterable, Callable, Any
+from typing import Callable, Any
+from typing import Optional, Iterable
 
 from spotterbase.rdf.uri import Uri
 from spotterbase.rdf.vocab import XSD

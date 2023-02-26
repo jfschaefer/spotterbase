@@ -3,6 +3,7 @@ from __future__ import annotations
 import functools
 import pathlib
 import re
+import uuid
 from typing import Optional
 
 from rdflib import URIRef
@@ -63,6 +64,10 @@ class Uri:
                 raise NotImplementedError(f'Unsupported type {type(uri)}')
         if namespace:
             assert self.full_uri().startswith(namespace.uri.full_uri())
+
+    @classmethod
+    def uuid(cls) -> Uri:
+        return Uri(uuid.uuid4().urn)
 
     def with_namespace_from(self, namespaces: list[NameSpace]) -> Optional[Uri]:
         for namespace in sorted(namespaces, key=lambda ns: len(ns.uri.full_uri()), reverse=True):

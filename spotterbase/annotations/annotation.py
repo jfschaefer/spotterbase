@@ -2,51 +2,31 @@ from __future__ import annotations
 
 from typing import Any, Optional
 
-from spotterbase.annotations.body import Body
-from spotterbase.annotations.serialization_abc import Portable
-from spotterbase.annotations.target import Target
-from spotterbase.rdf.base import TripleI
+from spotterbase.concept_graphs.concept_graph import Concept, ConceptInfo, AttrInfo
+from spotterbase.concept_graphs.oa_support import OA_PRED
 from spotterbase.rdf.uri import Uri
-from spotterbase.rdf.vocab import RDF, OA, DCTerms
+from spotterbase.rdf.vocab import OA
 
 
-class Annotation(Portable):
-    uri: Uri
-    target: Target
-    body: Body
+class Annotation(Concept):
+    concept_info = ConceptInfo(
+        concept_type=OA.Annotation,
+        attrs=[
+            AttrInfo('target', OA_PRED.target),
+            AttrInfo('body', OA_PRED.body),
+            AttrInfo('creator_uri', OA_PRED.creator),
+        ],
+        is_root_concept=True,
+    )
+
+    # attributes
+    target_uri: Uri
+    body: Any
     creator_uri: Optional[Uri]
 
-    def __init__(self, uri: Uri, target: Target, body: Body, creator_uri: Optional[Uri] = None):
-        self.uri = uri
-        self.target = target
-        self.body = body
-        self.creator_uri = creator_uri
-
-    def to_json(self) -> dict[str, Any]:
-        json = {
-            'id': str(self.uri),
-            'target': self.target.to_json(),
-            'body': self.body.to_json()
-        }
-        if self.creator_uri is not None:
-            json['creator'] = str(self.creator_uri)
-        return json
-
-    @classmethod
-    def from_json(cls, json: Any) -> Annotation:
-        return Annotation(
-            uri=Uri(json['id']),
-            target=Target.from_json(json['target']),
-            body=Body.from_json(json['body']),
-            creator_uri=Uri(json['creator']) if 'creator' in json else None,
-        )
-
-    def to_triples(self) -> TripleI:
-        yield self.uri, RDF.type, OA.Annotation
-        yield from self.target.to_triples()
-        yield self.uri, OA.hasTarget, self.target.uri
-        yield from self.body.to_triples()
-        yield self.uri, OA.hasBody, self.body.get_rdf_node()
-
-        if self.creator_uri is not None:
-            yield self.uri, DCTerms.creator, self.creator_uri
+    def __init__(self, uri: Optional[Uri] = None, target_uri: Optional[Uri] = None,
+                 body: Optional[Any] = None, creator_uri: Optional[Uri] = None):
+        self._set_attr_if_not_none('uri', uri)
+        self._set_attr_if_not_none('target', target_uri)
+        self._set_attr_if_not_none('body', body)
+        self._set_attr_if_not_none('creator_uri', creator_uri)

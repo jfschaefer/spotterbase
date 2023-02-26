@@ -4,6 +4,9 @@ import zipfile
 from typing import Optional
 
 from spotterbase import config_loader
+from spotterbase.annotations.annotation import Annotation
+from spotterbase.annotations.annotation_creator import SpotterRun
+from spotterbase.annotations.tag_body import TagSet, Tag, SimpleTagBody
 from spotterbase.config_loader import ConfigString
 from spotterbase.corpora.arxiv import USE_CENTI_ARXIV, ArxivUris
 from spotterbase.corpora.arxmliv import ArXMLivUris, ArXMLivCorpus, ARXMLIV_RELEASES
@@ -13,7 +16,6 @@ from spotterbase.sb_vocab import SB
 from spotterbase.rdf.base import TripleI
 from spotterbase.rdf.serializer import TurtleSerializer
 from spotterbase.rdf.vocab import RDF
-from spotterbase.spotters.rdfhelpers import SpotterRun, Annotation
 from spotterbase import __version__
 
 logger = logging.getLogger(__name__)
@@ -37,8 +39,8 @@ def _get_severities_lists(corpus: ArXMLivCorpus) -> Optional[tuple[list[str], li
 
 def iter_triples(corpus: ArXMLivCorpus) -> TripleI:
     dataset_uri = ArXMLivUris.get_corpus_uri(corpus.release)
-    yield dataset_uri, RDF.type, SB.dataset
-    yield dataset_uri, SB.basedOn, ArxivUris.dataset
+    yield dataset_uri, RDF.type, SB.Dataset
+    yield dataset_uri, SB.isBasedOn, ArxivUris.dataset
 
     if USE_CENTI_ARXIV:
         logger.info(f'Note: Since `{USE_CENTI_ARXIV.name}` was set, most documents will be ignored')
@@ -46,32 +48,37 @@ def iter_triples(corpus: ArXMLivCorpus) -> TripleI:
     for document in corpus:
         if USE_CENTI_ARXIV and not document.arxivid.is_in_centi_arxiv():
             continue
-        yield document.get_uri(), SB.basedOn, document.arxivid.as_uri()
-        yield document.get_uri(), RDF.type, SB.document
+        yield document.get_uri(), SB.isBasedOn, document.arxivid.as_uri()
+        yield document.get_uri(), RDF.type, SB.Document
         yield document.get_uri(), SB.belongsTo, dataset_uri
 
     spotter_run = SpotterRun(SB.NS['spotter/arxmlivmetadata'], spotter_version=__version__)
-    yield from spotter_run.triples()
+    yield from spotter_run.to_triples()
     logger.info('Loading severity data')
     severities = _get_severities_lists(corpus)
     if severities:
         np, w, e = severities
-        yield ArXMLivUris.severity_no_problem, RDF.type, ArXMLivUris.severity
-        yield ArXMLivUris.severity_warning, RDF.type, ArXMLivUris.severity
-        yield ArXMLivUris.severity_error, RDF.type, ArXMLivUris.severity
+        tag_set = TagSet(uri=ArXMLivUris.severity)
+        yield from tag_set.to_triples()
+        for sev_uri in [ArXMLivUris.severity_no_problem, ArXMLivUris.severity_warning, ArXMLivUris.severity_error]:
+            yield from Tag(uri=sev_uri, belongs_to=tag_set.uri).to_triples()
+
         for (docs, sev) in [(np, ArXMLivUris.severity_no_problem), (w, ArXMLivUris.severity_warning),
                             (e, ArXMLivUris.severity_error)]:
-            annotation = Annotation(spotter_run)
-            annotation.add_body(sev)
             for doc in docs:
                 arxivid = corpus.filename_to_arxivid_or_none(doc)
                 if arxivid:
                     if USE_CENTI_ARXIV and not arxivid.is_in_centi_arxiv():
                         continue
-                    annotation.add_target(corpus.get_document_by_id(arxivid).get_uri())
                 else:
                     logger.warning(f'Unexpected file name in severity data: {doc}')
-            yield from annotation.triples()
+                    continue
+                doc_uri = corpus.get_document_by_id(arxivid).get_uri()
+                annotation = Annotation(uri=doc_uri + '#meta.severity.anno')
+                annotation.target_uri = doc_uri
+                annotation.creator_uri = spotter_run.uri
+                annotation.body = SimpleTagBody(tag=sev)
+                yield from annotation.to_triples()
     else:
         logger.warning(f'No severity data found in {corpus.get_path()}')
 
