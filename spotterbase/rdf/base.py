@@ -8,7 +8,7 @@ from typing import Callable, Any
 from typing import Optional, Iterable
 
 from spotterbase.rdf.uri import Uri
-from spotterbase.rdf.vocab import XSD
+from spotterbase.rdf.vocab import XSD, RDF
 
 
 class BlankNode:
@@ -98,6 +98,10 @@ class Literal:
         if any([isinstance(py_val, x) for x in types]):
             return cls(py_val_to_str(py_val), datatype)
         raise TypeError(f'Type {type(py_val)} is not one of the expected types {types}')
+
+    @classmethod
+    def lang_tagged(cls, string: str, lang_tag: str) -> Literal:
+        return cls(string, RDF.langString, lang_tag)
 
     def __str__(self) -> str:
         return self.to_ntriples()

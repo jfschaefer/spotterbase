@@ -5,9 +5,8 @@ from pathlib import Path
 
 from spotterbase.rdf.base import BlankNode, Literal
 from spotterbase.rdf.uri import NameSpace, Vocabulary, Uri
-from spotterbase.rdf.literals import StringLiteral
 from spotterbase.rdf.serializer import TurtleSerializer, NTriplesSerializer, FileSerializer
-from spotterbase.rdf.vocab import RDF
+from spotterbase.rdf.vocab import RDF, XSD
 
 
 class MyVocab(Vocabulary):
@@ -28,7 +27,7 @@ class TestRdf(unittest.TestCase):
             (MyVocab.thingB, RDF.type, MyVocab.someClass),
             (MyVocab.thingA, MyVocab.someRel, MyVocab.thingA),
             (MyVocab.thingA, MyVocab.someRel, MyVocab.thingB),
-            (MyVocab.thingA, MyVocab.someRel, StringLiteral('some string')),
+            (MyVocab.thingA, MyVocab.someRel, Literal('some string', XSD.string)),
         ])
         serializer.write_comment('this is another comment for turtle')
         serializer.flush()
@@ -57,8 +56,8 @@ mv:thingA a mv:someClass ;
         serializer.write_comment('this is a comment for ntriples')
         serializer.add_from_iterable([
             (MyVocab.thingA, MyVocab.someRel, MyVocab.thingA),
-            (MyVocab.thingA, MyVocab.someRel, StringLiteral('some string')),
-            (BlankNode(), MyVocab.someRel, StringLiteral('some string')),
+            (MyVocab.thingA, MyVocab.someRel, Literal('some string', XSD.string)),
+            (BlankNode(), MyVocab.someRel, Literal('some string', XSD.string)),
         ])
         serializer.write_comment('this is another comment for ntriples')
         serializer.flush()

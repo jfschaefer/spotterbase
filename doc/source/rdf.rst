@@ -56,9 +56,9 @@ Uri('http://www.w3.org/1999/02/22-rdf-syntax-ns#type')
 
 Here is a literal:
 
->>> from spotterbase.rdf.literals import FloatLiteral
->>> FloatLiteral(5.3)
-"5.300000e+00"^^<http://www.w3.org/2001/XMLSchema#double>
+>>> from spotterbase.rdf.base import Literal
+>>> Literal.from_py_val(5.3, vocab.XSD.double)
+"5.300000E+00"^^<http://www.w3.org/2001/XMLSchema#double>
 
 If a :class:`~spotterbase.rdf.base.NameSpace` has a prefix,
 we can format it and its derived URIs nicely:
@@ -79,11 +79,10 @@ Triples and serialization
 
 Let's make some triples:
 
->>> from spotterbase.rdf.literals import LangString
 >>> food = NameSpace('http://example.org/food/', prefix='food:')
 >>> triples = [
 ...     (food['apple'], vocab.RDF.type, food['fruit']),
-...     (food['apple'], vocab.RDFS.label, LangString('Apfel', 'de'))]
+...     (food['apple'], vocab.RDFS.label, Literal.lang_tagged('Apfel', 'de'))]
 >>> from spotterbase.rdf.serializer import TurtleSerializer
 
 Normally, the serializer should write to a file,
