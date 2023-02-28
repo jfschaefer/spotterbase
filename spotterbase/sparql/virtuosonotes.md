@@ -11,7 +11,7 @@ vim virtuoso.ini
 virtuoso-t -fd
 ```
 
-Conductor interface: http://localhost:8890/conductor/
+Conductor interface: `http://localhost:8890/conductor/`
 (by default on port 8890)
 
 Formerly:

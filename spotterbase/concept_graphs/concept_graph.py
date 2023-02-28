@@ -61,6 +61,10 @@ class Concept:
     # instance attributes
     uri: Uri
 
+    def __init__(self, **kwargs):
+        for attr, val in kwargs.items():
+            self._set_attr_if_not_none(attr, val)
+
     def to_triples(self) -> TripleI:
         assert self.uri
         return _concept_to_triples(self, self.uri)

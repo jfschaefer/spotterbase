@@ -1,10 +1,11 @@
 import abc
 import gzip
 from collections import OrderedDict, defaultdict
+from io import StringIO
 from pathlib import Path
 from typing import TextIO, Iterable, Optional
 
-from spotterbase.rdf.base import Triple, Object, Subject, BlankNode, Predicate, Literal
+from spotterbase.rdf.base import Triple, Object, Subject, BlankNode, Predicate, Literal, TripleI
 from spotterbase.rdf.uri import NameSpace, Uri
 from spotterbase.rdf.vocab import RDF
 
@@ -132,16 +133,15 @@ class TurtleSerializer(Serializer):
         self.fp.write(' .\n')
 
     def _write_node(self, node: Subject | Predicate | Object):
-        match node:
-            case Uri():
-                # use 'nrprefix' because virtuoso seems to have problems with prefix:path\/to\/something
-                self.fp.write(format(node, 'nrprefix'))
-            case BlankNode():
-                self.fp.write(f'_:{node.value}')
-            case Literal():
-                self.fp.write(node.to_turtle())
-            case _:
-                raise NotImplementedError(f'Unsupported node type {type(node)}')
+        if isinstance(node, Uri):
+            # use 'nrprefix' because virtuoso seems to have problems with prefix:path\/to\/something
+            self.fp.write(format(node, 'nrprefix'))
+        elif isinstance(node, BlankNode):
+            self.fp.write(f'_:{node.value}')
+        elif isinstance(node, Literal):
+            self.fp.write(node.to_turtle())
+        else:
+            raise NotImplementedError(f'Unsupported node type {type(node)}')
 
     def _require_prefix(self, ns: Optional[NameSpace]):
         if not ns or not ns.prefix:
@@ -179,13 +179,18 @@ class NTriplesSerializer(Serializer):
         self.fp.write(' .\n')
 
     def _write_node(self, node: Subject | Predicate | Object):
-        # TODO: almost same as in TurtleSerializer
-        match node:
-            case Uri():
-                self.fp.write(format(node, '<>'))
-            case BlankNode():
-                self.fp.write(f'_:{node.value}')
-            case Literal():
-                self.fp.write(node.to_ntriples())
-            case _:
-                raise NotImplementedError(f'Unsupported node type {type(node)}')
+        if isinstance(node, Uri):
+            self.fp.write(format(node, '<>'))
+        elif isinstance(node, BlankNode):
+            self.fp.write(f'_:{node.value}')
+        elif isinstance(node, Literal):
+            self.fp.write(node.to_ntriples())
+        else:
+            raise NotImplementedError(f'Unsupported node type {type(node)}')
+
+
+def triples_to_nt_string(triples: TripleI) -> str:
+    strio = StringIO()
+    with NTriplesSerializer(strio) as serializer:
+        serializer.add_from_iterable(triples)
+    return strio.getvalue()

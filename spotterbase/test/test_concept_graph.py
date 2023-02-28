@@ -1,10 +1,15 @@
 import unittest
 
+import rdflib
+
 from spotterbase.concept_graphs.concept_graph import PredInfo, AttrInfo, Concept, ConceptInfo
 from spotterbase.concept_graphs.concept_resolver import ConceptResolver
 from spotterbase.concept_graphs.jsonld_support import JsonLdConceptConverter
 from spotterbase.concept_graphs.oa_support import OA_JSONLD_CONTEXT
+from spotterbase.concept_graphs.sparql_populate import Populator
+from spotterbase.rdf.serializer import triples_to_nt_string
 from spotterbase.rdf.uri import Vocabulary, NameSpace, Uri
+from spotterbase.sparql.endpoint import RdflibEndpoint
 
 
 class TestVocab(Vocabulary):
@@ -46,9 +51,10 @@ class TestConceptGraph(unittest.TestCase):
         concept.val.thing = Uri('http://www.w3.org/ns/oa#Annotation')
         concept.uri = TestVocab.thingA
 
-        converter = JsonLdConceptConverter(contexts=[OA_JSONLD_CONTEXT],
-                                           concept_resolver=ConceptResolver([MiniConcept, MiniSubConcept])
-                                           )
+        concept_resolver = ConceptResolver([MiniConcept, MiniSubConcept])
+
+        # test json-ld conversion
+        converter = JsonLdConceptConverter(contexts=[OA_JSONLD_CONTEXT], concept_resolver=concept_resolver)
         json_ld = converter.concept_to_json_ld(concept)
         self.assertEqual(json_ld, {'type': 'http://example.org/sb-test#typeA',
                                    'id': 'http://example.org/sb-test#thingA', 'edge-in-json-ld':
@@ -56,3 +62,13 @@ class TestConceptGraph(unittest.TestCase):
                                    })
         concept_2 = converter.json_ld_to_concept(json_ld)
         self.assertEqual(json_ld, converter.concept_to_json_ld(concept_2))
+
+        # test rdf serialization/querying
+        graph = rdflib.Graph()
+        graph.parse(data=triples_to_nt_string(concept.to_triples()), format='nt')
+        endpoint = RdflibEndpoint(graph)
+        populator = Populator(concept_resolver=concept_resolver, endpoint=endpoint)
+        concepts = list(populator.get_concepts(iter((concept.uri,))))
+        self.assertEqual(len(concepts), 1)
+        self.assertIsInstance(concepts[0], MiniConcept)
+        self.assertEqual(concepts[0].uri, concept.uri)

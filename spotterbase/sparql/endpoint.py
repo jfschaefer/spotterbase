@@ -1,6 +1,8 @@
 import abc
+import json
 from typing import Optional, Iterable
 
+import rdflib
 import requests as requests
 from requests.auth import HTTPBasicAuth
 
@@ -54,6 +56,22 @@ class Virtuoso(SparqlEndpoint):
             return r.json()
         else:
             return r.text
+
+
+class RdflibEndpoint(SparqlEndpoint):
+    def __init__(self, graph: Optional[rdflib.Graph] = None):
+        self.graph = graph or rdflib.Graph()
+
+    def get(self, query: str, accept: str = 'application/json'):
+        results = self.graph.query(query).serialize(format=accept[len('application/'):])
+        assert results is not None
+        if accept == 'application/json':
+            return json.loads(results)
+        else:
+            return results.decode('utf-8')
+
+    def post(self, query: str):
+        raise NotImplementedError()
 
 
 def get_endpoint():
