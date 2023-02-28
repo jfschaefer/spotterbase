@@ -79,7 +79,7 @@ class ArXMLivCorpus(Corpus):
     def __init__(self, release: str, centi: bool = False):
         self.release = release
         self._locator: Locator = Locator(
-            f'--arxmliv-{release}-path',
+            f'--arxmliv-{release}-{"centi-" if centi else ""}path',
             description=f'path to the {release} arXMLiv release',
             default_rel_locations=[f'arxmliv-{release}'],
             how_to_get='SIGMathLing members can download the arXMLiv copora from ' +

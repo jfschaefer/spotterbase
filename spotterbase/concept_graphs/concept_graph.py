@@ -12,10 +12,20 @@ from spotterbase.rdf.vocab import RDF
 class PredInfo:
     uri: Uri
 
-    # Info needed for JSON-LD (but might be used for other things as well)
-    json_ld_term: Optional[str] = None
     is_rdf_list: bool = False
     literal_type: Optional[Uri] = None
+    is_reversed: bool = False    # subject/object are swapped
+
+    # Info needed for JSON-LD (but might be used for other things as well)
+    json_ld_term: Optional[str] = None
+    json_ld_type_is_id: bool = False
+
+    def __post_init__(self):
+        if self.json_ld_type_is_id:
+            assert self.json_ld_term, 'json_ld_term must be set if the type is "@id"'
+        if self.is_reversed:
+            assert not self.is_rdf_list, 'cannot have reversed predicate for RDF list'
+            assert not self.literal_type, 'cannot have reversed predicate for literals'
 
 
 @dataclasses.dataclass
@@ -83,6 +93,7 @@ def _concept_to_triples(concept: Concept, node: Subject) -> TripleI:
                 val_nodes.append(val_node)
 
         if p_info.is_rdf_list:
+            assert not p_info.is_reversed
             list_head = BlankNode()
             yield node, RDF.value, list_head
             yield list_head, RDF.first, val_nodes[0]
@@ -94,7 +105,12 @@ def _concept_to_triples(concept: Concept, node: Subject) -> TripleI:
             yield list_head, RDF.rest, RDF.nil
         else:
             for val_node in val_nodes:
-                yield node, p_info.uri, val_node
+                if p_info.is_reversed:
+                    assert isinstance(val_node, Uri) or isinstance(val_node, BlankNode),\
+                        f'Making a reversed edge would lead to a subject of type {type(val_node)}'
+                    yield val_node, p_info.uri, node
+                else:
+                    yield node, p_info.uri, val_node
 
 
 def _to_triples(thing) -> tuple[Subject, TripleI]:

@@ -70,6 +70,7 @@ class JsonLdConceptConverter:
         self.concept_resolver: ConceptResolver = concept_resolver
 
     def format_uri(self, uri: Uri) -> str:
+        # TODO: should we use namespaces?
         if uri in self._merged_context.obj_terms.uri_to_term:
             return self._merged_context.obj_terms.uri_to_term[uri]
         else:
@@ -163,12 +164,15 @@ class JsonLdConceptConverter:
                 elif isinstance(val, Concept):
                     converted.append(self.concept_to_json_ld(val))
                 elif isinstance(val, Uri):
-                    if not p_info.json_ld_term:  # must wrap it because otherwise it would be interpreted as a literal
+                    if not p_info.json_ld_type_is_id:
+                        # must wrap it because otherwise it would be interpreted as a literal
                         converted.append({'id': self.format_uri(val)})
                     else:
                         converted.append(self.format_uri(val))
                 else:
-                    raise NotImplementedError(f'Unsupported type {type(val)}')
+                    if not p_info.json_ld_type_is_id:
+                        # TODO: treat literals properly
+                        converted.append(val)
 
             key = p_info.json_ld_term
             if key is None:

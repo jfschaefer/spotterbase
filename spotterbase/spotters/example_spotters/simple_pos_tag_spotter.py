@@ -1,3 +1,4 @@
+import itertools
 import json
 from typing import Iterator
 
@@ -8,7 +9,7 @@ from spotterbase import config_loader
 from spotterbase.annotations.annotation import Annotation
 from spotterbase.annotations.concepts import ANNOTATION_CONCEPT_RESOLVER
 from spotterbase.annotations.selector_converter import SelectorConverter
-from spotterbase.annotations.tag_body import SimpleTagBody
+from spotterbase.annotations.tag_body import SimpleTagBody, Tag, TagSet
 from spotterbase.annotations.target import FragmentTarget
 from spotterbase.concept_graphs.concept_graph import Concept
 from spotterbase.concept_graphs.jsonld_support import JsonLdConceptConverter
@@ -22,12 +23,38 @@ from spotterbase.dnm.token_dnm import TokenBasedDnm
 from spotterbase.dnm.token_generator import DefaultGenerators
 from spotterbase.dnm_nlp.sentence_tokenizer import sentence_tokenize
 from spotterbase.dnm_nlp.word_tokenizer import word_tokenize
+from spotterbase.rdf.uri import Uri
 from spotterbase.sb_vocab import SB
 from spotterbase.spotters.spotter import Spotter, UriGeneratorMixin
+
+_univ_pos_tags: Uri = SB.NS['universal-pos-tags']
 
 
 class SimplePosTagSpotter(UriGeneratorMixin, Spotter):
     spotter_short_id = 'spostag'
+
+    tag_set = TagSet(uri=_univ_pos_tags, label='Universal Part-Of-Speech Tagset',
+                     comment='See https://arxiv.org/abs/1104.2086 for more information')
+
+    tags: dict[str, Tag] = {
+        tag: Tag(uri=_univ_pos_tags + f'#{tag}', label=tag, belongs_to=_univ_pos_tags, comment=comment)
+        for tag, comment in [
+            ('VERB', 'verbs (all tenses and modes)'),
+            ('NOUN', 'nouns (common and proper)'),
+            ('PRON', 'pronouns'),
+            ('ADJ', 'adjectives'),
+            ('ADV', 'adverbs'),
+            ('ADP', 'adpositions (prepositions and postpositions)'),
+            ('CONJ', 'conjunctions'),
+            ('DET', 'determiners'),
+            ('NUM', 'cardinal numbers'),
+            ('PRT', 'particles or other function words'),
+            ('X', 'other: foreign words, typos, abbreviations'),
+            ('.', 'punctuation'),
+        ]
+    }
+
+    tag_set.tags = [tag.uri for tag in tags.values()]
 
     def process_document(self, document: Document) -> Iterator[Concept]:
         uri_generator = self.get_uri_generator_for(document)
@@ -49,7 +76,7 @@ class SimplePosTagSpotter(UriGeneratorMixin, Spotter):
                 yield Annotation(
                     uri=uri('anno'),
                     target_uri=target.uri,
-                    body=SimpleTagBody(SB.NS['pos-tag#' + tagged_word[1]]),
+                    body=SimpleTagBody(self.tags[tagged_word[1]].uri),
                     creator_uri=self.ctx.run_uri,
                 )
 
@@ -68,6 +95,7 @@ if __name__ == '__main__':
         jsonld_converter = JsonLdConceptConverter(contexts=[OA_JSONLD_CONTEXT, SB_JSONLD_CONTEXT],
                                                   concept_resolver=ANNOTATION_CONCEPT_RESOLVER)
         with open('/tmp/annotations.json', 'w') as fp:
-            json.dump([jsonld_converter.concept_to_json_ld(concept) for concept in concepts], fp, indent=4)
+            json.dump([jsonld_converter.concept_to_json_ld(concept) for concept in itertools.chain(
+                concepts, (spotter.tag_set,), spotter.tags.values())], fp, indent=4)
 
     test_run()

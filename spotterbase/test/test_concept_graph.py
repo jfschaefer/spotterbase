@@ -18,8 +18,8 @@ class TestVocab(Vocabulary):
 
 
 class TestPredicates:
-    edge: PredInfo = PredInfo(TestVocab.edge, 'edge-in-json-ld')
-    edge2: PredInfo = PredInfo(TestVocab.edge, 'edge2-in-json-ld')
+    edge: PredInfo = PredInfo(TestVocab.edge, json_ld_term='edge-in-json-ld', json_ld_type_is_id=True)
+    edge2: PredInfo = PredInfo(TestVocab.edge, json_ld_term='edge2-in-json-ld', json_ld_type_is_id=True)
 
 
 class TestConceptGraph(unittest.TestCase):
