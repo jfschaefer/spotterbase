@@ -9,6 +9,7 @@ from spotterbase.concept_graphs.oa_support import OA_JSONLD_CONTEXT
 from spotterbase.concept_graphs.sparql_populate import Populator
 from spotterbase.rdf.serializer import triples_to_nt_string
 from spotterbase.rdf.uri import Vocabulary, NameSpace, Uri
+from spotterbase.rdf.vocab import OA
 from spotterbase.sparql.endpoint import RdflibEndpoint
 
 
@@ -40,7 +41,7 @@ class TestConceptGraph(unittest.TestCase):
         class MiniConcept(Concept):
             concept_info = ConceptInfo(
                 concept_type=TestVocab.typeA,
-                attrs=[AttrInfo('val', TestPredicates.edge)],
+                attrs=[AttrInfo('val', TestPredicates.edge, target_type={TestVocab.typeB})],
                 is_root_concept=True,
             )
 
@@ -48,7 +49,7 @@ class TestConceptGraph(unittest.TestCase):
 
         concept = MiniConcept()
         concept.val = MiniSubConcept()
-        concept.val.thing = Uri('http://www.w3.org/ns/oa#Annotation')
+        concept.val.thing = OA.Annotation
         concept.uri = TestVocab.thingA
 
         concept_resolver = ConceptResolver([MiniConcept, MiniSubConcept])
@@ -70,5 +71,8 @@ class TestConceptGraph(unittest.TestCase):
         populator = Populator(concept_resolver=concept_resolver, endpoint=endpoint)
         concepts = list(populator.get_concepts(iter((concept.uri,))))
         self.assertEqual(len(concepts), 1)
-        self.assertIsInstance(concepts[0], MiniConcept)
-        self.assertEqual(concepts[0].uri, concept.uri)
+        new_concept = concepts[0]
+        self.assertIsInstance(new_concept, MiniConcept)
+        assert isinstance(new_concept, MiniConcept)   # make mypy happy too
+        self.assertEqual(new_concept.uri, concept.uri)
+        self.assertEqual(new_concept.val.thing, OA.Annotation)

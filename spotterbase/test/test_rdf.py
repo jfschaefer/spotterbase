@@ -93,11 +93,11 @@ mv:thingA mv:someRel mv:thingA,
                     self.assertEqual(fp.read().strip(), output.strip())
 
     def test_literal(self):
-        self.assertEqual(Literal.from_py_val(42).get_py_val(), 42)
+        self.assertEqual(Literal.from_py_val(42).to_py_val(), 42)
         self.assertEqual(Literal.from_py_val(4.5).to_ntriples(),
                          '\"4.500000E+00\"^^<http://www.w3.org/2001/XMLSchema#double>')
         l = Literal('[2,3]', datatype=Uri('http://example.org/listdatatype'))
         with self.assertRaises(NotImplementedError):
-            l.get_py_val()
+            l.to_py_val()
         with self.assertRaises(TypeError):
             Literal.from_py_val([2, 3])

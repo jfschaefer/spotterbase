@@ -78,7 +78,7 @@ class Literal:
         else:
             return self.to_ntriples()
 
-    def get_py_val(self):
+    def to_py_val(self):
         if self.datatype not in LIT2PY_FUN:
             raise NotImplementedError(f'{self.datatype} data type not supported')
         return LIT2PY_FUN[self.datatype](self.string)

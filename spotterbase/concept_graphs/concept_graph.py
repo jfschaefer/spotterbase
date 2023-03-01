@@ -46,7 +46,7 @@ class ConceptInfo:
 
     def __init__(self, concept_type: Uri, attrs: list[AttrInfo], is_root_concept: bool = False):
         self.concept_type = concept_type
-        self.attrs = attrs
+        self.attrs: list[AttrInfo] = attrs
         self.is_root_concept = is_root_concept
 
         self.attrs_by_jsonld_term = {
