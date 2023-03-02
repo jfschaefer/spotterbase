@@ -1,10 +1,7 @@
-import bz2
 import gzip
 import logging
-import lzma
 import zipfile
 from datetime import datetime
-import time
 from pathlib import Path
 from typing import IO
 
@@ -17,7 +14,7 @@ from spotterbase.corpora.arxiv import ArxivId, ArxivCategory, USE_CENTI_ARXIV, A
 from spotterbase.data.locator import Locator, DataDir
 from spotterbase.data.utils import json_lib
 from spotterbase.rdf.base import TripleI, Uri
-from spotterbase.rdf.serializer import TurtleSerializer, NTriplesSerializer
+from spotterbase.rdf.serializer import TurtleSerializer
 from spotterbase.rdf.vocab import RDF
 from spotterbase.sb_vocab import SB
 
@@ -115,43 +112,21 @@ def _get_rdf_dest() -> Path:
 
 
 def main():
-    time_elapsed = []
     accumulator = MetatdataAccumulator()
     path = arxiv_raw_metadata_locator.require()
     logger.info(f'Loading the arxiv metadata from {path}. This will take a moment.')
     accumulator.load_from_file(path)
     logger.info(f'Loaded the metadata of {len(accumulator)} arxiv documents.')
-    for i in range(10):
-        print(i)
-        # dest = _get_rdf_dest()
-        dest = f'/tmp/output{i}.nt.lz'
-        logger.info(f'Writing graph to {dest}.')
-        start = time.time()
-        with lzma.open(dest, 'wt') as fp:  # 9 is the highest compression -> slowest
-            fp.write(f'# Graph: {ArxivUris.meta_graph:<>}\n')
-            serializer = NTriplesSerializer(fp)
-            serializer.add_from_iterable(MetadataRdfGenerator(accumulator).triples())
-            serializer.flush()
-        logger.info(f'The graph has successfully been written to {dest}.')
-        end = time.time()
-        time_elapsed.append(end-start)
-        print(f'time elapsed: {end-start}')
-    print(time_elapsed)
 
-    # # turtle_cl9 = [22,21,16,16,17,16,18,21,32,16] #highest
-    # # turtle_cl9 = [int(time_elapsed[x]) for x in time_elapsed]
-    # turtle_cl9 = np.array([22,15,19,25,28,17,23,18,30,19])    #highest
-    # file_size_ttl_cl9 = 424 #bytes
-    # turtle_cl0 = np.array([24,15,15,15,16,15,15,15,16,15])   #lowest
-    # file_size_ttl_cl0 = 8940 #bytes, 20xfile_size_cl9
-    # turtle_cl4 = np.array([22,20,25,22,29,29,22,19,16,17])
-    # file_size_ttl_cl4 = 512
-    # ntriples_cl9 = np.array([21,15,14,17,19,20,16,17,15,15])
-    # file_size_nt_cl9 = 932
-    # ntriples_cl0 = np.array([31,16,14,15,14,14,14,14,14,14])
-    # file_size_nt_cl0 = 23268
-    # ntriples_cl4 = np.array([25,22,19,26,26,15,25,17,14,14])
-    # file_size_nt_cl4 = 1376
+    dest = _get_rdf_dest()
+    logger.info(f'Writing graph to {dest}.')
+    with gzip.open(dest, 'wt') as fp:
+        fp.write(f'# Graph: {ArxivUris.meta_graph:<>}\n')
+        serializer = TurtleSerializer(fp)
+        serializer.add_from_iterable(MetadataRdfGenerator(accumulator).triples())
+        serializer.flush()
+    logger.info(f'The graph has successfully been written to {dest}.')
+
 
 if __name__ == '__main__':
     config_loader.auto()
