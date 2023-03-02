@@ -12,6 +12,7 @@ from spotterbase.rdf.base import Literal, BlankNode
 from spotterbase.rdf.uri import Uri
 from spotterbase.rdf.vocab import RDF
 from spotterbase.sparql.endpoint import SparqlEndpoint
+from spotterbase.sparql.property_path import PropertyPath, UriPath, SequencePropertyPath
 
 logger = logging.getLogger(__name__)
 
@@ -21,57 +22,13 @@ logger = logging.getLogger(__name__)
 #   * request sizes should have reasonable limits
 #   * results (e.g. for types) should be cached - at least for a single population run
 
-class PropertyPath(abc.ABC):
-    """ The needed subset of SPARQL property paths """
 
-    @abc.abstractmethod
-    def __truediv__(self, other):
-        ...
-
-    @abc.abstractmethod
-    def __format__(self, format_spec) -> str:
-        ...
-
-
-@dataclasses.dataclass
-class ListPropertyPath(PropertyPath):
-    elements: list[PropertyPath]
-
-    def __truediv__(self, other):
-        if isinstance(other, Uri):
-            return ListPropertyPath(self.elements + [UriPropertyPath(other)])
-        elif isinstance(other, ListPropertyPath):
-            return ListPropertyPath(self.elements + other.elements)
-        elif isinstance(other, PropertyPath):
-            return ListPropertyPath(self.elements + [other])
-        else:
-            raise Exception(f'Unsupported argument type {type(other)}')
-
-    def __format__(self, format_spec) -> str:
-        return ' / '.join(format(element, format_spec) for element in self.elements)
-
-
-@dataclasses.dataclass
-class UriPropertyPath(PropertyPath):
-    element: Uri
-    inverted: bool = False
-
-    def __truediv__(self, other):
-        return ListPropertyPath([self]) / other
-
-    def __format__(self, format_spec) -> str:
-        if self.inverted:
-            return f'^{self.element:<>}'
-        else:
-            return f'{self.element:<>}'
-
-
-def get_types(uris: list[Uri], endpoint: SparqlEndpoint, property_path: PropertyPath = UriPropertyPath(RDF.type)) \
+def get_types(uris: list[Uri], endpoint: SparqlEndpoint, property_path: PropertyPath = UriPath(RDF.type)) \
         -> dict[Uri, list[Uri]]:
     response = endpoint.query(f'''
 SELECT ?uri ?type WHERE {{
     VALUES ?uri {{ {" ".join(format(uri, '<>') for uri in uris)} }}
-    ?uri {property_path} ?type .
+    ?uri {property_path.to_string()} ?type .
 }}
     ''')
 
@@ -92,7 +49,6 @@ def set_plain_attributes(concepts: list[tuple[Concept, Uri]], info: ConceptInfo,
     """
         `concepts` is a list of pairs `(concept, root_uri)`, such that `root_uri / property_path` points to `concept`.
     """
-    var_count = 0
     var_to_attr: dict[str, AttrInfo] = {}
     lines: list[str] = []
     for attr in info.attrs:
@@ -100,11 +56,11 @@ def set_plain_attributes(concepts: list[tuple[Concept, Uri]], info: ConceptInfo,
             continue
         if attr.target_type is not None:
             continue
-        var = f'?v{var_count}'
+        var = f'?v{len(var_to_attr)}'
         var_to_attr[var] = attr
-        var_count += 1
-        path = property_path / UriPropertyPath(attr.pred_info.uri, inverted=attr.pred_info.is_reversed)
-        lines.append(f'OPTIONAL {{ ?uri {path} {var} . }}')
+        edge = UriPath(attr.pred_info.uri)
+        path = property_path / (edge.inverted() if attr.pred_info.is_reversed else edge)
+        lines.append(f'OPTIONAL {{ ?uri {path.to_string()} {var} . }}')
 
     if not var_to_attr:
         return
@@ -146,6 +102,45 @@ SELECT ?uri {" ".join(var_to_attr.keys())} WHERE {{
                 raise TypeError(f'Unexpected type {type(val)}')
 
 
+def set_plain_multival_attributes(concepts: list[tuple[Concept, Uri]], info: ConceptInfo, property_path: PropertyPath,
+                                  endpoint: SparqlEndpoint):
+    for attr in info.attrs:  # TODO: this loop could be parallelized
+        if not attr.can_be_multiple:
+            continue
+        if attr.target_type is not None:
+            continue
+        edge = UriPath(attr.pred_info.uri)
+        path = property_path / (edge.inverted() if attr.pred_info.is_reversed else edge)
+        for concept, _ in concepts:
+            if hasattr(concept, attr.attr_name):
+                logger.warning(f'Concept already has attribute {attr.attr_name} (overwriting it)')
+            setattr(concept, attr.attr_name, [])
+
+        concept_by_uri = {uri: concept for concept, uri in concepts}
+        response = endpoint.query(f'''
+SELECT ?uri ?val WHERE {{
+    VALUES ?uri {{ {" ".join(format(uri, '<>') for uri in concept_by_uri)} }}
+    ?uri {path.to_string()} ?val .
+}}
+    ''')
+
+        for row in response:
+            uri = row['uri']
+            assert isinstance(uri, Uri)
+            concept = concept_by_uri[uri]
+            val = row['val']
+            if isinstance(val, Literal):
+                getattr(concept, attr.attr_name).append(val.to_py_val())
+            elif isinstance(val, Uri):
+                getattr(concept, attr.attr_name).append(val)
+            elif isinstance(val, BlankNode):
+                logger.warning(
+                    f'Got blank node for multi-value attribute {attr.attr_name} for concept {type(concept)}. '
+                    'Did you forget to set the target_type in AttrInfo?')
+            else:
+                raise TypeError(f'Unexpected type {type(val)}')
+
+
 class Populator:
     def __init__(self, concept_resolver: ConceptResolver, endpoint: SparqlEndpoint):
         self.concept_resolver: ConceptResolver = concept_resolver
@@ -166,7 +161,7 @@ class Populator:
                 logger.warning(f'Cannot infer concept for {uri} from types {types}')
                 continue
             concepts.append(concept(uri=uri))
-        self.fill_concepts([(concept, concept.uri) for concept in concepts], ListPropertyPath([]))
+        self.fill_concepts([(concept, concept.uri) for concept in concepts], SequencePropertyPath([]))
         yield from concepts
 
     def fill_concepts(self, concepts: list[tuple[Concept, Uri]], property_path: PropertyPath):
@@ -178,6 +173,8 @@ class Populator:
             info = concept_type.concept_info
             set_plain_attributes(concepts_of_that_type, info=info, property_path=property_path, endpoint=self.endpoint)
             self._fill_sub_concepts(concept_type, concepts_of_that_type, property_path)
+            set_plain_multival_attributes(concepts_of_that_type, info=info, property_path=property_path,
+                                          endpoint=self.endpoint)
 
     def _fill_sub_concepts(self, concept_type: type[Concept], concepts: list[tuple[Concept, Uri]],
                            property_path: PropertyPath):
@@ -197,5 +194,5 @@ class Populator:
                 sub_concept = self.concept_resolver[list(attr.target_type)[0]]()
                 setattr(concept, attr.attr_name, sub_concept)
                 sub_concepts.append((sub_concept, root_uri))
-            self.fill_concepts(sub_concepts,
-                               property_path / UriPropertyPath(attr.pred_info.uri, inverted=attr.pred_info.is_reversed))
+            edge = UriPath(attr.pred_info.uri)
+            self.fill_concepts(sub_concepts, property_path / (edge.inverted() if attr.pred_info.is_reversed else edge))
