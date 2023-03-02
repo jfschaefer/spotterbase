@@ -9,7 +9,7 @@ from spotterbase.concept_graphs.oa_support import OA_JSONLD_CONTEXT
 from spotterbase.concept_graphs.sparql_populate import Populator
 from spotterbase.rdf.serializer import triples_to_nt_string
 from spotterbase.rdf.uri import Vocabulary, NameSpace, Uri
-from spotterbase.rdf.vocab import OA
+from spotterbase.rdf.vocab import OA, XSD
 from spotterbase.sparql.endpoint import RdflibEndpoint
 
 
@@ -17,6 +17,7 @@ class TestVocab(Vocabulary):
     NS = NameSpace(Uri('http://example.org/sb-test#'), prefix='sbtest:')
 
     edge: Uri
+    edge3: Uri
     thingA: Uri
     thingB: Uri
     typeA: Uri
@@ -26,6 +27,7 @@ class TestVocab(Vocabulary):
 class TestPredicates:
     edge: PredInfo = PredInfo(TestVocab.edge, json_ld_term='edge-in-json-ld', json_ld_type_is_id=True)
     edge2: PredInfo = PredInfo(TestVocab.edge, json_ld_term='edge2-in-json-ld', json_ld_type_is_id=True)
+    edge3: PredInfo = PredInfo(TestVocab.edge3, json_ld_term='edge3-in-json-ld', literal_type=XSD.integer)
 
 
 class TestConceptGraph(unittest.TestCase):
@@ -33,10 +35,14 @@ class TestConceptGraph(unittest.TestCase):
         class MiniSubConcept(Concept):
             concept_info = ConceptInfo(
                 concept_type=TestVocab.typeB,
-                attrs=[AttrInfo('thing', TestPredicates.edge2)]
+                attrs=[
+                    AttrInfo('thing', TestPredicates.edge2),
+                    AttrInfo('numbers', TestPredicates.edge3, can_be_multiple=True)
+                ]
             )
 
             thing: Uri
+            numbers: list[int]
 
         class MiniConcept(Concept):
             concept_info = ConceptInfo(
@@ -50,6 +56,7 @@ class TestConceptGraph(unittest.TestCase):
         concept = MiniConcept()
         concept.val = MiniSubConcept()
         concept.val.thing = OA.Annotation
+        concept.val.numbers = [1, 5, 3]
         concept.uri = TestVocab.thingA
 
         concept_resolver = ConceptResolver([MiniConcept, MiniSubConcept])
@@ -59,7 +66,9 @@ class TestConceptGraph(unittest.TestCase):
         json_ld = converter.concept_to_json_ld(concept)
         self.assertEqual(json_ld, {'type': 'http://example.org/sb-test#typeA',
                                    'id': 'http://example.org/sb-test#thingA', 'edge-in-json-ld':
-                                       {'type': 'http://example.org/sb-test#typeB', 'edge2-in-json-ld': 'Annotation'}
+                                       {'type': 'http://example.org/sb-test#typeB',
+                                        'edge2-in-json-ld': 'Annotation',
+                                        'edge3-in-json-ld': [1, 5, 3]}
                                    })
         concept_2 = converter.json_ld_to_concept(json_ld)
         self.assertEqual(json_ld, converter.concept_to_json_ld(concept_2))
@@ -76,3 +85,4 @@ class TestConceptGraph(unittest.TestCase):
         assert isinstance(new_concept, MiniConcept)   # make mypy happy too
         self.assertEqual(new_concept.uri, concept.uri)
         self.assertEqual(new_concept.val.thing, OA.Annotation)
+        self.assertEqual(new_concept.val.numbers, [1, 5, 3])

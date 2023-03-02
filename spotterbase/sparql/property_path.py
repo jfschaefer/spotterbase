@@ -10,12 +10,12 @@ class PropertyPath(abc.ABC):
     @abc.abstractmethod
     def to_string(self) -> str:
         ...
-    
+
     def inverted(self) -> InvertedPropertyPath:
         return InvertedPropertyPath(self)
 
     def __truediv__(self, other) -> SequencePropertyPath:
-        return SequencePropertyPath([self])/other
+        return SequencePropertyPath([self]) / other
 
 
 @dataclasses.dataclass
@@ -38,7 +38,7 @@ class InvertedPropertyPath(PropertyPath):
 class SequencePropertyPath(PropertyPath):
     sequence: list[PropertyPath]
 
-    def __truediv__(self, other) -> PropertyPath:
+    def __truediv__(self, other) -> SequencePropertyPath:
         if isinstance(other, Uri):
             return SequencePropertyPath(self.sequence + [UriPath(other)])
         elif isinstance(other, SequencePropertyPath):

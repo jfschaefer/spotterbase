@@ -40,9 +40,9 @@ def json_binding_to_object(d: dict[str, str]) -> Object:
         case 'literal':
             if 'xml:lang' in d:
                 return Literal(d['value'], vocab.RDF.langString, d['xml:lang'])
+            elif 'datatype' in d:
+                return Literal(d['value'], Uri(d['datatype']))
             else:
                 return Literal(d['value'], vocab.XSD.string)
-        case 'typed-literal':
-            return Literal(d['value'], Uri(d['datatype']))
         case other:
             raise Exception(f'Unsupported type {other}')
