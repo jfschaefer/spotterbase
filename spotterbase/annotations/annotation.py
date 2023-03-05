@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any, Optional
 
-from spotterbase.concept_graphs.concept_graph import Concept, ConceptInfo, AttrInfo
+from spotterbase.concept_graphs.concept_graph import Concept, ConceptInfo, AttrInfo, TargetUnknownConcept
 from spotterbase.concept_graphs.oa_support import OA_PRED
 from spotterbase.rdf.uri import Uri
 from spotterbase.rdf.vocab import OA
@@ -13,7 +13,7 @@ class Annotation(Concept):
         concept_type=OA.Annotation,
         attrs=[
             AttrInfo('target', OA_PRED.target),
-            AttrInfo('body', OA_PRED.body),
+            AttrInfo('body', OA_PRED.body, target_type=TargetUnknownConcept),
             AttrInfo('creator_uri', OA_PRED.creator),
         ],
         is_root_concept=True,

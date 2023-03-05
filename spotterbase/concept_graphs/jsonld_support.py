@@ -108,7 +108,7 @@ class JsonLdConceptConverter:
             concept.uri = self.uri_from_str(json_ld['id'])
 
         for key in json_ld:
-            if key in {'id', 'type'}:
+            if key in {'id', 'type', '@context'}:
                 continue
             a_info: AttrInfo
             if key in c_info.attrs_by_jsonld_term:

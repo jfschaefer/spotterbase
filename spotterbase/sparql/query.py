@@ -1,7 +1,9 @@
+from collections import defaultdict
+
 import spotterbase.corpora.arxiv
 import spotterbase.rdf.vocab as vocab
 from spotterbase import sb_vocab
-from spotterbase.rdf.base import Object, Literal
+from spotterbase.rdf.base import Object, Literal, BlankNode
 from spotterbase.rdf.uri import NameSpace, Uri
 
 NAMESPACES: list[NameSpace] = [
@@ -33,7 +35,7 @@ def _get_prefixes(ns_list: list[NameSpace]):
 PREFIXES = _get_prefixes(NAMESPACES)
 
 
-def json_binding_to_object(d: dict[str, str]) -> Object:
+def json_binding_to_object(d: dict[str, str], bnode_map: defaultdict[str, BlankNode]) -> Object:
     match d['type']:
         case 'uri':
             return Uri(d['value'])
@@ -44,5 +46,7 @@ def json_binding_to_object(d: dict[str, str]) -> Object:
                 return Literal(d['value'], Uri(d['datatype']))
             else:
                 return Literal(d['value'], vocab.XSD.string)
+        case 'bnode':
+            return bnode_map[d['value']]
         case other:
             raise Exception(f'Unsupported type {other}')

@@ -6,6 +6,7 @@ from typing import Optional, Any
 from spotterbase.rdf.base import TripleI, Subject, BlankNode, Literal, Object
 from spotterbase.rdf.uri import Uri
 from spotterbase.rdf.vocab import RDF
+from spotterbase.sparql.property_path import PropertyPath, UriPath
 
 
 @dataclasses.dataclass
@@ -27,14 +28,38 @@ class PredInfo:
             assert not self.is_rdf_list, 'cannot have reversed predicate for RDF list'
             assert not self.literal_type, 'cannot have reversed predicate for literals'
 
+    def to_property_path(self) -> PropertyPath:
+        prop_path: PropertyPath = UriPath(self.uri)
+        if self.is_reversed:
+            prop_path = prop_path.inverted()
+        return prop_path
+
+
+class TargetConceptInfo:
+    ...
+
+
+TargetNoConcept = TargetConceptInfo()   # target is literal or URI (the URI may belong to a concept though)
+TargetUnknownConcept = TargetConceptInfo()   # target is a concept, but we do not know which one
+
+
+@dataclasses.dataclass
+class TargetKnownConcept(TargetConceptInfo):
+    concept: type[Concept]
+
+
+@dataclasses.dataclass
+class TargetConceptSet(TargetConceptInfo):
+    concepts: set[type[Concept]]
+
 
 @dataclasses.dataclass
 class AttrInfo:
     attr_name: str
     pred_info: PredInfo
 
-    target_type: Optional[set[Uri]] = None
-    can_be_multiple: bool = False
+    target_type: TargetConceptInfo = TargetNoConcept
+    multi_target: bool = False
 
 
 class ConceptInfo:

@@ -8,11 +8,14 @@ from spotterbase.rdf.uri import Uri
 
 class PropertyPath(abc.ABC):
     @abc.abstractmethod
-    def to_string(self) -> str:
+    def to_string(self, _put_paren: bool = False) -> str:
         ...
 
     def inverted(self) -> InvertedPropertyPath:
         return InvertedPropertyPath(self)
+
+    def with_star(self) -> StarPropertyPath:
+        return StarPropertyPath(self)
 
     def __truediv__(self, other) -> SequencePropertyPath:
         return SequencePropertyPath([self]) / other
@@ -22,7 +25,7 @@ class PropertyPath(abc.ABC):
 class UriPath(PropertyPath):
     uri: Uri
 
-    def to_string(self) -> str:
+    def to_string(self, _put_paren: bool = False) -> str:
         return format(self.uri, '<>')
 
 
@@ -30,8 +33,19 @@ class UriPath(PropertyPath):
 class InvertedPropertyPath(PropertyPath):
     path: PropertyPath
 
-    def to_string(self):
-        return f'^{self.path.to_string()}'
+    def to_string(self, _put_paren: bool = False) -> str:
+        return f'^{self.path.to_string(_put_paren=True)}'
+
+
+@dataclasses.dataclass
+class StarPropertyPath(PropertyPath):
+    path: PropertyPath
+
+    def to_string(self, _put_paren: bool = False) -> str:
+        if _put_paren:
+            return f'({self.path.to_string(_put_paren=True)}*)'
+        else:
+            return f'{self.path.to_string(_put_paren=True)}*'
 
 
 @dataclasses.dataclass
@@ -48,5 +62,9 @@ class SequencePropertyPath(PropertyPath):
         else:
             raise Exception(f'Unsupported argument type {type(other)}')
 
-    def to_string(self):
-        return ' / '.join([el.to_string() for el in self.sequence])
+    def to_string(self, _put_paren: bool = False):
+        s = ' / '.join([el.to_string(_put_paren=True) for el in self.sequence])
+        if _put_paren:
+            return f'({s})'
+        else:
+            return s

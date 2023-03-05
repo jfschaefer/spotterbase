@@ -60,7 +60,7 @@ class ListSelector(Concept):
     concept_info = ConceptInfo(
         concept_type=SB.ListSelector,
         attrs=[
-            AttrInfo('selectors', SB_PRED.vals, can_be_multiple=True)
+            AttrInfo('selectors', SB_PRED.vals, multi_target=True)
         ]
     )
 

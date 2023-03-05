@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import logging
 from collections import defaultdict
-from typing import Iterator, Optional
+from typing import Iterator, Optional, NewType, Callable, TypeAlias, Iterable
 
-from spotterbase.concept_graphs.concept_graph import Concept, ConceptInfo, AttrInfo
+from spotterbase.concept_graphs.concept_graph import Concept, ConceptInfo, AttrInfo, TargetKnownConcept, \
+    TargetNoConcept, TargetUnknownConcept, TargetConceptSet
 from spotterbase.concept_graphs.concept_resolver import ConceptResolver
 from spotterbase.rdf.base import Literal, BlankNode
 from spotterbase.rdf.uri import Uri
@@ -15,182 +16,223 @@ from spotterbase.sparql.property_path import PropertyPath, UriPath, SequenceProp
 logger = logging.getLogger(__name__)
 
 
-# TODO: The code is just a prototype and should be heavily refactored and optimized. In particular:
+# TODO: The code is just a prototype and should be heavily optimized. In particular:
 #   * requests should be parallelized (with coroutines or threads)
 #   * request sizes should have reasonable limits
 #   * results (e.g. for types) should be cached - at least for a single population run
 
 
-def get_types(uris: list[Uri], endpoint: SparqlEndpoint, property_path: PropertyPath = UriPath(RDF.type)) \
-        -> dict[Uri, list[Uri]]:
-    response = endpoint.query(f'''
-SELECT ?uri ?type WHERE {{
-    VALUES ?uri {{ {" ".join(format(uri, '<>') for uri in uris)} }}
-    ?uri {property_path.to_string()} ?type .
-}}
-    ''')
+# The RootUri of a concept C is the Uri of the root concept that C belongs to.
+# The typical use case the following:
+#   There is a root concept R has a sub concept C, which we want to populate.
+#   C might not have a URI associated with it. So to somehow reference it in SPARQL queries,
+#   we instead refer to R's URI (the RootUri of C) and use a property path that leads from R to C.
+RootUri = NewType('RootUri', Uri)
 
-    results: dict[Uri, list[Uri]] = {uri: [] for uri in uris}
-    for line in response:
-        type_ = line['type']
-        if not isinstance(type_, Uri):
-            continue
-        uri = line['uri']
-        assert isinstance(uri, Uri)  # let's make mypy happy
-        results[uri].append(type_)
-
-    return results
-
-
-def set_plain_attributes(concepts: list[tuple[Concept, Uri]], info: ConceptInfo, property_path: PropertyPath,
-                         endpoint: SparqlEndpoint):
-    """
-        `concepts` is a list of pairs `(concept, root_uri)`, such that `root_uri / property_path` points to `concept`.
-    """
-    var_to_attr: dict[str, AttrInfo] = {}
-    lines: list[str] = []
-    for attr in info.attrs:
-        if attr.can_be_multiple:
-            continue
-        if attr.target_type is not None:
-            continue
-        var = f'?v{len(var_to_attr)}'
-        var_to_attr[var] = attr
-        edge = UriPath(attr.pred_info.uri)
-        path = property_path / (edge.inverted() if attr.pred_info.is_reversed else edge)
-        lines.append(f'OPTIONAL {{ ?uri {path.to_string()} {var} . }}')
-
-    if not var_to_attr:
-        return
-
-    body = '\n'.join(lines)
-    concept_by_uri = {uri: concept for concept, uri in concepts}
-    response = endpoint.query(f'''
-SELECT ?uri {" ".join(var_to_attr.keys())} WHERE {{
-    VALUES ?uri {{ {" ".join(format(uri, '<>') for uri in concept_by_uri)} }}
-    {body}
-}}
-    ''')
-    processed: set[Uri] = set()
-    for row in response:
-        uri = row['uri']
-        assert isinstance(uri, Uri)
-        if uri in processed:
-            logger.warning(f'Multiple results when filling out {uri:<>} / {property_path}')
-            continue
-        processed.add(uri)
-        concept = concept_by_uri[uri]
-        for var, a_info in var_to_attr.items():
-            if var[1:] not in row:
-                continue
-            val = row[var[1:]]
-            if isinstance(val, Literal):
-                if hasattr(concept, a_info.attr_name):
-                    logger.warning(f'Concept already has attribute {a_info.attr_name}')
-                setattr(concept, a_info.attr_name, val.to_py_val())
-            elif isinstance(val, BlankNode):
-                logger.warning(f'Got blank node for attribute {a_info.attr_name}'
-                               f'for {type(concept)} {uri:<>} / {property_path}. '
-                               'Did you forget to set the target_type in the AttrInfo?')
-            elif isinstance(val, Uri):
-                if hasattr(concept, a_info.attr_name):
-                    logger.warning(f'Concept already has attribute {a_info.attr_name}')
-                setattr(concept, a_info.attr_name, val)
-            else:
-                raise TypeError(f'Unexpected type {type(val)}')
-
-
-def set_plain_multival_attributes(concepts: list[tuple[Concept, Uri]], info: ConceptInfo, property_path: PropertyPath,
-                                  endpoint: SparqlEndpoint):
-    for attr in info.attrs:  # TODO: this loop could be parallelized
-        if not attr.can_be_multiple:
-            continue
-        if attr.target_type is not None:
-            continue
-        edge = UriPath(attr.pred_info.uri)
-        path = property_path / (edge.inverted() if attr.pred_info.is_reversed else edge)
-        for concept, _ in concepts:
-            if hasattr(concept, attr.attr_name):
-                logger.warning(f'Concept already has attribute {attr.attr_name} (overwriting it)')
-            setattr(concept, attr.attr_name, [])
-
-        concept_by_uri = {uri: concept for concept, uri in concepts}
-        response = endpoint.query(f'''
-SELECT ?uri ?val WHERE {{
-    VALUES ?uri {{ {" ".join(format(uri, '<>') for uri in concept_by_uri)} }}
-    ?uri {path.to_string()} ?val .
-}}
-    ''')
-
-        for row in response:
-            uri = row['uri']
-            assert isinstance(uri, Uri)
-            concept = concept_by_uri[uri]
-            val = row['val']
-            if isinstance(val, Literal):
-                getattr(concept, attr.attr_name).append(val.to_py_val())
-            elif isinstance(val, Uri):
-                getattr(concept, attr.attr_name).append(val)
-            elif isinstance(val, BlankNode):
-                logger.warning(
-                    f'Got blank node for multi-value attribute {attr.attr_name} for concept {type(concept)}. '
-                    'Did you forget to set the target_type in AttrInfo?')
-            else:
-                raise TypeError(f'Unexpected type {type(val)}')
+SubConcepts: TypeAlias = list[tuple[Concept, RootUri]]
+SpecialPopulator: TypeAlias = Callable[[SubConcepts, PropertyPath, 'Populator'], None]
 
 
 class Populator:
-    def __init__(self, concept_resolver: ConceptResolver, endpoint: SparqlEndpoint):
+    def __init__(self, concept_resolver: ConceptResolver, endpoint: SparqlEndpoint,
+                 special_populators: Optional[dict[type[Concept], list[SpecialPopulator]]] = None):
         self.concept_resolver: ConceptResolver = concept_resolver
         self.endpoint = endpoint
+        self.special_populators: dict[type[Concept], list[SpecialPopulator]] = special_populators or {}
 
-    def concept_from_types(self, types: list[Uri]) -> Optional[type[Concept]]:
+    def get_concepts(self, uris: Iterable[Uri]) -> Iterator[Concept]:
+        type_info = self._get_types(list(uris))
+        concepts: list[Concept] = []
+        for uri, types in type_info.items():
+            concept = self._concept_from_types(types)
+            if concept is None:
+                logger.warning(f'Cannot infer concept for {uri} from types {types}')
+                continue
+            concepts.append(concept(uri=uri))
+        self._fill_concepts([(concept, RootUri(concept.uri)) for concept in concepts], SequencePropertyPath([]))
+        yield from concepts
+
+    def _concept_from_types(self, types: list[Uri]) -> Optional[type[Concept]]:
         for type_ in types:
             if type_ in self.concept_resolver:
                 return self.concept_resolver[type_]
         return None
 
-    def get_concepts(self, uris: Iterator[Uri]) -> Iterator[Concept]:
-        type_info = get_types(list(uris), self.endpoint)
-        concepts: list[Concept] = []
-        for uri, types in type_info.items():
-            concept = self.concept_from_types(types)
-            if concept is None:
-                logger.warning(f'Cannot infer concept for {uri} from types {types}')
-                continue
-            concepts.append(concept(uri=uri))
-        self.fill_concepts([(concept, concept.uri) for concept in concepts], SequencePropertyPath([]))
-        yield from concepts
-
-    def fill_concepts(self, concepts: list[tuple[Concept, Uri]], property_path: PropertyPath):
-        concepts_by_type: dict[type[Concept], list[tuple[Concept, Uri]]] = defaultdict(list)
+    def _fill_concepts(self, concepts: SubConcepts, property_path: PropertyPath):
+        concepts_by_type: dict[type[Concept], SubConcepts] = defaultdict(list)
         for concept, root_uri in concepts:
             concepts_by_type[type(concept)].append((concept, root_uri))
 
         for concept_type, concepts_of_that_type in concepts_by_type.items():
             info = concept_type.concept_info
-            set_plain_attributes(concepts_of_that_type, info=info, property_path=property_path, endpoint=self.endpoint)
-            self._fill_sub_concepts(concept_type, concepts_of_that_type, property_path)
-            set_plain_multival_attributes(concepts_of_that_type, info=info, property_path=property_path,
-                                          endpoint=self.endpoint)
+            # TODO: the following things can be parallelized
+            self._set_plain_attributes(concepts_of_that_type, info=info, property_path=property_path)
+            self._fill_known_sub_concepts(concept_type, concepts_of_that_type, property_path)
+            self._fill_unknown_sub_concepts(concept_type, concepts_of_that_type, property_path)
+            self._set_plain_multival_attributes(concepts_of_that_type, info=info, property_path=property_path)
+            if concept_type in self.special_populators:
+                for populator in self.special_populators[concept_type]:
+                    populator(concepts_of_that_type, property_path, self)
 
-    def _fill_sub_concepts(self, concept_type: type[Concept], concepts: list[tuple[Concept, Uri]],
-                           property_path: PropertyPath):
+    def _fill_known_sub_concepts(self, concept_type: type[Concept], concepts: SubConcepts, property_path: PropertyPath):
         for attr in concept_type.concept_info.attrs:
-            if attr.can_be_multiple:
+            if attr.multi_target:
                 continue
-            if attr.target_type is None:
+            if not isinstance(attr.target_type, TargetKnownConcept):
                 continue
-            if len(attr.target_type) > 1:  # TODO
-                continue
-            sub_concepts: list[tuple[Concept, Uri]] = []
+            sub_concepts: SubConcepts = []
             for concept, root_uri in concepts:
                 if hasattr(concept, attr.attr_name):
                     logger.warning(f'Concept already has attribute {attr.attr_name}')
                     continue
                 # TODO: set instance uri if it exists
-                sub_concept = self.concept_resolver[list(attr.target_type)[0]]()
+                sub_concept = attr.target_type.concept()
                 setattr(concept, attr.attr_name, sub_concept)
                 sub_concepts.append((sub_concept, root_uri))
-            edge = UriPath(attr.pred_info.uri)
-            self.fill_concepts(sub_concepts, property_path / (edge.inverted() if attr.pred_info.is_reversed else edge))
+            self._fill_concepts(sub_concepts, property_path / attr.pred_info.to_property_path())
+
+    def _fill_unknown_sub_concepts(self, concept_type: type[Concept], concepts: SubConcepts,
+                                   property_path: PropertyPath):
+        concept_by_uri: dict[Uri, Concept] = {uri: concept for concept, uri in concepts}
+        for attr in concept_type.concept_info.attrs:
+            if attr.multi_target:
+                continue
+            if not (attr.target_type == TargetUnknownConcept or isinstance(attr.target_type, TargetConceptSet)):
+                # for simplicity, we ignore the set of possible target concepts if we have one
+                continue
+
+            # step 1: get target types
+            types_ = self._get_types(concept_by_uri.keys(),
+                                     property_path / attr.pred_info.to_property_path() / RDF.type)
+            # step 2: instantiate sub-concepts according to type
+            sub_concepts: SubConcepts = []
+            for uri in types_:
+                concept = concept_by_uri[uri]
+                if hasattr(concept, attr.attr_name):
+                    logger.warning(f'Concept already has attribute {attr.attr_name}')
+                    continue
+                sub_concept_type = self._concept_from_types(types_[uri])
+                if sub_concept_type is None:
+                    logger.warning(f'Cannot find concept for types {types_[uri]} '
+                                   '(did you forget to add it to the resolver? (ignoring attribute)')
+                    continue
+                # TODO: set sub_concept.uri (maybe this should be the task of _fill_concepts)
+                sub_concept = sub_concept_type()
+                setattr(concept, attr.attr_name, sub_concept)
+                sub_concepts.append((sub_concept, RootUri(uri)))
+            # step 3: recursively fill up concepts
+            self._fill_concepts(sub_concepts, property_path / attr.pred_info.to_property_path())
+
+    def _get_types(self, uris: Iterable[Uri], property_path: PropertyPath = UriPath(RDF.type)) \
+            -> dict[Uri, list[Uri]]:
+        response = self.endpoint.query(f'''
+SELECT ?uri ?type WHERE {{
+    VALUES ?uri {{ {" ".join(format(uri, '<>') for uri in uris)} }}
+    ?uri {property_path.to_string()} ?type .
+}}
+        '''.strip())
+
+        results: dict[Uri, list[Uri]] = {uri: [] for uri in uris}
+        for line in response:
+            type_ = line['type']
+            if not isinstance(type_, Uri):
+                continue
+            uri = line['uri']
+            assert isinstance(uri, Uri)  # let's make mypy happy
+            results[uri].append(type_)
+
+        return results
+
+    def _set_plain_attributes(self, concepts: SubConcepts, info: ConceptInfo, property_path: PropertyPath):
+        """ Fills in all attributes where a single plain value (literal or URI) is expected. """
+
+        # Step 1: Prepare query content
+        var_to_attr: dict[str, AttrInfo] = {}
+        lines: list[str] = []
+        for attr in info.attrs:
+            if attr.multi_target:
+                # note: requires a separate query for each multi-target to avoid exponential blow-up of response
+                continue
+            if attr.target_type != TargetNoConcept:
+                continue
+            var = f'?v{len(var_to_attr)}'
+            var_to_attr[var] = attr
+            path = property_path / attr.pred_info.to_property_path()
+            lines.append(f'OPTIONAL {{ ?uri {path.to_string()} {var} . }}')
+
+        if not var_to_attr:
+            return
+
+        # Step 2: Assemble and send query
+        body = '    \n'.join(lines)
+        concept_by_uri: dict[Uri, Concept] = {uri: concept for concept, uri in concepts}
+        response = self.endpoint.query(f'''
+SELECT ?uri {" ".join(var_to_attr.keys())} WHERE {{
+    VALUES ?uri {{ {" ".join(format(uri, '<>') for uri in concept_by_uri)} }}
+    {body}
+}}
+        '''.strip())
+
+        # Step 3: Process query results
+        processed: set[Uri] = set()
+        for row in response:
+            uri = row['uri']
+            assert isinstance(uri, Uri)
+            if uri in processed:
+                logger.warning(f'Multiple results when filling out {uri:<>} {property_path}')
+                continue
+            processed.add(uri)
+            concept = concept_by_uri[uri]
+            for var, a_info in var_to_attr.items():
+                if var[1:] not in row:
+                    continue
+                val = row[var[1:]]
+                if hasattr(concept, a_info.attr_name):
+                    logger.warning(f'Concept already has attribute {a_info.attr_name}')
+                if isinstance(val, Literal):
+                    setattr(concept, a_info.attr_name, val.to_py_val())
+                elif isinstance(val, BlankNode):
+                    logger.warning(f'Got blank node for attribute {a_info.attr_name} '
+                                   f'for {type(concept)} {uri:<>} / {property_path}. '
+                                   'Did you forget to set the target_type in the AttrInfo?')
+                elif isinstance(val, Uri):
+                    setattr(concept, a_info.attr_name, val)
+                else:
+                    raise TypeError(f'Unexpected type {type(val)}')
+
+    def _set_plain_multival_attributes(self, concepts: SubConcepts, info: ConceptInfo, property_path: PropertyPath):
+        """ Fills in attributes that can have multiple plain values (Uris or literals) """
+        for attr in info.attrs:  # TODO: this loop could be parallelized
+            if not attr.multi_target:
+                continue
+            if attr.target_type != TargetNoConcept:
+                continue
+            path = property_path / attr.pred_info.to_property_path()
+            for concept, _ in concepts:
+                if hasattr(concept, attr.attr_name):
+                    logger.warning(f'Concept already has attribute {attr.attr_name} (overwriting it)')
+                setattr(concept, attr.attr_name, [])
+
+            concept_by_uri: dict[Uri, Concept] = {uri: concept for concept, uri in concepts}
+            response = self.endpoint.query(f'''
+SELECT ?uri ?val WHERE {{
+    VALUES ?uri {{ {" ".join(format(uri, '<>') for uri in concept_by_uri)} }}
+    ?uri {path.to_string()} ?val .
+}}
+        '''.strip())
+
+            for row in response:
+                uri = row['uri']
+                assert isinstance(uri, Uri)
+                concept = concept_by_uri[uri]
+                val = row['val']
+                if isinstance(val, Literal):
+                    getattr(concept, attr.attr_name).append(val.to_py_val())
+                elif isinstance(val, Uri):
+                    getattr(concept, attr.attr_name).append(val)
+                elif isinstance(val, BlankNode):
+                    logger.warning(
+                        f'Got blank node for multi-value attribute {attr.attr_name} for concept {type(concept)}. '
+                        'Did you forget to set the target_type in AttrInfo?')
+                else:
+                    raise TypeError(f'Unexpected type {type(val)}')

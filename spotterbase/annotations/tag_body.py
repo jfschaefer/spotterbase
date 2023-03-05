@@ -27,7 +27,7 @@ class MultiTagBody(Concept):
     concept_info = ConceptInfo(
         concept_type=SB.MultiTagBody,
         attrs=[
-            AttrInfo('tags', SB_PRED.val, can_be_multiple=True),
+            AttrInfo('tags', SB_PRED.val, multi_target=True),
         ]
     )
 
@@ -63,7 +63,7 @@ class TagSet(Concept):
     concept_info = ConceptInfo(
         concept_type=SB.TagSet,
         attrs=[
-            AttrInfo('tags', SB_PRED.belongsTo_Rev, can_be_multiple=True),
+            AttrInfo('tags', SB_PRED.belongsTo_Rev, multi_target=True),
             AttrInfo('label', OA_PRED.label),
             AttrInfo('comment', SB_PRED.comment),
         ],

@@ -1,24 +1,25 @@
 import abc
 import json
+from collections import defaultdict
 from typing import Optional, Iterable
 
 import rdflib
 import requests as requests
 from requests.auth import HTTPBasicAuth
 
-from spotterbase.rdf.base import Object
+from spotterbase.rdf.base import Object, BlankNode
 from spotterbase.sparql.query import json_binding_to_object
 
 
 class SparqlEndpoint(abc.ABC):
     def query(self, query: str) -> Iterable[dict[str, Optional[Object]]]:
         result = self.get(query, accept='application/json')
-
+        bnode_map: defaultdict[str, BlankNode] = defaultdict(BlankNode)
         for binding in result['results']['bindings']:
             d: dict[str, Optional[Object]] = {}
             for var in result['head']['vars']:
                 if var in binding:
-                    d[var] = json_binding_to_object(binding[var])
+                    d[var] = json_binding_to_object(binding[var], bnode_map)
                 else:
                     d[var] = None
             yield d

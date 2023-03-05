@@ -20,15 +20,17 @@ _rdflib_triple_T = tuple[rdflib.term.Node, rdflib.term.Node, rdflib.term.Node]
 
 
 class Converter:
-    bnode_map: dict[BlankNode, rdflib.BNode] = {}
+    bnode_map: dict[BlankNode, rdflib.BNode]
 
-    @classmethod
-    def convert_node(cls, node: Uri | Literal | BlankNode) -> rdflib.term.Node:
+    def __init__(self):
+        self.bnode_map = {}
+
+    def convert_node(self, node: Uri | Literal | BlankNode) -> rdflib.term.Node:
         match node:
             case BlankNode():
-                if node not in cls.bnode_map:
-                    cls.bnode_map[node] = rdflib.BNode()
-                return cls.bnode_map[node]
+                if node not in self.bnode_map:
+                    self.bnode_map[node] = rdflib.BNode()
+                return self.bnode_map[node]
             case Uri():
                 return rdflib.URIRef(node.full_uri())
             case Literal():
@@ -39,19 +41,20 @@ class Converter:
             case _:
                 raise Exception('cannot support node type ', type(node))
 
-    @classmethod
-    def convert_triple(cls, triple: Triple) -> _rdflib_triple_T:
+    def convert_triple(self, triple: Triple) -> _rdflib_triple_T:
         # mypy doesn't like something more sophisticated than the following
-        return cls.convert_node(triple[0]), cls.convert_node(triple[1]), cls.convert_node(triple[2])
+        return self.convert_node(triple[0]), self.convert_node(triple[1]), self.convert_node(triple[2])
 
-    @classmethod
-    def convert_triples(cls, triples: TripleI) -> Iterator[_rdflib_triple_T]:
+    def convert_triples(self, triples: TripleI) -> Iterator[_rdflib_triple_T]:
         for triple in triples:
-            yield cls.convert_triple(triple)
+            yield self.convert_triple(triple)
 
-    @classmethod
-    def convert_to_graph(cls, triples: TripleI) -> rdflib.Graph:
+    def convert_to_graph(self, triples: TripleI) -> rdflib.Graph:
         graph = rdflib.Graph()
-        for triple in cls.convert_triples(triples):
+        for triple in self.convert_triples(triples):
             graph.add(triple)
         return graph
+
+
+def triples_to_graph(triples: TripleI) -> rdflib.Graph:
+    return Converter().convert_to_graph(triples)

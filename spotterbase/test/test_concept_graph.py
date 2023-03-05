@@ -2,7 +2,7 @@ import unittest
 
 import rdflib
 
-from spotterbase.concept_graphs.concept_graph import PredInfo, AttrInfo, Concept, ConceptInfo
+from spotterbase.concept_graphs.concept_graph import PredInfo, AttrInfo, Concept, ConceptInfo, TargetKnownConcept
 from spotterbase.concept_graphs.concept_resolver import ConceptResolver
 from spotterbase.concept_graphs.jsonld_support import JsonLdConceptConverter
 from spotterbase.concept_graphs.oa_support import OA_JSONLD_CONTEXT
@@ -37,7 +37,7 @@ class TestConceptGraph(unittest.TestCase):
                 concept_type=TestVocab.typeB,
                 attrs=[
                     AttrInfo('thing', TestPredicates.edge2),
-                    AttrInfo('numbers', TestPredicates.edge3, can_be_multiple=True)
+                    AttrInfo('numbers', TestPredicates.edge3, multi_target=True)
                 ]
             )
 
@@ -47,7 +47,7 @@ class TestConceptGraph(unittest.TestCase):
         class MiniConcept(Concept):
             concept_info = ConceptInfo(
                 concept_type=TestVocab.typeA,
-                attrs=[AttrInfo('val', TestPredicates.edge, target_type={TestVocab.typeB})],
+                attrs=[AttrInfo('val', TestPredicates.edge, target_type=TargetKnownConcept(MiniSubConcept))],
                 is_root_concept=True,
             )
 

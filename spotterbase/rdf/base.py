@@ -32,6 +32,7 @@ LIT2PY_FUN: dict[Uri, Callable[[str], Any]] = {
     XSD.decimal: float,
     XSD.double: float,
     XSD.boolean: lambda s: {'false': False, 'true': True, '0': False, '1': True}[s],
+    XSD.nonNegativeInteger: int,    # TODO: check that not negative
 }
 
 PY2LIT_LIST: list[tuple[type, Callable[[Any], Literal]]] = [
