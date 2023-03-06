@@ -57,6 +57,32 @@ class JsonLdContext:
         for a, u in terms:
             self.obj_terms.add(a, u)
 
+    def export_to_json(self) -> dict:
+        result: dict[str, str | dict[str, str]] = {}
+        for prefix, namespace in self.namespaces.items():
+            result[prefix[:-1]] = format(namespace.uri, 'plain')
+
+        for term, p_info in self.pred_terms.items():
+            sub_result = {}
+            sub_result['@id'] = format(p_info.uri, 'plain')
+            if p_info.json_ld_type_is_id:
+                sub_result['@type'] = '@id'
+            if p_info.is_rdf_list:
+                sub_result['@container'] = '@list'
+            if p_info.literal_type is not None:
+                assert '@type' not in sub_result
+                sub_result['@type'] = format(p_info.literal_type, 'plain')
+
+            if p_info.is_reversed:
+                result[term + '_unreversed'] = sub_result
+                result[term] = {'@reverse': term + '_unreversed'}
+            else:
+                result[term] = sub_result
+
+        for term, uri in self.obj_terms.term_to_uri.items():
+            result[term] = format(uri, 'plain')
+        return result
+
 
 class JsonLdConceptConverter:
     def __init__(self, contexts: list[JsonLdContext], concept_resolver: ConceptResolver):

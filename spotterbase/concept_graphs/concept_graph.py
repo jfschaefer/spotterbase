@@ -24,6 +24,7 @@ class PredInfo:
     def __post_init__(self):
         if self.json_ld_type_is_id:
             assert self.json_ld_term, 'json_ld_term must be set if the type is "@id"'
+            assert self.literal_type is None, 'cannot have literal type if the type is "@id"'
         if self.is_reversed:
             assert not self.is_rdf_list, 'cannot have reversed predicate for RDF list'
             assert not self.literal_type, 'cannot have reversed predicate for literals'

@@ -22,8 +22,9 @@ _rdflib_triple_T = tuple[rdflib.term.Node, rdflib.term.Node, rdflib.term.Node]
 class Converter:
     bnode_map: dict[BlankNode, rdflib.BNode]
 
-    def __init__(self):
+    def __init__(self, suppress_str_datatypes: bool = False):
         self.bnode_map = {}
+        self.suppress_str_datatypes = suppress_str_datatypes
 
     def convert_node(self, node: Uri | Literal | BlankNode) -> rdflib.term.Node:
         match node:
@@ -36,7 +37,10 @@ class Converter:
             case Literal():
                 # rdflib has problems with using XSD.string as default etc.
                 # see e.g. https://github.com/RDFLib/rdflib/issues/2123
-                rdflib_dt = node.datatype.full_uri() if node.datatype not in {XSD.string, RDF.langString} else None
+                if self.suppress_str_datatypes and node.datatype in {XSD.string, RDF.langString}:
+                    rdflib_dt = None
+                else:
+                    rdflib_dt = node.datatype.full_uri()
                 return rdflib.Literal(node.string, lang=node.lang_tag, datatype=rdflib_dt)
             case _:
                 raise Exception('cannot support node type ', type(node))
@@ -56,5 +60,5 @@ class Converter:
         return graph
 
 
-def triples_to_graph(triples: TripleI) -> rdflib.Graph:
-    return Converter().convert_to_graph(triples)
+def triples_to_graph(triples: TripleI, suppress_str_datatypes: bool = False) -> rdflib.Graph:
+    return Converter(suppress_str_datatypes=suppress_str_datatypes).convert_to_graph(triples)

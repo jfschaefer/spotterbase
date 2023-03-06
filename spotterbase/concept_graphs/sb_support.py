@@ -1,7 +1,11 @@
+import json
+from pathlib import Path
+
 from spotterbase.concept_graphs.concept_graph import PredInfo
 from spotterbase.concept_graphs.jsonld_support import JsonLdContext
 from spotterbase.rdf.vocab import RDF, XSD, RDFS
 from spotterbase.sb_vocab import SB
+from spotterbase.utils.resources import RESOURCES_DIR
 
 
 class SB_PRED:
@@ -32,3 +36,15 @@ SB_JSONLD_CONTEXT: JsonLdContext = JsonLdContext(
         ('SimpleTagBody', SB.SimpleTagBody)
     ]
 )
+
+SB_CONTEXT_FILE: Path = RESOURCES_DIR / 'sb-context.jsonld'
+
+
+def _write_to_file():
+    with open(SB_CONTEXT_FILE, 'w') as fp:
+        json.dump({'@context': SB_JSONLD_CONTEXT.export_to_json()}, fp, indent=4)
+        fp.write('\n')
+
+
+if __name__ == '__main__':
+    _write_to_file()

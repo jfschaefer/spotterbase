@@ -1,17 +1,53 @@
 {
     "@context": {
         "sb": "http://sigmathling.kwarc.info/spotterbase/",
-
-        "vals": {"@type": "@id", "@id": "rdf:value", "@container": "@list"},
-        "val": {"@type": "@id", "@id": "rdf:value"},
-
-        "PathSelector": "sb:PathSelector",
-        "FragmentTarget": "sb:FragmentTarget",
-        "startPath": "sb:startPath",
-        "endPath": "sb:endPath",
-        "ListSelector": "sb:ListSelector",
-        "OffsetSelector": "sb:OffsetSelector",
-
-        "SimpleTagBody": "sb:SimpleTagBody"
+        "val": {
+            "@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#value",
+            "@type": "@id"
+        },
+        "vals": {
+            "@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#value",
+            "@type": "@id",
+            "@container": "@list"
+        },
+        "belongsTo": {
+            "@id": "http://sigmathling.kwarc.info/spotterbase/belongsTo",
+            "@type": "@id"
+        },
+        "belongsTo_Rev_unreversed": {
+            "@id": "http://sigmathling.kwarc.info/spotterbase/belongsTo",
+            "@type": "@id"
+        },
+        "belongsTo_Rev": {
+            "@reverse": "belongsTo_Rev_unreversed"
+        },
+        "contains": {
+            "@id": "http://sigmathling.kwarc.info/spotterbase/contains",
+            "@type": "@id"
+        },
+        "comment": {
+            "@id": "http://www.w3.org/2000/01/rdf-schema#comment"
+        },
+        "endPath": {
+            "@id": "http://sigmathling.kwarc.info/spotterbase/endPath",
+            "@type": "http://www.w3.org/2001/XMLSchema#string"
+        },
+        "startPath": {
+            "@id": "http://sigmathling.kwarc.info/spotterbase/startPath",
+            "@type": "http://www.w3.org/2001/XMLSchema#string"
+        },
+        "spotterVersion": {
+            "@id": "http://sigmathling.kwarc.info/spotterbase/spotterVersion",
+            "@type": "http://www.w3.org/2001/XMLSchema#string"
+        },
+        "withSpotter": {
+            "@id": "http://sigmathling.kwarc.info/spotterbase/withSpotter",
+            "@type": "@id"
+        },
+        "FragmentTarget": "http://sigmathling.kwarc.info/spotterbase/FragmentTarget",
+        "ListSelector": "http://sigmathling.kwarc.info/spotterbase/ListSelector",
+        "PathSelector": "http://sigmathling.kwarc.info/spotterbase/PathSelector",
+        "OffsetSelector": "http://sigmathling.kwarc.info/spotterbase/OffsetSelector",
+        "SimpleTagBody": "http://sigmathling.kwarc.info/spotterbase/SimpleTagBody"
     }
 }

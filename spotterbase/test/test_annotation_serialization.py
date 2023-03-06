@@ -8,7 +8,7 @@ from spotterbase.annotations.concepts import ANNOTATION_CONCEPT_RESOLVER
 from spotterbase.annotations.target import FragmentTarget, populate_standard_selectors
 from spotterbase.concept_graphs.jsonld_support import JsonLdConceptConverter
 from spotterbase.concept_graphs.oa_support import OA_JSONLD_CONTEXT
-from spotterbase.concept_graphs.sb_support import SB_JSONLD_CONTEXT
+from spotterbase.concept_graphs.sb_support import SB_JSONLD_CONTEXT, SB_CONTEXT_FILE
 from spotterbase.concept_graphs.sparql_populate import Populator
 from spotterbase.rdf import to_rdflib
 from spotterbase.sparql.endpoint import RdflibEndpoint
@@ -17,7 +17,7 @@ from spotterbase.test.mixins import GraphTestMixin
 
 class TestAnnotationSerialization(GraphTestMixin, unittest.TestCase):
     package_root = Path(__file__).parent.parent
-    with open(package_root / 'resources' / 'sb-context.jsonld') as fp:
+    with open(SB_CONTEXT_FILE) as fp:
         sb_context = json.load(fp)
     converter = JsonLdConceptConverter(
         contexts=[OA_JSONLD_CONTEXT, SB_JSONLD_CONTEXT],
