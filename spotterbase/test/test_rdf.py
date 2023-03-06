@@ -1,12 +1,15 @@
 import io
+import json
 import tempfile
 import unittest
 from pathlib import Path
 
+from spotterbase.concept_graphs.sb_support import SB_JSONLD_CONTEXT
 from spotterbase.rdf.base import BlankNode, Literal
 from spotterbase.rdf.uri import NameSpace, Vocabulary, Uri
 from spotterbase.rdf.serializer import TurtleSerializer, NTriplesSerializer, FileSerializer
 from spotterbase.rdf.vocab import RDF, XSD
+from spotterbase.utils.resources import RESOURCES_DIR
 
 
 class MyVocab(Vocabulary):
@@ -101,3 +104,11 @@ mv:thingA mv:someRel mv:thingA,
             l.to_py_val()
         with self.assertRaises(TypeError):
             Literal.from_py_val([2, 3])
+
+    def test_context_generation(self):
+        updated_sb_context = {'@context': SB_JSONLD_CONTEXT.export_to_json()}
+        SB_CONTEXT_FILE: Path = RESOURCES_DIR / 'sb-context.jsonld'
+        with open(SB_CONTEXT_FILE, 'r') as fp:
+            sb_context = json.load(fp)
+        self.assertEqual(sb_context, updated_sb_context,
+                         msg='\n The "sb-context.jsonld" file is not up-to-date. Please re-run "sb_support.py"')
