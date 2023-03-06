@@ -1,12 +1,11 @@
 import logging
 import urllib.parse
-from typing import Iterator
 
 from spotterbase.annotations.annotation import Annotation
 from spotterbase.annotations.tag_body import MultiTagBody
-from spotterbase.concept_graphs.concept_graph import Concept
 from spotterbase.config_loader import ConfigInt
 from spotterbase.corpora.interface import Document
+from spotterbase.rdf.base import TripleI
 from spotterbase.sb_vocab import SB
 from spotterbase.spotters.spotter import Spotter
 
@@ -36,13 +35,13 @@ def get_contained_substrings(document: Document) -> list[str]:
 class SimpleSubstringSpotter(Spotter):
     spotter_short_id = 'ssubstr'
 
-    def process_document(self, document: Document) -> Iterator[Concept]:
+    def process_document(self, document: Document) -> TripleI:
         tag_uris = [SUBSTRING_URI / urllib.parse.quote_plus(tag) for tag in get_contained_substrings(document)]
         annotation = Annotation(uri=document.get_uri() + f'#{self.spotter_short_id}.anno',
                                 target_uri=document.get_uri(),
                                 body=MultiTagBody(tags=tag_uris),
                                 creator_uri=self.ctx.run_uri)
-        yield annotation
+        yield from annotation.to_triples()
 
 # TODO: The following code should be into into general code for running a spotter
 

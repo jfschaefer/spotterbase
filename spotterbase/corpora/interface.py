@@ -43,3 +43,6 @@ class Corpus(abc.ABC):
     @abc.abstractmethod
     def __iter__(self) -> Iterator[Document]:
         raise NotImplementedError()
+
+    def get_documents(self) -> Iterator[Document]:
+        return iter(self)

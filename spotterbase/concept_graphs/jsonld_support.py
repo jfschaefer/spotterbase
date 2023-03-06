@@ -4,6 +4,7 @@ from typing import Optional, Any
 
 from spotterbase.concept_graphs.concept_graph import PredInfo, Concept, ConceptInfo, AttrInfo
 from spotterbase.concept_graphs.concept_resolver import ConceptResolver
+from spotterbase.rdf.base import Literal
 from spotterbase.rdf.uri import Uri, NameSpace
 
 
@@ -145,25 +146,31 @@ class JsonLdConceptConverter:
                     a_info = c_info.attrs_by_uri[uri]
                 else:
                     raise Exception(f'Unknown key {key} for concept {type(concept)} ({type_})')
-            setattr(concept, a_info.attr_name, self._import_json_ld_value(json_ld[key], a_info.pred_info.literal_type))
+            v = self._import_json_ld_value(json_ld[key], a_info.literal_type,
+                                           expected_id=a_info.pred_info.json_ld_type_is_id)
+            setattr(concept, a_info.attr_name, v)
 
         return concept
 
-    def _import_json_ld_value(self, value, expected_literal_type: Optional[Uri]):
+    def _import_json_ld_value(self, value, expected_literal_type: Optional[Uri], expected_id: bool = False):
         if isinstance(value, list):
-            return [self._import_json_ld_value(v, expected_literal_type) for v in value]
+            return [self._import_json_ld_value(v, expected_literal_type, expected_id) for v in value]
         elif expected_literal_type:
-            # TODO: properly support literals
-            return value
+            assert not expected_id
+            if isinstance(value, str):
+                literal = Literal(value, expected_literal_type)
+            else:
+                literal = Literal.from_py_val(value, datatype=expected_literal_type)
+            return literal.to_py_val()
         elif isinstance(value, dict):
             if 'type' in value:
                 return self.json_ld_to_concept(value, expect_non_root_concept=True)
             if len(value) != 1 or 'id' not in value:
                 raise Exception(f'Unexpected value {value} - did you forget to specify a type?')
         elif isinstance(value, str):
+            if not expected_id:
+                raise Exception(f'Expected neither a string literal nor an identifier, but got {value!r}')
             return self.uri_from_str(value)
-#         elif isinstance(value, int):
-#             return value
         else:
             raise Exception(f'Value {value!r} has unsupported type {type(value)}')
 

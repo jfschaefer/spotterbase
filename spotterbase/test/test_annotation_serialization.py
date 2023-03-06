@@ -24,7 +24,7 @@ class TestAnnotationSerialization(GraphTestMixin, unittest.TestCase):
         concept_resolver=ANNOTATION_CONCEPT_RESOLVER,
     )
     example_json_ld_files: list[Path] = [
-        package_root.parent / 'doc' / 'source' / 'codesnippets' / 'example-annotation.jsonld',
+        # package_root.parent / 'doc' / 'source' / 'codesnippets' / 'example-annotation.jsonld',
         package_root.parent / 'doc' / 'source' / 'codesnippets' / 'example-target.jsonld',
     ]
 

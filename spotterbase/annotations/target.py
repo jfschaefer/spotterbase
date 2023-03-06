@@ -42,6 +42,7 @@ class FragmentTarget(Concept):
 
 def _populate_without_refinements(fragment_targets: SubConcepts, property_path: PropertyPath, populator: Populator):
     uri_to_concept: dict[Uri, FragmentTarget] = {}
+    fragment_targets = fragment_targets
     for concept, root_uri in fragment_targets:
         assert isinstance(concept, FragmentTarget)
         if hasattr(concept, 'selectors') and concept.selectors:

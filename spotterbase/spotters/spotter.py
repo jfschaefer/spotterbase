@@ -1,9 +1,8 @@
 from __future__ import annotations
 
 import abc
-from typing import Iterator, Callable
+from typing import Callable
 
-from spotterbase.concept_graphs.concept_graph import Concept
 from spotterbase.corpora.interface import Document
 from spotterbase.rdf.base import TripleI
 from spotterbase.rdf.uri import Uri
@@ -31,7 +30,7 @@ class Spotter(abc.ABC):
         return SpotterContext(run_uri=Uri.uuid()), iter(())
 
     @abc.abstractmethod
-    def process_document(self, document: Document) -> Iterator[Concept]:
+    def process_document(self, document: Document) -> TripleI:
         ...
 
 

@@ -25,8 +25,8 @@ class ArXMLivUris:
     @classmethod
     def get_corpus_uri(cls, release: str, centi: bool = False) -> Uri:
         if centi:
-            return ArXMLivUris.arxmliv / 'centi' / release
-        return ArXMLivUris.arxmliv / release
+            return ArXMLivUris.arxmliv / 'centi' / release + '/'
+        return ArXMLivUris.arxmliv / release + '/'
 
     @classmethod
     def get_metadata_graph_uri(cls, release: str) -> Uri:

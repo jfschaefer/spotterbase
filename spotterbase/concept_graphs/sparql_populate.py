@@ -35,22 +35,35 @@ SpecialPopulator: TypeAlias = Callable[[SubConcepts, PropertyPath, 'Populator'],
 
 class Populator:
     def __init__(self, concept_resolver: ConceptResolver, endpoint: SparqlEndpoint,
-                 special_populators: Optional[dict[type[Concept], list[SpecialPopulator]]] = None):
+                 special_populators: Optional[dict[type[Concept], list[SpecialPopulator]]] = None,
+                 chunk_size: int = 1000):
         self.concept_resolver: ConceptResolver = concept_resolver
         self.endpoint = endpoint
         self.special_populators: dict[type[Concept], list[SpecialPopulator]] = special_populators or {}
+        self.chunk_size: int = chunk_size
 
-    def get_concepts(self, uris: Iterable[Uri]) -> Iterator[Concept]:
-        type_info = self._get_types(list(uris))
-        concepts: list[Concept] = []
-        for uri, types in type_info.items():
-            concept = self._concept_from_types(types)
-            if concept is None:
-                logger.warning(f'Cannot infer concept for {uri} from types {types}')
-                continue
-            concepts.append(concept(uri=uri))
-        self._fill_concepts([(concept, RootUri(concept.uri)) for concept in concepts], SequencePropertyPath([]))
-        yield from concepts
+    def get_concepts(self, uris: Iterable[Uri], warn_if_initial_uri_unresolvable: bool = True) -> Iterator[Concept]:
+        uris_iterator = iter(uris)
+        while True:
+            chunk: list[Uri] = []
+            for uri in uris_iterator:
+                chunk.append(uri)
+                if len(chunk) >= self.chunk_size:
+                    break
+            if not chunk:   # done
+                return
+
+            type_info = self._get_types(list(chunk))
+            concepts: list[Concept] = []
+            for uri, types in type_info.items():
+                concept = self._concept_from_types(types)
+                if concept is None:
+                    if warn_if_initial_uri_unresolvable:
+                        logger.warning(f'Cannot infer concept for {uri} from types {types}')
+                    continue
+                concepts.append(concept(uri=uri))
+            self._fill_concepts([(concept, RootUri(concept.uri)) for concept in concepts], SequencePropertyPath([]))
+            yield from concepts
 
     def _concept_from_types(self, types: list[Uri]) -> Optional[type[Concept]]:
         for type_ in types:
@@ -62,6 +75,7 @@ class Populator:
         concepts_by_type: dict[type[Concept], SubConcepts] = defaultdict(list)
         for concept, root_uri in concepts:
             concepts_by_type[type(concept)].append((concept, root_uri))
+        # TODO: fill concept uris if they are not set
 
         for concept_type, concepts_of_that_type in concepts_by_type.items():
             info = concept_type.concept_info

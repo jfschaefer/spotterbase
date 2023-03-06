@@ -13,6 +13,8 @@ from typing import Any, Optional
 
 import configargparse   # type: ignore
 
+from spotterbase.rdf.uri import Uri
+
 logger = logging.getLogger(__name__)
 
 DEFAULT_CONFIG_PATHS: list[Path] = list(map(lambda p: p.expanduser(), [
@@ -111,6 +113,10 @@ class SimpleExtension(ConfigExtension):
         self.kwargs = kwargs
         if add_to_default_configs:
             ConfigLoader.default_extensions.append(self)
+        self.__post_init__()
+
+    def __post_init__(self):
+        pass
 
     def prepare_argparser(self, argparser: argparse.ArgumentParser):
         argparser.add_argument(self.name, help=self.description, **self.kwargs)
@@ -126,8 +132,9 @@ class SimpleExtension(ConfigExtension):
 class ConfigFlag(SimpleExtension):
     value: bool = False
 
-    def prepare_argparser(self, argparser: argparse.ArgumentParser):
-        argparser.add_argument(self.name, action='store_true', help=self.description, **self.kwargs)
+    def __post_init__(self):
+        assert 'action' not in self.kwargs
+        self.kwargs['action'] = 'store_true'
 
     def __bool__(self) -> bool:
         return self.value
@@ -140,8 +147,25 @@ class ConfigString(SimpleExtension):
 class ConfigInt(SimpleExtension):
     value: Optional[int] = None
 
-    def prepare_argparser(self, argparser: argparse.ArgumentParser):
-        argparser.add_argument(self.name, help=self.description, type=int, **self.kwargs)
+    def __post_init__(self):
+        assert 'type' not in self.kwargs
+        self.kwargs['type'] = int
+
+
+class ConfigUri(SimpleExtension):
+    value: Optional[Uri] = None
+
+    def __post_init__(self):
+        assert 'type' not in self.kwargs
+        self.kwargs['type'] = Uri
+
+
+class ConfigPath(SimpleExtension):
+    value: Optional[Path] = None
+
+    def __post_init__(self):
+        assert 'type' not in self.kwargs
+        self.kwargs['type'] = Path
 
 
 def auto():

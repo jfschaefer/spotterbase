@@ -15,7 +15,7 @@ class SB_PRED:
     belongsTo = PredInfo(SB.belongsTo, json_ld_term='belongsTo', json_ld_type_is_id=True)
     belongsTo_Rev = PredInfo(SB.belongsTo, json_ld_term='belongsTo_Rev', json_ld_type_is_id=True, is_reversed=True)
     contains = PredInfo(SB.contains, json_ld_term='contains', json_ld_type_is_id=True)
-    comment = PredInfo(RDFS.comment, json_ld_term='comment')
+    comment = PredInfo(RDFS.comment, json_ld_term='comment', literal_type=XSD.string)
 
     # selectors:
     endPath = PredInfo(SB.endPath, json_ld_term='endPath', literal_type=XSD.string)

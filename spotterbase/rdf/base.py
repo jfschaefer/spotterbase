@@ -50,6 +50,7 @@ PY2LIT_DT: dict[Uri, tuple[list[type], Callable[[Any], str]]] = {
     XSD.float: ([float, int], lambda f: f'{f:E}'),
     XSD.boolean: ([bool], lambda b: str(b).lower()),
     XSD.dateTime: ([datetime.datetime], lambda d: d.isoformat()),
+    XSD.nonNegativeInteger: ([int], lambda i: str(i))
 }
 
 

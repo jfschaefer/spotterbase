@@ -43,7 +43,7 @@ class ArxivId:
     def yymm(self) -> str:
         if match := self.arxiv_id_regex.match(self.identifier):
             return match.group('yymm')
-        raise InvalidArxivId(self.arxiv_id_regex)
+        raise InvalidArxivId(self.identifier)
 
 
 class ArxivCategory:

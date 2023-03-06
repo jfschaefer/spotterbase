@@ -61,6 +61,11 @@ class AttrInfo:
 
     target_type: TargetConceptInfo = TargetNoConcept
     multi_target: bool = False
+    literal_type: Optional[Uri] = None      # copied from pred_info if not set explicitly
+
+    def __post_init__(self):
+        if self.literal_type is None:
+            self.literal_type = self.pred_info.literal_type
 
 
 class ConceptInfo:
@@ -114,9 +119,8 @@ def _concept_to_triples(concept: Concept, node: Subject) -> TripleI:
         val_nodes: list[Object] = []
         val_node: Object
         for val in vals:
-            if p_info.literal_type:
-                # TODO: Proper treatment of literals
-                val_nodes.append(Literal(str(val), p_info.literal_type))
+            if attr.literal_type:
+                val_nodes.append(Literal.from_py_val(val, attr.literal_type))
             else:
                 val_node, triples = _to_triples(val)
                 yield from triples
@@ -154,4 +158,5 @@ def _to_triples(thing) -> tuple[Subject, TripleI]:
     elif isinstance(thing, Uri):
         return thing, iter(())
     else:
-        raise Exception(f'Unsupported type {type(thing)}')
+        raise Exception(f'Unsupported type {type(thing)} of {thing!r}. '
+                        'Did you forget to specify the literal type in the attribute info?')

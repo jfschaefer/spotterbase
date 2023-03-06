@@ -6,6 +6,7 @@ from spotterbase.concept_graphs.concept_graph import Concept, ConceptInfo, AttrI
 from spotterbase.concept_graphs.oa_support import OA_PRED
 from spotterbase.concept_graphs.sb_support import SB_PRED
 from spotterbase.rdf.base import Uri
+from spotterbase.rdf.vocab import XSD
 from spotterbase.sb_vocab import SB
 
 
@@ -42,7 +43,7 @@ class Tag(Concept):
         concept_type=SB.Tag,
         attrs=[
             AttrInfo('belongs_to', SB_PRED.belongsTo),
-            AttrInfo('label', OA_PRED.label),
+            AttrInfo('label', OA_PRED.label, literal_type=XSD.string),
             AttrInfo('comment', SB_PRED.comment),
         ],
         is_root_concept=True
@@ -64,7 +65,7 @@ class TagSet(Concept):
         concept_type=SB.TagSet,
         attrs=[
             AttrInfo('tags', SB_PRED.belongsTo_Rev, multi_target=True),
-            AttrInfo('label', OA_PRED.label),
+            AttrInfo('label', OA_PRED.label, literal_type=XSD.string),
             AttrInfo('comment', SB_PRED.comment),
         ],
         is_root_concept=True
