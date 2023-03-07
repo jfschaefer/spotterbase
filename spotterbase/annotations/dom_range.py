@@ -62,15 +62,15 @@ class DomPoint:
 
 
 class DomRange:
-    def __init__(self, from_: DomPoint | DomRange, to: DomPoint | DomRange):
-        if isinstance(from_, DomPoint):
-            self.start = from_
+    def __init__(self, start: DomPoint | DomRange, end: DomPoint | DomRange):
+        if isinstance(start, DomPoint):
+            self.start = start
         else:
-            self.start = from_.start
-        if isinstance(to, DomPoint):
-            self.end = to
+            self.start = start.start
+        if isinstance(end, DomPoint):
+            self.end = end
         else:
-            self.end = to.end
+            self.end = end.end
 
     def __eq__(self, other):
         if not isinstance(other, DomRange):

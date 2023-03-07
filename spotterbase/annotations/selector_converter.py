@@ -39,6 +39,11 @@ class SelectorConverter:
         if isinstance(selector, PathSelector):
             return DomRange(self._path_to_dom_point(selector.start),
                             self._path_to_dom_point(selector.end))
+        elif isinstance(selector, OffsetSelector):
+            return DomRange(
+                start=self.offset_converter.get_dom_point(selector.start, offset_type=OffsetType.NodeText),
+                end=self.offset_converter.get_dom_point(selector.end, offset_type=OffsetType.NodeText),
+            )
         else:
             raise Exception(f'Unsupported selector {type(selector)}')
 
@@ -79,10 +84,8 @@ class SelectorConverter:
         return [path_selector, offset_selector]
 
     def dom_to_offset_selector(self, dom_range: DomRange) -> OffsetSelector:
-        return OffsetSelector(
-            start=self.offset_converter.get_offset(dom_range.start, offset_type=OffsetType.NodeText),
-            end=self.offset_converter.get_offset(dom_range.end, offset_type=OffsetType.NodeText)
-        )
+        dom_offset_range = self.offset_converter.convert_dom_range(dom_range)
+        return OffsetSelector(start=dom_offset_range.start, end=dom_offset_range.end)
 
     def dom_to_path_selector(self, dom_range: DomRange) -> PathSelector:
         return PathSelector(

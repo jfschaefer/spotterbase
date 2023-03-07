@@ -6,7 +6,26 @@ import enum
 
 from lxml.etree import _Element, _Comment
 
-from spotterbase.annotations.dom_range import DomPoint
+from spotterbase.annotations.dom_range import DomPoint, DomRange
+
+
+class DomOffsetRange:
+    """ A DomRange, except that it uses node offsets as created by the OffsetConverter """
+    __slots__ = ('start', 'end', 'converter')
+    start: int
+    end: int
+    converter: OffsetConverter
+
+    def __init__(self, start: int, end: int, converter: OffsetConverter):
+        self.start = start
+        self.end = end
+        self.converter = converter
+
+    def to_dom_range(self) -> DomRange:
+        return DomRange(
+            self.converter.get_dom_point(self.start, OffsetType.NodeText),
+            self.converter.get_dom_point(self.end, OffsetType.NodeText)
+        )
 
 
 class OffsetType(enum.Enum):
@@ -152,3 +171,10 @@ class OffsetConverter:
                                     key=lambda entry: entry[1].get_offsets_of_type(offset_type)[1]) - 1
         node, offset_data = self._nodes_post_order[index]
         return DomPoint(node, tail_offset=offset - offset_data.get_offsets_of_type(offset_type)[1] - 1)
+
+    def convert_dom_range(self, dom_range: DomRange) -> DomOffsetRange:
+        return DomOffsetRange(
+            start=self.get_offset(dom_range.start, offset_type=OffsetType.NodeText),
+            end=self.get_offset(dom_range.end, offset_type=OffsetType.NodeText),
+            converter=self
+        )

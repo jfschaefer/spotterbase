@@ -1,5 +1,5 @@
 import re
-from typing import TypeVar
+from typing import TypeVar, Sequence
 
 __all__ = ['LStr']
 
@@ -7,11 +7,11 @@ T = TypeVar('T', bound='LStr')   # TODO: Replace with ``typing.Self'' in Python 
 
 
 class LStr:
-    def __init__(self, string: str, backrefs: list[int]):
+    def __init__(self, string: str, backrefs: Sequence[int]):
         self.string = string
         self.backrefs = backrefs
 
-    def new(self: T, new_string: str, new_backrefs: list[int]) -> T:
+    def new(self: T, new_string: str, new_backrefs: Sequence[int]) -> T:
         """ Intended to be overwritten in subclasses if more corpora has to be copied (e.g. a source document) """
         return self.__class__(new_string, new_backrefs)
 

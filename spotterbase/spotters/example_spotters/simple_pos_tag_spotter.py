@@ -91,23 +91,3 @@ class SimplePosTagSpotter(UriGeneratorMixin, Spotter):
 if __name__ == '__main__':
     from spotterbase.spotters import spotter_runner
     spotter_runner.main(SimplePosTagSpotter)
-
-
-# if __name__ == '__main__':
-#     def test_run():
-#         config_loader.auto()
-#         ctx = SimplePosTagSpotter.setup_run()[0]
-#         spotter = SimplePosTagSpotter(ctx)
-#         document = Resolver.get_document(ArXMLivUris.get_corpus_uri('2020') + '1910.06709')
-#         assert document is not None, 'Document not found'
-#         concepts = list(spotter.process_document(document))
-#         with document.open() as doc_fp:
-#             with open('/tmp/document.html', 'wb') as out_fp:
-#                 out_fp.write(doc_fp.read())
-#         jsonld_converter = JsonLdConceptConverter(contexts=[OA_JSONLD_CONTEXT, SB_JSONLD_CONTEXT],
-#                                                   concept_resolver=ANNOTATION_CONCEPT_RESOLVER)
-#         with open('/tmp/annotations.json', 'w') as fp:
-#             json.dump([jsonld_converter.concept_to_json_ld(concept) for concept in itertools.chain(
-#                 concepts, (spotter.tag_set,), spotter.tags.values())], fp, indent=4)
-#
-#     test_run()
