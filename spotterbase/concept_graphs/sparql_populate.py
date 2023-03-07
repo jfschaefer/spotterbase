@@ -181,7 +181,7 @@ SELECT ?uri ?type WHERE {{
         body = '    \n'.join(lines)
         concept_by_uri: dict[Uri, Concept] = {uri: concept for concept, uri in concepts}
         response = self.endpoint.query(f'''
-SELECT ?uri {" ".join(var_to_attr.keys())} WHERE {{
+SELECT DISTINCT ?uri {" ".join(var_to_attr.keys())} WHERE {{
     VALUES ?uri {{ {" ".join(format(uri, '<>') for uri in concept_by_uri)} }}
     {body}
 }}

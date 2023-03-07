@@ -39,7 +39,7 @@ def json_binding_to_object(d: dict[str, str], bnode_map: defaultdict[str, BlankN
     match d['type']:
         case 'uri':
             return Uri(d['value'])
-        case 'literal':
+        case 'literal' | 'typed-literal':
             if 'xml:lang' in d:
                 return Literal(d['value'], vocab.RDF.langString, d['xml:lang'])
             elif 'datatype' in d:
@@ -49,4 +49,4 @@ def json_binding_to_object(d: dict[str, str], bnode_map: defaultdict[str, BlankN
         case 'bnode':
             return bnode_map[d['value']]
         case other:
-            raise Exception(f'Unsupported type {other}')
+            raise Exception(f'Unsupported type {other} in entry {d}')

@@ -13,12 +13,12 @@ from spotterbase.sparql.endpoint import SparqlEndpoint
 #         self.populator = populator
 
 
-def load_all_concepts_from_endpoint(endpoint: SparqlEndpoint, populator: Populator) -> Iterator[Concept]:
-    response = endpoint.query('''
-SELECT DISTINCT ?uri WHERE {
-    ?uri a ?type .
+def load_all_concepts_from_graph(endpoint: SparqlEndpoint, graph: Uri, populator: Populator) -> Iterator[Concept]:
+    response = endpoint.query(f'''
+SELECT DISTINCT ?uri WHERE {{
+    GRAPH {graph:<>} {{ ?uri a ?type . }}
     FILTER isIRI(?uri)
-}
+}}
     ''')
 
     def uri_iterator() -> Iterator[Uri]:

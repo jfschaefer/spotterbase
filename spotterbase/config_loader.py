@@ -104,7 +104,7 @@ class LogConfigExtension(ConfigExtension):
 ConfigLoader.default_extensions.append(LogConfigExtension())
 
 
-class SimpleExtension(ConfigExtension):
+class SimpleConfigExtension(ConfigExtension):
     value: Any
 
     def __init__(self, name: str, description: str, add_to_default_configs: bool = True, **kwargs):
@@ -129,7 +129,7 @@ class SimpleExtension(ConfigExtension):
         return self.value == other
 
 
-class ConfigFlag(SimpleExtension):
+class ConfigFlag(SimpleConfigExtension):
     value: bool = False
 
     def __post_init__(self):
@@ -140,11 +140,11 @@ class ConfigFlag(SimpleExtension):
         return self.value
 
 
-class ConfigString(SimpleExtension):
+class ConfigString(SimpleConfigExtension):
     value: Optional[str] = None
 
 
-class ConfigInt(SimpleExtension):
+class ConfigInt(SimpleConfigExtension):
     value: Optional[int] = None
 
     def __post_init__(self):
@@ -152,7 +152,7 @@ class ConfigInt(SimpleExtension):
         self.kwargs['type'] = int
 
 
-class ConfigUri(SimpleExtension):
+class ConfigUri(SimpleConfigExtension):
     value: Optional[Uri] = None
 
     def __post_init__(self):
@@ -160,7 +160,7 @@ class ConfigUri(SimpleExtension):
         self.kwargs['type'] = Uri
 
 
-class ConfigPath(SimpleExtension):
+class ConfigPath(SimpleConfigExtension):
     value: Optional[Path] = None
 
     def __post_init__(self):

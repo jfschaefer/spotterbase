@@ -4,12 +4,13 @@ import logging
 from spotterbase import config_loader
 from spotterbase.annotations.concepts import ANNOTATION_CONCEPT_RESOLVER
 from spotterbase.annotations.target import FragmentTarget, populate_standard_selectors
-from spotterbase.concept_graphs.concept_loading import load_all_concepts_from_endpoint
+from spotterbase.concept_graphs.concept_loading import load_all_concepts_from_graph
 from spotterbase.concept_graphs.jsonld_support import JsonLdConceptConverter
 from spotterbase.concept_graphs.oa_support import OA_JSONLD_CONTEXT
 from spotterbase.concept_graphs.sb_support import SB_JSONLD_CONTEXT
 from spotterbase.concept_graphs.sparql_populate import Populator
-from spotterbase.sparql.endpoint import RdflibEndpoint
+from spotterbase.rdf.uri import Uri
+from spotterbase.sparql.sb_sparql import get_work_endpoint, get_tmp_graph_uri
 from spotterbase.utils.logutils import ProgressLogger
 
 logger = logging.getLogger(__name__)
@@ -21,32 +22,41 @@ def main():
 
     config_loader.auto()
 
-    endpoint = RdflibEndpoint()
-    logger.info(f'Loading data from {rdf_file.value}')
-    endpoint.graph.parse(rdf_file.value)
-    logger.info(f'Loaded {len(endpoint.graph)} triples')
-
+    endpoint = get_work_endpoint()
     populator = Populator(concept_resolver=ANNOTATION_CONCEPT_RESOLVER,
                           endpoint=endpoint,
                           special_populators={
                               FragmentTarget: [populate_standard_selectors]
-                          })
+                          },
+                          chunk_size=50)
 
-    concepts = load_all_concepts_from_endpoint(endpoint, populator)
-    logger.info('Determined potential concepts URIs')
+    graph_uri = get_tmp_graph_uri()
 
-    converter = JsonLdConceptConverter(
-        contexts=[OA_JSONLD_CONTEXT, SB_JSONLD_CONTEXT],
-        concept_resolver=ANNOTATION_CONCEPT_RESOLVER,
-    )
+    try:
+        endpoint.update(f'CREATE GRAPH {graph_uri:<>}')
+        file = rdf_file.value
+        assert file is not None
+        logger.info(f'Loading data from {Uri(file)} into {graph_uri}')
+        endpoint.update(f'LOAD {Uri(file):<>} INTO GRAPH {graph_uri:<>}')
+        logger.info('Finished loading data')
+        concepts = load_all_concepts_from_graph(endpoint, graph_uri, populator)
+        logger.info('Determined potential concepts URIs')
 
-    progress_logger = ProgressLogger(logger, 'Status update: Processed {progress} concepts')
+        converter = JsonLdConceptConverter(
+            contexts=[OA_JSONLD_CONTEXT, SB_JSONLD_CONTEXT],
+            concept_resolver=ANNOTATION_CONCEPT_RESOLVER,
+        )
 
-    logger.info('Loading concepts and converting them to JSON-LD (this may take a while)')
-    results: list = []
-    for i, concept in enumerate(concepts):
-        progress_logger.update(i)
-        results.append(converter.concept_to_json_ld(concept))
+        progress_logger = ProgressLogger(logger, 'Status update: Processed {progress} concepts')
+
+        logger.info('Loading concepts and converting them to JSON-LD (this may take a while)')
+        results: list = []
+        for i, concept in enumerate(concepts):
+            progress_logger.update(i)
+            results.append(converter.concept_to_json_ld(concept))
+    finally:
+        logger.info(f'Dropping temporarily created graph {graph_uri}')
+        endpoint.update(f'DROP GRAPH {graph_uri:<>}')
 
     file = jsonld_file.value
     assert file is not None

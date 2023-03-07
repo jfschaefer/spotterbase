@@ -33,9 +33,8 @@ but doesn't because of https://github.com/openlink/virtuoso-opensource/issues/76
 
 Possible solution: gunzip in /tmp first (works without gzip)
 
-
 Also interesting: https://gist.github.com/jonlazaro/6934282
-
+Also useful: https://vos.openlinksw.com/owiki/wiki/VOS/VOSSparqlProtocol#HTTP%20Request%20Methods
 
 Relevant for using sparql endpoint from browser (e.g. javascript):
 https://vos.openlinksw.com/owiki/wiki/VOS/VirtTipsAndTricksCORsEnableSPARQLURLs

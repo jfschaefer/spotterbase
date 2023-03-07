@@ -9,17 +9,17 @@ import rdflib
 from rdflib.extras.external_graph_libs import rdflib_to_networkx_multidigraph
 
 from spotterbase.config_loader import ConfigLoader
-from spotterbase.sparql.endpoint import get_endpoint
+from spotterbase.sparql.sb_sparql import get_data_endpoint
 
 logger = logging.getLogger(__name__)
 
 
 def visualize_queryfile(query_file: Path):
-    endpoint = get_endpoint()
+    endpoint = get_data_endpoint()
 
     with open(query_file, 'r') as fp:
         query = fp.read()
-    rdf = endpoint.get(query, accept='application/rdf+xml')
+    rdf = endpoint.send_query(query, accept='application/rdf+xml')
     print(rdf)
     graph = rdflib.Graph()
     graph.parse(io.StringIO(rdf), format='application/rdf+xml')
