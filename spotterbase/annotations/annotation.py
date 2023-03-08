@@ -12,7 +12,7 @@ class Annotation(Concept):
     concept_info = ConceptInfo(
         concept_type=OA.Annotation,
         attrs=[
-            AttrInfo('target', OA_PRED.target),
+            AttrInfo('target_uri', OA_PRED.target),
             AttrInfo('body', OA_PRED.body, target_type=TargetUnknownConcept),
             AttrInfo('creator_uri', OA_PRED.creator),
         ],
@@ -27,6 +27,6 @@ class Annotation(Concept):
     def __init__(self, uri: Optional[Uri] = None, target_uri: Optional[Uri] = None,
                  body: Optional[Any] = None, creator_uri: Optional[Uri] = None):
         self._set_attr_if_not_none('uri', uri)
-        self._set_attr_if_not_none('target', target_uri)
+        self._set_attr_if_not_none('target_uri', target_uri)
         self._set_attr_if_not_none('body', body)
         self._set_attr_if_not_none('creator_uri', creator_uri)

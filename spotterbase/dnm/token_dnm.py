@@ -54,10 +54,11 @@ class TokenBasedDnm(Dnm):
         return self.offset_converter
 
     @classmethod
-    def from_token_generator(cls: type[TokenBasedDnm_T], tree: _ElementTree, generator: TokenGenerator)\
+    def from_token_generator(cls: type[TokenBasedDnm_T], tree: _ElementTree, generator: TokenGenerator,
+                             offset_converter: Optional[OffsetConverter] = None)\
             -> TokenBasedDnm_T:
         tokens = list(generator.process(tree.getroot()))
-        return cls(tree, tokens)
+        return cls(tree, tokens, offset_converter)
 
     def get_dnm_str(self, dnm_range: Optional[DnmRange] = None) -> DnmStr:
         if dnm_range is not None:

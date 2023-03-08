@@ -77,7 +77,7 @@ class DefaultGenerators:
             # to ignore
             'ltx_bibliography': '', 'ltx_page_footer': '', 'ltx_dates': '', 'ltx_authors': '',
             'ltx_role_affiliationtext': '', 'ltx_tag_equation': '', 'ltx_classification': '',
-            'ltx_tag_section': '', 'ltx_tag_subsection': '',
+            'ltx_tag_section': '', 'ltx_tag_subsection': '', 'ltx_note_mark': '',
             # to replace
             'ltx_equationgroup': 'MathGroup', 'ltx_cite': 'LtxCite',
             'ltx_ref': 'LtxRef', 'ltx_ref_tag': 'LtxRef', 'ltx_equation': 'MathEquation',

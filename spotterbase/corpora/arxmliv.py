@@ -1,5 +1,6 @@
 import abc
 import re
+import zipfile
 from pathlib import Path
 from typing import IO, Iterator, Optional
 
@@ -66,7 +67,7 @@ class ZipArXMLivDocument(ArXMLivDocument):
     def open(self, *args, **kwargs) -> IO:
         zf = SHARED_ZIP_CACHE[self.path_to_zipfile]
         try:
-            return zf.open(self.filename, *args, **kwargs)
+            return (zipfile.Path(zf) / self.filename).open(*args, **kwargs)
         except KeyError as e:
             missing = DocumentNotFoundError(f'Failed to find {self.filename} in {self.path_to_zipfile}: {e}')
             missing.__suppress_context__ = True

@@ -5,12 +5,15 @@ from spotterbase import config_loader
 from spotterbase.annotations.concepts import ANNOTATION_CONCEPT_RESOLVER
 from spotterbase.annotations.target import FragmentTarget, populate_standard_selectors
 from spotterbase.concept_graphs.concept_loading import load_all_concepts_from_graph
+from spotterbase.concept_graphs.concept_resolver import ConceptResolver
 from spotterbase.concept_graphs.jsonld_support import JsonLdConceptConverter
 from spotterbase.concept_graphs.oa_support import OA_JSONLD_CONTEXT
 from spotterbase.concept_graphs.sb_support import SB_JSONLD_CONTEXT
 from spotterbase.concept_graphs.sparql_populate import Populator
 from spotterbase.rdf.uri import Uri
 from spotterbase.sparql.sb_sparql import get_work_endpoint, get_tmp_graph_uri
+from spotterbase.special_concepts.sbx import SBX_JSONLD_CONTEXT
+from spotterbase.special_concepts.sbx_concept_resolver import SBX_CONCEPT_RESOLVER
 from spotterbase.utils.logutils import ProgressLogger
 
 logger = logging.getLogger(__name__)
@@ -23,11 +26,9 @@ def main():
     config_loader.auto()
 
     endpoint = get_work_endpoint()
-    populator = Populator(concept_resolver=ANNOTATION_CONCEPT_RESOLVER,
+    populator = Populator(concept_resolver=ConceptResolver.merged(ANNOTATION_CONCEPT_RESOLVER, SBX_CONCEPT_RESOLVER),
                           endpoint=endpoint,
-                          special_populators={
-                              FragmentTarget: [populate_standard_selectors]
-                          },
+                          special_populators={FragmentTarget: [populate_standard_selectors]},
                           chunk_size=50)
 
     graph_uri = get_tmp_graph_uri()
@@ -43,8 +44,8 @@ def main():
         logger.info('Determined potential concepts URIs')
 
         converter = JsonLdConceptConverter(
-            contexts=[OA_JSONLD_CONTEXT, SB_JSONLD_CONTEXT],
-            concept_resolver=ANNOTATION_CONCEPT_RESOLVER,
+            contexts=[OA_JSONLD_CONTEXT, SB_JSONLD_CONTEXT, SBX_JSONLD_CONTEXT],
+            concept_resolver=populator.concept_resolver,
         )
 
         progress_logger = ProgressLogger(logger, 'Status update: Processed {progress} concepts')

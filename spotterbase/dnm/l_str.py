@@ -51,3 +51,9 @@ class LStr:
                 str_end = i + 1
                 break
         return self[str_start:str_end]
+
+    def lower(self: T) -> T:
+        return self.new(self.string.lower(), self.backrefs)
+
+    def upper(self: T) -> T:
+        return self.new(self.string.upper(), self.backrefs)

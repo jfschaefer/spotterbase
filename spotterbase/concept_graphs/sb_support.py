@@ -33,7 +33,10 @@ SB_JSONLD_CONTEXT: JsonLdContext = JsonLdContext(
         ('ListSelector', SB.ListSelector),
         ('PathSelector', SB.PathSelector),
         ('OffsetSelector', SB.OffsetSelector),
-        ('SimpleTagBody', SB.SimpleTagBody)
+        ('SimpleTagBody', SB.SimpleTagBody),
+        ('SpotterRun', SB.SpotterRun),
+        ('TagSet', SB.TagSet),
+        ('Tag', SB.Tag),
     ]
 )
 

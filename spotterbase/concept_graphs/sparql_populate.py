@@ -201,6 +201,8 @@ SELECT DISTINCT ?uri {" ".join(var_to_attr.keys())} WHERE {{
                 if var[1:] not in row:
                     continue
                 val = row[var[1:]]
+                if val is None:
+                    continue
                 if hasattr(concept, a_info.attr_name):
                     logger.warning(f'Concept already has attribute {a_info.attr_name}')
                 if isinstance(val, Literal):
@@ -212,7 +214,8 @@ SELECT DISTINCT ?uri {" ".join(var_to_attr.keys())} WHERE {{
                 elif isinstance(val, Uri):
                     setattr(concept, a_info.attr_name, val)
                 else:
-                    raise TypeError(f'Unexpected type {type(val)}')
+                    raise TypeError(f'Unexpected type {type(val)} for attribute {a_info.attr_name} '
+                                    f'of concept {type(concept)}')
 
     def _set_plain_multival_attributes(self, concepts: SubConcepts, info: ConceptInfo, property_path: PropertyPath):
         """ Fills in attributes that can have multiple plain values (Uris or literals) """

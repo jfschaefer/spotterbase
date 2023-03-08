@@ -49,6 +49,9 @@
         "ListSelector": "http://sigmathling.kwarc.info/spotterbase/ListSelector",
         "PathSelector": "http://sigmathling.kwarc.info/spotterbase/PathSelector",
         "OffsetSelector": "http://sigmathling.kwarc.info/spotterbase/OffsetSelector",
-        "SimpleTagBody": "http://sigmathling.kwarc.info/spotterbase/SimpleTagBody"
+        "SimpleTagBody": "http://sigmathling.kwarc.info/spotterbase/SimpleTagBody",
+        "SpotterRun": "http://sigmathling.kwarc.info/spotterbase/SpotterRun",
+        "TagSet": "http://sigmathling.kwarc.info/spotterbase/TagSet",
+        "Tag": "http://sigmathling.kwarc.info/spotterbase/Tag"
     }
 }
