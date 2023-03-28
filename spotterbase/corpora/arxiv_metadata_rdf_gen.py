@@ -13,7 +13,8 @@ from spotterbase.annotations.tag_body import Tag, MultiTagBody, TagSet
 from spotterbase.corpora.arxiv import ArxivId, ArxivCategory, USE_CENTI_ARXIV, ArxivUris
 from spotterbase.data.locator import Locator, DataDir
 from spotterbase.data.utils import json_lib
-from spotterbase.rdf.base import TripleI, Uri
+from spotterbase.rdf.literal import Uri
+from spotterbase.rdf.types import TripleI
 from spotterbase.rdf.serializer import TurtleSerializer
 from spotterbase.rdf.vocab import RDF
 from spotterbase.sb_vocab import SB

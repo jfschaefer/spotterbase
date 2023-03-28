@@ -28,10 +28,26 @@ spotterbase.sparql.load\_graph module
    :undoc-members:
    :show-inheritance:
 
+spotterbase.sparql.property\_path module
+----------------------------------------
+
+.. automodule:: spotterbase.sparql.property_path
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 spotterbase.sparql.query module
 -------------------------------
 
 .. automodule:: spotterbase.sparql.query
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+spotterbase.sparql.sb\_sparql module
+------------------------------------
+
+.. automodule:: spotterbase.sparql.sb_sparql
    :members:
    :undoc-members:
    :show-inheritance:

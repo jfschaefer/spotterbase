@@ -60,6 +60,14 @@ spotterbase.corpora.test\_corpus module
    :undoc-members:
    :show-inheritance:
 
+spotterbase.corpora.write\_document\_to\_file module
+----------------------------------------------------
+
+.. automodule:: spotterbase.corpora.write_document_to_file
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Module contents
 ---------------
 

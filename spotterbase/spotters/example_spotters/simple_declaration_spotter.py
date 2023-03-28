@@ -16,7 +16,7 @@ from spotterbase.annotations.target import FragmentTarget
 from spotterbase.corpora.interface import Document
 from spotterbase.dnm.token_dnm import TokenBasedDnm
 from spotterbase.dnm.token_generator import DefaultGenerators
-from spotterbase.rdf.base import TripleI
+from spotterbase.rdf.types import TripleI
 from spotterbase.rdf.uri import Uri
 from spotterbase.sb_vocab import SB
 from spotterbase.special_concepts.declarations import Identifier, IdentifierDeclaration, IdentifierOccurrence, \

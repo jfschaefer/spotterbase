@@ -12,14 +12,6 @@ spotterbase.rdf.base module
    :undoc-members:
    :show-inheritance:
 
-spotterbase.rdf.literals module
--------------------------------
-
-.. automodule:: spotterbase.rdf.literals
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 spotterbase.rdf.serializer module
 ---------------------------------
 
@@ -32,6 +24,14 @@ spotterbase.rdf.to\_rdflib module
 ---------------------------------
 
 .. automodule:: spotterbase.rdf.to_rdflib
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+spotterbase.rdf.uri module
+--------------------------
+
+.. automodule:: spotterbase.rdf.uri
    :members:
    :undoc-members:
    :show-inheritance:

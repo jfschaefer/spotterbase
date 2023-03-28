@@ -1,10 +1,15 @@
 import abc
-from typing import IO, Iterator
+from typing import IO, Iterator, Optional
+
+from lxml.etree import _ElementTree
+import lxml.etree as etree
 
 from spotterbase.rdf.uri import Uri
 
 
 class Document(abc.ABC):
+    _html_tree: Optional[_ElementTree] = None
+
     @abc.abstractmethod
     def get_uri(self) -> Uri:
         raise NotImplementedError()
@@ -12,6 +17,15 @@ class Document(abc.ABC):
     @abc.abstractmethod
     def open(self, *args, **kwargs) -> IO:
         raise NotImplementedError()
+
+    def get_html_tree(self, cached: bool) -> _ElementTree:
+        if cached and self._html_tree is not None:
+            return self._html_tree
+        with self.open() as fp:
+            tree: _ElementTree = etree.parse(fp, parser=etree.HTMLParser())  # type: ignore
+        if cached:
+            self._html_tree = tree
+        return tree
 
 
 class DocumentNotInCorpusException(Exception):

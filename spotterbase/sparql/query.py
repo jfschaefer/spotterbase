@@ -3,7 +3,9 @@ from collections import defaultdict
 import spotterbase.corpora.arxiv
 import spotterbase.rdf.vocab as vocab
 from spotterbase import sb_vocab
-from spotterbase.rdf.base import Object, Literal, BlankNode
+from spotterbase.rdf.literal import Literal
+from spotterbase.rdf.types import Object
+from spotterbase.rdf.bnode import BlankNode
 from spotterbase.rdf.uri import NameSpace, Uri
 
 NAMESPACES: list[NameSpace] = [

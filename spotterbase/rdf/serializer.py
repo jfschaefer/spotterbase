@@ -5,7 +5,9 @@ from io import StringIO
 from pathlib import Path
 from typing import TextIO, Iterable, Optional
 
-from spotterbase.rdf.base import Triple, Object, Subject, BlankNode, Predicate, Literal, TripleI
+from spotterbase.rdf.literal import Literal
+from spotterbase.rdf.types import Subject, Predicate, Object, Triple, TripleI
+from spotterbase.rdf.bnode import BlankNode
 from spotterbase.rdf.uri import NameSpace, Uri
 from spotterbase.rdf.vocab import RDF
 

@@ -1,18 +1,18 @@
 from __future__ import annotations
 
 import abc
-from typing import Callable
+from typing import Callable, Optional
 
 from spotterbase.corpora.interface import Document
-from spotterbase.rdf.base import TripleI
+from spotterbase.rdf.types import TripleI
 from spotterbase.rdf.uri import Uri
 
 
 class SpotterContext:
     run_uri: Uri
 
-    def __init__(self, run_uri: Uri):
-        self.run_uri = run_uri
+    def __init__(self, run_uri: Optional[Uri] = None):
+        self.run_uri = Uri.uuid() if run_uri is None else run_uri
 
 
 class Spotter(abc.ABC):

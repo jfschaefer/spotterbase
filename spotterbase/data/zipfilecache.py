@@ -34,6 +34,11 @@ class OpenedZipFile(zipfile.ZipFile):
         """ Remove closed files from the ``opened_files`` list """
         self.opened_files = [file for file in self.opened_files if not file.closed]
 
+    def __setattr__(self, key, value):
+        if key == '__class__':
+            raise Exception('You are doing something that overwrites __class__, which would cause problems later on')
+        super().__setattr__(key, value)
+
 
 class ZipFileCache(object):
     """ A cache for opened zip files """

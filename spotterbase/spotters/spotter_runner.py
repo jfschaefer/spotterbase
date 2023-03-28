@@ -1,20 +1,25 @@
+import logging
 from datetime import datetime
 from typing import Iterable
 
 from spotterbase import config_loader
-from spotterbase.config_loader import ConfigUri, ConfigPath
+from spotterbase.config_loader import ConfigUri, ConfigPath, ConfigInt
 from spotterbase.corpora.interface import Document
 from spotterbase.corpora.resolver import Resolver
 from spotterbase.data.locator import DataDir
 from spotterbase.rdf.serializer import FileSerializer
 from spotterbase.rdf.uri import Uri
 from spotterbase.spotters.spotter import Spotter
+from spotterbase.utils.logutils import ProgressLogger
+
+logger = logging.getLogger()
 
 DOCUMENT = ConfigUri('--document', 'The document to be processed by the spotter')
 CORPUS = ConfigUri('--corpus', 'The corpus to be processed by the spotter')
 RESULT_FILE = ConfigPath(
     '--result-file', f'File for the spotter results (default: {DataDir.get("[SPOTTER]-run-[TIMESTAMP].ttl.gz")})'
 )
+NUMBER_OF_PROCESSES = ConfigInt('--number-of-processes', description='number of processes', default=4)
 
 
 def run(spotter_class: type[Spotter], documents_iterator: Iterable[Document], source: Uri):
@@ -37,8 +42,11 @@ def run(spotter_class: type[Spotter], documents_iterator: Iterable[Document], so
         serializer.flush()
         serializer.write_comment('Triples from processing actual content:')
         spotter = spotter_class(context)
-        for document in documents_iterator:
+
+        progress_logger = ProgressLogger(logger, 'Status update: Processed {progress} documents')
+        for i, document in enumerate(documents_iterator):
             serializer.add_from_iterable(spotter.process_document(document))
+            progress_logger.update(i)
 
 
 def main(spotter: type[Spotter]):

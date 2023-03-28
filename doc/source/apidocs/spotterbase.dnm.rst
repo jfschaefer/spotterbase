@@ -4,14 +4,6 @@ spotterbase.dnm package
 Submodules
 ----------
 
-spotterbase.dnm.LStr module
----------------------------
-
-.. automodule:: spotterbase.dnm.LStr
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 spotterbase.dnm.dnm module
 --------------------------
 
@@ -20,18 +12,10 @@ spotterbase.dnm.dnm module
    :undoc-members:
    :show-inheritance:
 
-spotterbase.dnm.selectors module
---------------------------------
+spotterbase.dnm.l\_str module
+-----------------------------
 
-.. automodule:: spotterbase.dnm.selectors
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-spotterbase.dnm.text\_offset\_tracker module
---------------------------------------------
-
-.. automodule:: spotterbase.dnm.text_offset_tracker
+.. automodule:: spotterbase.dnm.l_str
    :members:
    :undoc-members:
    :show-inheritance:

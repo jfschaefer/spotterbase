@@ -13,7 +13,7 @@ from spotterbase.corpora.arxmliv import ArXMLivUris, ArXMLivCorpus, ARXMLIV_RELE
 from spotterbase.corpora.resolver import Resolver
 from spotterbase.data.locator import DataDir
 from spotterbase.sb_vocab import SB
-from spotterbase.rdf.base import TripleI
+from spotterbase.rdf.types import TripleI
 from spotterbase.rdf.serializer import TurtleSerializer
 from spotterbase.rdf.vocab import RDF
 from spotterbase import __version__

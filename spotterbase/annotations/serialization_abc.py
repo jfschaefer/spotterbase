@@ -1,7 +1,7 @@
 import abc
 from typing import Any
 
-from spotterbase.rdf.base import TripleI
+from spotterbase.rdf.types import TripleI
 
 
 class JsonExportable(abc.ABC):

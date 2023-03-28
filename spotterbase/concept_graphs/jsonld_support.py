@@ -4,7 +4,7 @@ from typing import Optional, Any
 
 from spotterbase.concept_graphs.concept_graph import PredInfo, Concept, ConceptInfo, AttrInfo
 from spotterbase.concept_graphs.concept_resolver import ConceptResolver
-from spotterbase.rdf.base import Literal
+from spotterbase.rdf.literal import Literal
 from spotterbase.rdf.uri import Uri, NameSpace
 
 
@@ -192,8 +192,14 @@ class JsonLdConceptConverter:
             converted: list = []
             for val in vals:
                 if p_info.literal_type is not None:
-                    # TODO: treat literals properly
-                    converted.append(val)
+                    if isinstance(val, int) or isinstance(val, str) or isinstance(val, float):
+                        # TODO: this is not very proper.
+                        # Note that we cannot simply use the literal type as an indicated because
+                        # values other than XSD.integer may still be reasonably represented as an integer in
+                        # JSON-LD (as long as the literal type is explicitly set (e.g. in the context))
+                        converted.append(val)
+                    else:
+                        converted.append(Literal.from_py_val(val, p_info.literal_type).string)
                 elif isinstance(val, Concept):
                     converted.append(self.concept_to_json_ld(val))
                 elif isinstance(val, Uri):

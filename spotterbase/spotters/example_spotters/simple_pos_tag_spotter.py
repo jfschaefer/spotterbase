@@ -11,7 +11,7 @@ from spotterbase.dnm.token_dnm import TokenBasedDnm
 from spotterbase.dnm.token_generator import DefaultGenerators
 from spotterbase.dnm_nlp.sentence_tokenizer import sentence_tokenize
 from spotterbase.dnm_nlp.word_tokenizer import word_tokenize
-from spotterbase.rdf.base import TripleI
+from spotterbase.rdf.types import TripleI
 from spotterbase.rdf.uri import Uri
 from spotterbase.sb_vocab import SB
 from spotterbase.spotters.spotter import Spotter, UriGeneratorMixin, SpotterContext

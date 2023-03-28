@@ -12,6 +12,14 @@ spotterbase.utils.logutils module
    :undoc-members:
    :show-inheritance:
 
+spotterbase.utils.resources module
+----------------------------------
+
+.. automodule:: spotterbase.utils.resources
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 spotterbase.utils.xml\_match module
 -----------------------------------
 

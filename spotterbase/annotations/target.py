@@ -9,7 +9,9 @@ from spotterbase.concept_graphs.concept_graph import Concept, ConceptInfo, AttrI
 from spotterbase.concept_graphs.oa_support import OA_PRED
 from spotterbase.concept_graphs.sb_support import SB_PRED
 from spotterbase.concept_graphs.sparql_populate import SubConcepts, Populator
-from spotterbase.rdf.base import Subject, BlankNode, Literal
+from spotterbase.rdf.literal import Literal
+from spotterbase.rdf.types import Subject
+from spotterbase.rdf.bnode import BlankNode
 from spotterbase.rdf.uri import Uri
 from spotterbase.rdf.vocab import RDF
 from spotterbase.sb_vocab import SB

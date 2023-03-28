@@ -1,29 +1,14 @@
-"""
-A small library for RDF triples.
-"""
 from __future__ import annotations
 
 import datetime
 from typing import Callable, Any
-from typing import Optional, Iterable
+from typing import Optional
 
 from spotterbase.rdf.uri import Uri
 from spotterbase.rdf.vocab import XSD, RDF
 
 
-class BlankNode:
-    counter: int = 0
-
-    def __init__(self):
-        # must have unique value
-        self.value = hex(BlankNode.counter)[2:]
-        BlankNode.counter += 1
-
-    def __repr__(self):
-        return f'{self.__class__.__name__}({self.value})'
-
-    def __str__(self):
-        return f'_:{self.value}'
+__all__ = ['Literal']
 
 
 LIT2PY_FUN: dict[Uri, Callable[[str], Any]] = {
@@ -33,6 +18,7 @@ LIT2PY_FUN: dict[Uri, Callable[[str], Any]] = {
     XSD.double: float,
     XSD.boolean: lambda s: {'false': False, 'true': True, '0': False, '1': True}[s],
     XSD.nonNegativeInteger: int,    # TODO: check that not negative
+    XSD.dateTime: datetime.datetime.fromisoformat,
 }
 
 PY2LIT_LIST: list[tuple[type, Callable[[Any], Literal]]] = [
@@ -110,11 +96,3 @@ class Literal:
 
     def __repr__(self) -> str:
         return str(self)
-
-
-Subject = Uri | BlankNode
-Predicate = Uri
-Object = Uri | BlankNode | Literal
-
-Triple = tuple[Subject, Predicate, Object]
-TripleI = Iterable[Triple]

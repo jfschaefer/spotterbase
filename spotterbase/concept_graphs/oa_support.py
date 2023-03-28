@@ -8,6 +8,7 @@ class OA_PRED:
     # Predicates that are part of OA or its recommendations
     # In other words, the predicates that are part of anno.jsonld
     body = PredInfo(OA.hasBody, json_ld_term='body', json_ld_type_is_id=True)
+    created = PredInfo(DCTerms.created, json_ld_term='created', literal_type=XSD.dateTime)
     creator = PredInfo(DCTerms.creator, json_ld_term='creator', json_ld_type_is_id=True)
     end = PredInfo(OA.end, json_ld_term='end', literal_type=XSD.nonNegativeInteger)
     label = PredInfo(RDFS.label, json_ld_term='label')

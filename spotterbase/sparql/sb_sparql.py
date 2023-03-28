@@ -15,7 +15,7 @@ def get_tmp_graph_uri() -> Uri:
 
 
 class EndpointConfig(SimpleConfigExtension):
-    value: Optional[SparqlEndpoint]
+    value: Optional[SparqlEndpoint] = None
 
     def process_namespace(self, args: argparse.Namespace):
         k = self.name.lstrip('-').replace('-', '_')

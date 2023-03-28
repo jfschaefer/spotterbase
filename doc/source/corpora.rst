@@ -13,7 +13,7 @@ Usually, it is required that you have downloaded the corpus and SpotterBase is a
 SpotterBase comes with a test corpus, which we will use for the examples:
 
 >>> from spotterbase.corpora.resolver import Resolver
->>> from spotterbase.rdf.base import Uri
+>>> from spotterbase.rdf import Uri
 >>> uri = Uri('http://sigmathling.kwarc.info/spotterbase/test-corpus/')
 >>> corpus = Resolver.get_corpus(uri)
 >>> for document in corpus:

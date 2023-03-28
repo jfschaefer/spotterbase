@@ -1,6 +1,5 @@
 import abc
 import re
-import zipfile
 from pathlib import Path
 from typing import IO, Iterator, Optional
 
@@ -67,7 +66,9 @@ class ZipArXMLivDocument(ArXMLivDocument):
     def open(self, *args, **kwargs) -> IO:
         zf = SHARED_ZIP_CACHE[self.path_to_zipfile]
         try:
-            return (zipfile.Path(zf) / self.filename).open(*args, **kwargs)
+            # Creating zipfile.Path overwrites __class__, which is a problem as we are subclassing...
+            # return (zipfile.Path(zf) / self.filename).open(*args, **kwargs)
+            return zf.open(self.filename, *args, **kwargs)
         except KeyError as e:
             missing = DocumentNotFoundError(f'Failed to find {self.filename} in {self.path_to_zipfile}: {e}')
             missing.__suppress_context__ = True
@@ -128,6 +129,8 @@ class ArXMLivCorpus(Corpus):
         if not (path := self.get_path() / 'corpora').is_dir():
             path = self.get_path()
         path_regex = re.compile(r'^[0-9][0-9][0-9][0-9](\.zip)?$')
+        if (path / 'data').is_dir():
+            path = path / 'data'
         for content in path.iterdir():
             if path_regex.match(content.name):
                 yield content

@@ -1,6 +1,7 @@
 from collections import OrderedDict
-from typing import Optional
+from typing import Optional, Iterable
 
+from spotterbase import config_loader
 from spotterbase.corpora.arxmliv import ARXMLIV_CORPORA, CENTI_ARXMLIV_CORPORA
 from spotterbase.corpora.interface import Corpus, Document, DocumentNotInCorpusException
 from spotterbase.corpora.test_corpus import TestCorpus
@@ -34,6 +35,9 @@ class _Resolver:
             self._corpora.move_to_end(correct_corpus.get_uri(), last=False)
         return document
 
+    def get_known_corpora(self) -> Iterable[Corpus]:
+        yield from self._corpora.values()
+
 
 def _register_standard_corpora(resolver: _Resolver):
     resolver.register_corpus(TestCorpus())
@@ -45,3 +49,10 @@ def _register_standard_corpora(resolver: _Resolver):
 
 Resolver: _Resolver = _Resolver()
 _register_standard_corpora(Resolver)
+
+
+if __name__ == '__main__':
+    config_loader.auto()
+    print('Known corpora:')
+    for corpus in Resolver.get_known_corpora():
+        print('   ', corpus.get_uri())

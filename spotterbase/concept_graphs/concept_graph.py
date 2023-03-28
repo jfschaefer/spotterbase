@@ -3,7 +3,9 @@ from __future__ import annotations
 import dataclasses
 from typing import Optional, Any
 
-from spotterbase.rdf.base import TripleI, Subject, BlankNode, Literal, Object
+from spotterbase.rdf.literal import Literal
+from spotterbase.rdf.types import Subject, Object, TripleI
+from spotterbase.rdf.bnode import BlankNode
 from spotterbase.rdf.uri import Uri
 from spotterbase.rdf.vocab import RDF
 from spotterbase.sparql.property_path import PropertyPath, UriPath
@@ -15,7 +17,7 @@ class PredInfo:
 
     is_rdf_list: bool = False
     literal_type: Optional[Uri] = None
-    is_reversed: bool = False    # subject/object are swapped
+    is_reversed: bool = False  # subject/object are swapped
 
     # Info needed for JSON-LD (but might be used for other things as well)
     json_ld_term: Optional[str] = None
@@ -40,8 +42,8 @@ class TargetConceptInfo:
     ...
 
 
-TargetNoConcept = TargetConceptInfo()   # target is literal or URI (the URI may belong to a concept though)
-TargetUnknownConcept = TargetConceptInfo()   # target is a concept, but we do not know which one
+TargetNoConcept = TargetConceptInfo()  # target is literal or URI (the URI may belong to a concept though)
+TargetUnknownConcept = TargetConceptInfo()  # target is a concept, but we do not know which one
 
 
 @dataclasses.dataclass
@@ -61,7 +63,7 @@ class AttrInfo:
 
     target_type: TargetConceptInfo = TargetNoConcept
     multi_target: bool = False
-    literal_type: Optional[Uri] = None      # copied from pred_info if not set explicitly
+    literal_type: Optional[Uri] = None  # copied from pred_info if not set explicitly
 
     def __post_init__(self):
         if self.literal_type is None:
@@ -74,6 +76,7 @@ class ConceptInfo:
     attrs: list[AttrInfo]
     attrs_by_jsonld_term: dict[str, AttrInfo]
     attrs_by_uri: dict[Uri, AttrInfo]
+    attrs_by_name: dict[str, AttrInfo]
 
     def __init__(self, concept_type: Uri, attrs: list[AttrInfo], is_root_concept: bool = False):
         self.concept_type = concept_type
@@ -84,6 +87,7 @@ class ConceptInfo:
             attr.pred_info.json_ld_term: attr for attr in self.attrs if attr.pred_info.json_ld_term
         }
         self.attrs_by_uri = {attr.pred_info.uri: attr for attr in self.attrs}
+        self.attrs_by_name = {attr.attr_name: attr for attr in self.attrs}
 
 
 class Concept:
@@ -101,6 +105,7 @@ class Concept:
         return _concept_to_triples(self, self.uri)
 
     def _set_attr_if_not_none(self, attr: str, val: Optional[Any]):
+        assert attr == 'uri' or attr in self.concept_info.attrs_by_name
         if val is not None:
             setattr(self, attr, val)
 
@@ -140,7 +145,7 @@ def _concept_to_triples(concept: Concept, node: Subject) -> TripleI:
         else:
             for val_node in val_nodes:
                 if p_info.is_reversed:
-                    assert isinstance(val_node, Uri) or isinstance(val_node, BlankNode),\
+                    assert isinstance(val_node, Uri) or isinstance(val_node, BlankNode), \
                         f'Making a reversed edge would lead to a subject of type {type(val_node)}'
                     yield val_node, p_info.uri, node
                 else:

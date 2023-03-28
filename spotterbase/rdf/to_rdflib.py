@@ -12,7 +12,9 @@ from typing import Iterator
 
 import rdflib
 
-from spotterbase.rdf.base import TripleI, BlankNode, Triple, Literal
+from spotterbase.rdf.literal import Literal
+from spotterbase.rdf.types import Triple, TripleI
+from spotterbase.rdf.bnode import BlankNode
 from spotterbase.rdf.uri import Uri
 from spotterbase.rdf.vocab import RDF, XSD
 

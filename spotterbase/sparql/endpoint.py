@@ -10,7 +10,8 @@ import rdflib
 import requests as requests
 from requests.auth import HTTPBasicAuth
 
-from spotterbase.rdf.base import Object, BlankNode
+from spotterbase.rdf.types import Object
+from spotterbase.rdf.bnode import BlankNode
 from spotterbase.sparql.query import json_binding_to_object
 
 logger = logging.getLogger(__name__)
@@ -18,9 +19,10 @@ logger = logging.getLogger(__name__)
 
 class SparqlEndpoint:
     def query(self, query: str) -> Iterable[dict[str, Optional[Object]]]:
+        """ For SELECT queries """
         result = self.send_query(query, accept='application/json')
         bnode_map: defaultdict[str, BlankNode] = defaultdict(BlankNode)
-        for binding in result['results']['bindings']:
+        for binding in result['results']['bindings']:   # SELECT query
             d: dict[str, Optional[Object]] = {}
             for var in result['head']['vars']:
                 if var in binding:
@@ -28,6 +30,10 @@ class SparqlEndpoint:
                 else:
                     d[var] = None
             yield d
+
+    def ask_query(self, query: str) -> bool:
+        result = self.send_query(query, accept='application/json')
+        return result['boolean']
 
     def send_query(self, query: str, accept: str = 'application/json'):
         raise NotImplementedError()

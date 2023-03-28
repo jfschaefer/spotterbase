@@ -7,7 +7,8 @@ from typing import Iterator, Optional, NewType, Callable, TypeAlias, Iterable
 from spotterbase.concept_graphs.concept_graph import Concept, ConceptInfo, AttrInfo, TargetKnownConcept, \
     TargetNoConcept, TargetUnknownConcept, TargetConceptSet
 from spotterbase.concept_graphs.concept_resolver import ConceptResolver
-from spotterbase.rdf.base import Literal, BlankNode
+from spotterbase.rdf.literal import Literal
+from spotterbase.rdf.bnode import BlankNode
 from spotterbase.rdf.uri import Uri
 from spotterbase.rdf.vocab import RDF
 from spotterbase.sparql.endpoint import SparqlEndpoint

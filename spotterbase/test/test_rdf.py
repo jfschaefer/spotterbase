@@ -5,7 +5,8 @@ import unittest
 from pathlib import Path
 
 from spotterbase.concept_graphs.sb_support import SB_JSONLD_CONTEXT
-from spotterbase.rdf.base import BlankNode, Literal
+from spotterbase.rdf.literal import Literal
+from spotterbase.rdf.bnode import BlankNode
 from spotterbase.rdf.uri import NameSpace, Vocabulary, Uri
 from spotterbase.rdf.serializer import TurtleSerializer, NTriplesSerializer, FileSerializer
 from spotterbase.rdf.vocab import RDF, XSD

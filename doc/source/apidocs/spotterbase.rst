@@ -8,11 +8,14 @@ Subpackages
    :maxdepth: 4
 
    spotterbase.annotations
+   spotterbase.concept_graphs
    spotterbase.corpora
    spotterbase.data
    spotterbase.dnm
+   spotterbase.dnm_nlp
    spotterbase.rdf
    spotterbase.sparql
+   spotterbase.special_concepts
    spotterbase.spotters
    spotterbase.test
    spotterbase.utils
@@ -32,14 +35,6 @@ spotterbase.dnm\_example module
 -------------------------------
 
 .. automodule:: spotterbase.dnm_example
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-spotterbase.experiment module
------------------------------
-
-.. automodule:: spotterbase.experiment
    :members:
    :undoc-members:
    :show-inheritance:

@@ -5,7 +5,7 @@ from typing import Optional
 from spotterbase.concept_graphs.concept_graph import Concept, ConceptInfo, AttrInfo
 from spotterbase.concept_graphs.oa_support import OA_PRED
 from spotterbase.concept_graphs.sb_support import SB_PRED
-from spotterbase.rdf.base import Uri
+from spotterbase.rdf.literal import Uri
 from spotterbase.rdf.vocab import XSD
 from spotterbase.sb_vocab import SB
 

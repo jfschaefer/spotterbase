@@ -27,7 +27,7 @@ The basics: URIs, literals, namespaces
 
 Let's create some URIs:
 
->>> from spotterbase.rdf.uri import Uri, NameSpace, Vocabulary
+>>> from spotterbase.rdf import Uri, NameSpace, Vocabulary
 >>> example = Uri('http://example.org')
 >>> example
 Uri('http://example.org')
@@ -50,13 +50,13 @@ Uri('http://example.org/helloWorld')
 
 Some commonly use vocabularies are already in the library:
 
->>> import spotterbase.rdf.vocab as vocab
+>>> from spotterbase.rdf import vocab
 >>> vocab.RDF.type
 Uri('http://www.w3.org/1999/02/22-rdf-syntax-ns#type')
 
 Here is a literal:
 
->>> from spotterbase.rdf.base import Literal
+>>> from spotterbase.rdf import Literal
 >>> Literal.from_py_val(5.3, vocab.XSD.double)
 "5.300000E+00"^^<http://www.w3.org/2001/XMLSchema#double>
 
@@ -83,7 +83,7 @@ Let's make some triples:
 >>> triples = [
 ...     (food['apple'], vocab.RDF.type, food['fruit']),
 ...     (food['apple'], vocab.RDFS.label, Literal.lang_tagged('Apfel', 'de'))]
->>> from spotterbase.rdf.serializer import TurtleSerializer
+>>> from spotterbase.rdf import TurtleSerializer
 
 Normally, the serializer should write to a file,
 but for this small example we will use :class:`io.StringIO` for better illustration:
