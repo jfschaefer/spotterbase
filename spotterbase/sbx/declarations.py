@@ -1,26 +1,26 @@
 from typing import Optional
 
 from spotterbase.annotations.tag_body import TagSet, Tag
-from spotterbase.concept_graphs.concept_graph import Concept, ConceptInfo, AttrInfo
+from spotterbase.records.record import Record, RecordInfo, AttrInfo
 from spotterbase.rdf.uri import Uri, Vocabulary, NameSpace
-from spotterbase.special_concepts.sbx import SBX, SBX_PRED
+from spotterbase.sbx.sbx import SBX, SBX_PRED
 
 
-class Identifier(Concept):
-    concept_info = ConceptInfo(
-        concept_type=SBX.Identifier,
+class Identifier(Record):
+    record_info = RecordInfo(
+        record_type=SBX.Identifier,
         attrs=[
         ],
-        is_root_concept=True,
+        is_root_record=True,
     )
 
     def __init__(self, uri: Optional[Uri] = None):
         self._set_attr_if_not_none('uri', uri)
 
 
-class IdentifierOccurrence(Concept):
-    concept_info = ConceptInfo(
-        concept_type=SBX.IdentifierOccurrence,
+class IdentifierOccurrence(Record):
+    record_info = RecordInfo(
+        record_type=SBX.IdentifierOccurrence,
         attrs=[
             AttrInfo('occurrence_of', SBX_PRED.occurrenceOf),
         ],
@@ -33,9 +33,9 @@ class IdentifierOccurrence(Concept):
         self._set_attr_if_not_none('occurrence_of', occurrence_of)
 
 
-class IdentifierDeclaration(Concept):
-    concept_info = ConceptInfo(
-        concept_type=SBX.IdentifierDeclaration,
+class IdentifierDeclaration(Record):
+    record_info = RecordInfo(
+        record_type=SBX.IdentifierDeclaration,
         attrs=[
             AttrInfo('polarity', SBX_PRED.hasPolarity),
             AttrInfo('declares', SBX_PRED.declares),

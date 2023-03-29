@@ -2,15 +2,15 @@ from __future__ import annotations
 
 from typing import Optional
 
-from spotterbase.concept_graphs.concept_graph import Concept, ConceptInfo, AttrInfo
-from spotterbase.concept_graphs.oa_support import OA_PRED
-from spotterbase.concept_graphs.sb_support import SB_PRED
+from spotterbase.records.record import Record, RecordInfo, AttrInfo
+from spotterbase.records.oa_support import OA_PRED
+from spotterbase.records.sb_support import SB_PRED
 from spotterbase.sb_vocab import SB
 
 
-class PathSelector(Concept):
-    concept_info = ConceptInfo(
-        concept_type=SB.PathSelector,
+class PathSelector(Record):
+    record_info = RecordInfo(
+        record_type=SB.PathSelector,
         attrs=[
             AttrInfo('start', SB_PRED.startPath),
             AttrInfo('end', SB_PRED.endPath),
@@ -32,9 +32,9 @@ class PathSelector(Concept):
             self.refinement = refinement
 
 
-class OffsetSelector(Concept):
-    concept_info = ConceptInfo(
-        concept_type=SB.OffsetSelector,
+class OffsetSelector(Record):
+    record_info = RecordInfo(
+        record_type=SB.OffsetSelector,
         attrs=[
             AttrInfo('start', OA_PRED.start),
             AttrInfo('end', OA_PRED.end),
@@ -56,11 +56,11 @@ class OffsetSelector(Concept):
             self.refinement = refinement
 
 
-class ListSelector(Concept):
-    concept_info = ConceptInfo(
-        concept_type=SB.ListSelector,
+class ListSelector(Record):
+    record_info = RecordInfo(
+        record_type=SB.ListSelector,
         attrs=[
-            AttrInfo('selectors', SB_PRED.vals, multi_target=True)
+            AttrInfo('selectors', SB_PRED.vals, multi_field=True)
         ]
     )
 

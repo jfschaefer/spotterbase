@@ -8,14 +8,14 @@ Subpackages
    :maxdepth: 4
 
    spotterbase.annotations
-   spotterbase.concept_graphs
    spotterbase.corpora
    spotterbase.data
    spotterbase.dnm
    spotterbase.dnm_nlp
    spotterbase.rdf
+   spotterbase.records
+   spotterbase.sbx
    spotterbase.sparql
-   spotterbase.special_concepts
    spotterbase.spotters
    spotterbase.test
    spotterbase.utils

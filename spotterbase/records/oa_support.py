@@ -1,5 +1,5 @@
-from spotterbase.concept_graphs.concept_graph import PredInfo
-from spotterbase.concept_graphs.jsonld_support import JsonLdContext
+from spotterbase.records.record import PredInfo
+from spotterbase.records.jsonld_support import JsonLdContext
 from spotterbase.rdf.uri import Uri
 from spotterbase.rdf.vocab import DCTerms, OA, XSD, DC, RDF, RDFS, OWL, AS
 

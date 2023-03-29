@@ -4,10 +4,26 @@ spotterbase.rdf package
 Submodules
 ----------
 
-spotterbase.rdf.base module
----------------------------
+spotterbase.rdf.bnode module
+----------------------------
 
-.. automodule:: spotterbase.rdf.base
+.. automodule:: spotterbase.rdf.bnode
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+spotterbase.rdf.deserializer module
+-----------------------------------
+
+.. automodule:: spotterbase.rdf.deserializer
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+spotterbase.rdf.literal module
+------------------------------
+
+.. automodule:: spotterbase.rdf.literal
    :members:
    :undoc-members:
    :show-inheritance:
@@ -24,6 +40,14 @@ spotterbase.rdf.to\_rdflib module
 ---------------------------------
 
 .. automodule:: spotterbase.rdf.to_rdflib
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+spotterbase.rdf.types module
+----------------------------
+
+.. automodule:: spotterbase.rdf.types
    :members:
    :undoc-members:
    :show-inheritance:

@@ -4,12 +4,12 @@ from pathlib import Path
 
 import rdflib
 
-from spotterbase.annotations.concepts import ANNOTATION_CONCEPT_RESOLVER
+from spotterbase.annotations.records import ANNOTATION_RECORD_RESOLVER
 from spotterbase.annotations.target import FragmentTarget, populate_standard_selectors
-from spotterbase.concept_graphs.jsonld_support import JsonLdConceptConverter
-from spotterbase.concept_graphs.oa_support import OA_JSONLD_CONTEXT
-from spotterbase.concept_graphs.sb_support import SB_JSONLD_CONTEXT, SB_CONTEXT_FILE
-from spotterbase.concept_graphs.sparql_populate import Populator
+from spotterbase.records.jsonld_support import JsonLdRecordConverter
+from spotterbase.records.oa_support import OA_JSONLD_CONTEXT
+from spotterbase.records.sb_support import SB_JSONLD_CONTEXT, SB_CONTEXT_FILE
+from spotterbase.records.sparql_populate import Populator
 from spotterbase.rdf import to_rdflib
 from spotterbase.sparql.endpoint import RdflibEndpoint
 from spotterbase.test.mixins import GraphTestMixin
@@ -19,9 +19,9 @@ class TestAnnotationSerialization(GraphTestMixin, unittest.TestCase):
     package_root = Path(__file__).parent.parent
     with open(SB_CONTEXT_FILE) as fp:
         sb_context = json.load(fp)
-    converter = JsonLdConceptConverter(
+    converter = JsonLdRecordConverter(
         contexts=[OA_JSONLD_CONTEXT, SB_JSONLD_CONTEXT],
-        concept_resolver=ANNOTATION_CONCEPT_RESOLVER,
+        record_type_resolver=ANNOTATION_RECORD_RESOLVER,
     )
     example_json_ld_files: list[Path] = [
         package_root.parent / 'doc' / 'source' / 'codesnippets' / 'example-annotation.jsonld',
@@ -33,7 +33,7 @@ class TestAnnotationSerialization(GraphTestMixin, unittest.TestCase):
             with self.subTest(file=path):
                 with open(path) as fp:
                     jsonld = json.load(fp)
-                my_graph = to_rdflib.triples_to_graph(self.converter.json_ld_to_concept(jsonld).to_triples())
+                my_graph = to_rdflib.triples_to_graph(self.converter.json_ld_to_record(jsonld).to_triples())
                 jsonld['@context'] = ['http://www.w3.org/ns/anno.jsonld', self.sb_context]
                 json_ld_graph = rdflib.Graph().parse(data=json.dumps(jsonld), format='json-ld')
 
@@ -49,15 +49,15 @@ class TestAnnotationSerialization(GraphTestMixin, unittest.TestCase):
                     jsonld = json.load(fp)
 
                 endpoint = RdflibEndpoint(
-                    to_rdflib.triples_to_graph(self.converter.json_ld_to_concept(jsonld).to_triples())
+                    to_rdflib.triples_to_graph(self.converter.json_ld_to_record(jsonld).to_triples())
                 )
 
-                populator = Populator(concept_resolver=ANNOTATION_CONCEPT_RESOLVER,
+                populator = Populator(record_type_resolver=ANNOTATION_RECORD_RESOLVER,
                                       endpoint=endpoint,
                                       special_populators={
                                           FragmentTarget: [populate_standard_selectors]
                                       })
-                uri = self.converter.json_ld_to_concept(jsonld).uri
-                concept = list(populator.get_concepts([uri]))[0]
-                new_json_ld = self.converter.concept_to_json_ld(concept)
+                uri = self.converter.json_ld_to_record(jsonld).uri
+                record = list(populator.get_records([uri]))[0]
+                new_json_ld = self.converter.record_to_json_ld(record)
                 self.assertEqual(jsonld, new_json_ld)

@@ -20,14 +20,6 @@ spotterbase.test.test\_annotation\_serialization module
    :undoc-members:
    :show-inheritance:
 
-spotterbase.test.test\_concept\_graph module
---------------------------------------------
-
-.. automodule:: spotterbase.test.test_concept_graph
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 spotterbase.test.test\_corpora module
 -------------------------------------
 
@@ -64,6 +56,14 @@ spotterbase.test.test\_rdf module
 ---------------------------------
 
 .. automodule:: spotterbase.test.test_rdf
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+spotterbase.test.test\_records module
+-------------------------------------
+
+.. automodule:: spotterbase.test.test_records
    :members:
    :undoc-members:
    :show-inheritance:

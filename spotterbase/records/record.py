@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import dataclasses
-from typing import Optional, Any
+from typing import Optional, Any, ClassVar
 
 from spotterbase.rdf.literal import Literal
 from spotterbase.rdf.types import Subject, Object, TripleI
@@ -38,22 +38,22 @@ class PredInfo:
         return prop_path
 
 
-class TargetConceptInfo:
+class FieldInfo:
     ...
 
 
-TargetNoConcept = TargetConceptInfo()  # target is literal or URI (the URI may belong to a concept though)
-TargetUnknownConcept = TargetConceptInfo()  # target is a concept, but we do not know which one
+FieldNoRecord = FieldInfo()  # field is literal or URI (the URI may belong to a record though)
+FieldUnknownRecord = FieldInfo()  # field is a record, but we do not know which one
 
 
 @dataclasses.dataclass
-class TargetKnownConcept(TargetConceptInfo):
-    concept: type[Concept]
+class FieldKnownRecord(FieldInfo):
+    record_type: type[Record]
 
 
 @dataclasses.dataclass
-class TargetConceptSet(TargetConceptInfo):
-    concepts: set[type[Concept]]
+class FieldRecordSet(FieldInfo):
+    record_types: set[type[Record]]
 
 
 @dataclasses.dataclass
@@ -61,8 +61,8 @@ class AttrInfo:
     attr_name: str
     pred_info: PredInfo
 
-    target_type: TargetConceptInfo = TargetNoConcept
-    multi_target: bool = False
+    field_info: FieldInfo = FieldNoRecord
+    multi_field: bool = False
     literal_type: Optional[Uri] = None  # copied from pred_info if not set explicitly
 
     def __post_init__(self):
@@ -70,18 +70,18 @@ class AttrInfo:
             self.literal_type = self.pred_info.literal_type
 
 
-class ConceptInfo:
-    concept_type: Uri
-    is_root_concept: bool
+class RecordInfo:
+    record_type: Uri
+    is_root_record: bool
     attrs: list[AttrInfo]
     attrs_by_jsonld_term: dict[str, AttrInfo]
     attrs_by_uri: dict[Uri, AttrInfo]
     attrs_by_name: dict[str, AttrInfo]
 
-    def __init__(self, concept_type: Uri, attrs: list[AttrInfo], is_root_concept: bool = False):
-        self.concept_type = concept_type
+    def __init__(self, record_type: Uri, attrs: list[AttrInfo], is_root_record: bool = False):
+        self.record_type = record_type
         self.attrs: list[AttrInfo] = attrs
-        self.is_root_concept = is_root_concept
+        self.is_root_record = is_root_record
 
         self.attrs_by_jsonld_term = {
             attr.pred_info.json_ld_term: attr for attr in self.attrs if attr.pred_info.json_ld_term
@@ -90,8 +90,8 @@ class ConceptInfo:
         self.attrs_by_name = {attr.attr_name: attr for attr in self.attrs}
 
 
-class Concept:
-    concept_info: ConceptInfo
+class Record:
+    record_info: ClassVar[RecordInfo]
 
     # instance attributes
     uri: Uri
@@ -102,20 +102,20 @@ class Concept:
 
     def to_triples(self) -> TripleI:
         assert self.uri
-        return _concept_to_triples(self, self.uri)
+        return _record_to_triples(self, self.uri)
 
     def _set_attr_if_not_none(self, attr: str, val: Optional[Any]):
-        assert attr == 'uri' or attr in self.concept_info.attrs_by_name
+        assert attr == 'uri' or attr in self.record_info.attrs_by_name
         if val is not None:
             setattr(self, attr, val)
 
 
-def _concept_to_triples(concept: Concept, node: Subject) -> TripleI:
-    yield node, RDF.type, concept.concept_info.concept_type
-    for attr in concept.concept_info.attrs:
-        if not hasattr(concept, attr.attr_name):
+def _record_to_triples(record: Record, node: Subject) -> TripleI:
+    yield node, RDF.type, record.record_info.record_type
+    for attr in record.record_info.attrs:
+        if not hasattr(record, attr.attr_name):
             continue
-        attr_val = getattr(concept, attr.attr_name)
+        attr_val = getattr(record, attr.attr_name)
         if attr_val is None:
             continue
         p_info = attr.pred_info
@@ -153,13 +153,13 @@ def _concept_to_triples(concept: Concept, node: Subject) -> TripleI:
 
 
 def _to_triples(thing) -> tuple[Subject, TripleI]:
-    if isinstance(thing, Concept):
+    if isinstance(thing, Record):
         node: Subject
         if hasattr(thing, 'uri') and thing.uri:
             node = thing.uri
         else:
             node = BlankNode()
-        return node, _concept_to_triples(thing, node)
+        return node, _record_to_triples(thing, node)
     elif isinstance(thing, Uri):
         return thing, iter(())
     else:

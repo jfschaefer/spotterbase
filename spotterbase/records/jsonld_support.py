@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from typing import Optional, Any
 
-from spotterbase.concept_graphs.concept_graph import PredInfo, Concept, ConceptInfo, AttrInfo
-from spotterbase.concept_graphs.concept_resolver import ConceptResolver
+from spotterbase.records.record import PredInfo, Record, RecordInfo, AttrInfo
+from spotterbase.records.record_class_resolver import RecordClassResolver
 from spotterbase.rdf.literal import Literal
 from spotterbase.rdf.uri import Uri, NameSpace
 
@@ -85,8 +85,8 @@ class JsonLdContext:
         return result
 
 
-class JsonLdConceptConverter:
-    def __init__(self, contexts: list[JsonLdContext], concept_resolver: ConceptResolver):
+class JsonLdRecordConverter:
+    def __init__(self, contexts: list[JsonLdContext], record_type_resolver: RecordClassResolver):
         self._contexts: list[JsonLdContext] = contexts
         self._merged_context: JsonLdContext = JsonLdContext(
             uri=None,
@@ -94,7 +94,7 @@ class JsonLdConceptConverter:
             pred_infos=[pinfo for ctx in contexts for pinfo in ctx.pred_terms.values()],
             terms=[term for ctx in contexts for term in ctx.obj_terms.term_to_uri.items()]
         )
-        self.concept_resolver: ConceptResolver = concept_resolver
+        self.record_type_resolver: RecordClassResolver = record_type_resolver
 
     def format_uri(self, uri: Uri) -> str:
         # TODO: should we use namespaces?
@@ -116,23 +116,23 @@ class JsonLdConceptConverter:
         # option 3: it's the correct URI already
         return Uri(string)
 
-    def json_ld_to_concept(self, json_ld, expect_non_root_concept: bool = False) -> Concept:
+    def json_ld_to_record(self, json_ld, expect_non_root_record: bool = False) -> Record:
         if not isinstance(json_ld, dict):
             raise Exception(f'Expected dictionary (JSON object), not {type(json_ld)}')
         if 'type' not in json_ld:
             raise Exception('No type information in json_ld object')
         type_ = self.uri_from_str(json_ld['type'])
-        if type_ not in self.concept_resolver:
-            raise Exception(f'Unknown concept {type_}')
-        concept = self.concept_resolver[type_]()
-        c_info: ConceptInfo = concept.concept_info
+        if type_ not in self.record_type_resolver:
+            raise Exception(f'Unknown record type {type_}')
+        record = self.record_type_resolver[type_]()
+        c_info: RecordInfo = record.record_info
 
-        if concept.concept_info.is_root_concept:
-            if expect_non_root_concept:
-                raise Exception(f'Expected non-root concept, found {type(concept)} (URI: {type_})')
-            assert 'id' in json_ld, 'No id provided for root concept'
+        if record.record_info.is_root_record:
+            if expect_non_root_record:
+                raise Exception(f'Expected non-root record, found {type(record)} (URI: {type_})')
+            assert 'id' in json_ld, 'No id provided for root record'
         if 'id' in json_ld:
-            concept.uri = self.uri_from_str(json_ld['id'])
+            record.uri = self.uri_from_str(json_ld['id'])
 
         for key in json_ld:
             if key in {'id', 'type', '@context'}:
@@ -145,12 +145,12 @@ class JsonLdConceptConverter:
                 if uri in c_info.attrs_by_uri:
                     a_info = c_info.attrs_by_uri[uri]
                 else:
-                    raise Exception(f'Unknown key {key} for concept {type(concept)} ({type_})')
+                    raise Exception(f'Unknown key {key} for record {type(record)} ({type_})')
             v = self._import_json_ld_value(json_ld[key], a_info.literal_type,
                                            expected_id=a_info.pred_info.json_ld_type_is_id)
-            setattr(concept, a_info.attr_name, v)
+            setattr(record, a_info.attr_name, v)
 
-        return concept
+        return record
 
     def _import_json_ld_value(self, value, expected_literal_type: Optional[Uri], expected_id: bool = False):
         if isinstance(value, list):
@@ -164,7 +164,7 @@ class JsonLdConceptConverter:
             return literal.to_py_val()
         elif isinstance(value, dict):
             if 'type' in value:
-                return self.json_ld_to_concept(value, expect_non_root_concept=True)
+                return self.json_ld_to_record(value, expect_non_root_record=True)
             if len(value) != 1 or 'id' not in value:
                 raise Exception(f'Unexpected value {value} - did you forget to specify a type?')
         elif isinstance(value, str):
@@ -174,16 +174,16 @@ class JsonLdConceptConverter:
         else:
             raise Exception(f'Value {value!r} has unsupported type {type(value)}')
 
-    def concept_to_json_ld(self, concept: Concept) -> dict[str, Any]:
-        result: dict[str, Any] = {'type': self.format_uri(concept.concept_info.concept_type)}
-        if hasattr(concept, 'uri') and concept.uri:
-            result['id'] = self.format_uri(concept.uri)
+    def record_to_json_ld(self, record: Record) -> dict[str, Any]:
+        result: dict[str, Any] = {'type': self.format_uri(record.record_info.record_type)}
+        if hasattr(record, 'uri') and record.uri:
+            result['id'] = self.format_uri(record.uri)
 
-        for attr in concept.concept_info.attrs:
+        for attr in record.record_info.attrs:
             p_info = attr.pred_info
-            if not hasattr(concept, attr.attr_name):
+            if not hasattr(record, attr.attr_name):
                 continue
-            attr_val = getattr(concept, attr.attr_name)
+            attr_val = getattr(record, attr.attr_name)
             if attr_val is None:
                 continue
 
@@ -200,8 +200,8 @@ class JsonLdConceptConverter:
                         converted.append(val)
                     else:
                         converted.append(Literal.from_py_val(val, p_info.literal_type).string)
-                elif isinstance(val, Concept):
-                    converted.append(self.concept_to_json_ld(val))
+                elif isinstance(val, Record):
+                    converted.append(self.record_to_json_ld(val))
                 elif isinstance(val, Uri):
                     if not p_info.json_ld_type_is_id:
                         # must wrap it because otherwise it would be interpreted as a literal

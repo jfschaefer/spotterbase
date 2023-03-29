@@ -19,7 +19,7 @@ from spotterbase.dnm.token_generator import DefaultGenerators
 from spotterbase.rdf.types import TripleI
 from spotterbase.rdf.uri import Uri
 from spotterbase.sb_vocab import SB
-from spotterbase.special_concepts.declarations import Identifier, IdentifierDeclaration, IdentifierOccurrence, \
+from spotterbase.sbx.declarations import Identifier, IdentifierDeclaration, IdentifierOccurrence, \
     PolarityVocab, POLARITY_TAG_SET, POLARITY_TAGS
 from spotterbase.spotters.spotter import UriGeneratorMixin, Spotter, SpotterContext
 

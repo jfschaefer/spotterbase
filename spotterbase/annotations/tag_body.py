@@ -2,17 +2,17 @@ from __future__ import annotations
 
 from typing import Optional
 
-from spotterbase.concept_graphs.concept_graph import Concept, ConceptInfo, AttrInfo
-from spotterbase.concept_graphs.oa_support import OA_PRED
-from spotterbase.concept_graphs.sb_support import SB_PRED
+from spotterbase.records.record import Record, RecordInfo, AttrInfo
+from spotterbase.records.oa_support import OA_PRED
+from spotterbase.records.sb_support import SB_PRED
 from spotterbase.rdf.literal import Uri
 from spotterbase.rdf.vocab import XSD
 from spotterbase.sb_vocab import SB
 
 
-class SimpleTagBody(Concept):
-    concept_info = ConceptInfo(
-        concept_type=SB.SimpleTagBody,
+class SimpleTagBody(Record):
+    record_info = RecordInfo(
+        record_type=SB.SimpleTagBody,
         attrs=[
             AttrInfo('tag', SB_PRED.val),
         ]
@@ -24,11 +24,11 @@ class SimpleTagBody(Concept):
         self._set_attr_if_not_none('tag', tag)
 
 
-class MultiTagBody(Concept):
-    concept_info = ConceptInfo(
-        concept_type=SB.MultiTagBody,
+class MultiTagBody(Record):
+    record_info = RecordInfo(
+        record_type=SB.MultiTagBody,
         attrs=[
-            AttrInfo('tags', SB_PRED.val, multi_target=True),
+            AttrInfo('tags', SB_PRED.val, multi_field=True),
         ]
     )
 
@@ -38,15 +38,15 @@ class MultiTagBody(Concept):
         self._set_attr_if_not_none('tags', tags)
 
 
-class Tag(Concept):
-    concept_info = ConceptInfo(
-        concept_type=SB.Tag,
+class Tag(Record):
+    record_info = RecordInfo(
+        record_type=SB.Tag,
         attrs=[
             AttrInfo('belongs_to', SB_PRED.belongsTo),
             AttrInfo('label', OA_PRED.label, literal_type=XSD.string),
             AttrInfo('comment', SB_PRED.comment),
         ],
-        is_root_concept=True
+        is_root_record=True
     )
     label: str
     belongs_to: Uri
@@ -60,15 +60,15 @@ class Tag(Concept):
         self._set_attr_if_not_none('comment', comment)
 
 
-class TagSet(Concept):
-    concept_info = ConceptInfo(
-        concept_type=SB.TagSet,
+class TagSet(Record):
+    record_info = RecordInfo(
+        record_type=SB.TagSet,
         attrs=[
-            AttrInfo('tags', SB_PRED.belongsTo_Rev, multi_target=True),
+            AttrInfo('tags', SB_PRED.belongsTo_Rev, multi_field=True),
             AttrInfo('label', OA_PRED.label, literal_type=XSD.string),
             AttrInfo('comment', SB_PRED.comment),
         ],
-        is_root_concept=True
+        is_root_record=True
     )
 
     # tags: list[Uri]

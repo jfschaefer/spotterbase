@@ -1,8 +1,8 @@
 import json
 from pathlib import Path
 
-from spotterbase.concept_graphs.concept_graph import PredInfo
-from spotterbase.concept_graphs.jsonld_support import JsonLdContext
+from spotterbase.records.record import PredInfo
+from spotterbase.records.jsonld_support import JsonLdContext
 from spotterbase.rdf.vocab import RDF, XSD, RDFS
 from spotterbase.sb_vocab import SB
 from spotterbase.utils.resources import RESOURCES_DIR

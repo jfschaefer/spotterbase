@@ -3,9 +3,9 @@ from spotterbase.annotations.annotation_creator import SpotterRun
 from spotterbase.annotations.tag_body import SimpleTagBody, MultiTagBody, Tag, TagSet
 from spotterbase.annotations.selector import OffsetSelector, PathSelector, ListSelector
 from spotterbase.annotations.target import FragmentTarget
-from spotterbase.concept_graphs.concept_resolver import ConceptResolver
+from spotterbase.records.record_class_resolver import RecordClassResolver
 
-ANNOTATION_CONCEPT_RESOLVER: ConceptResolver = ConceptResolver([
+ANNOTATION_RECORD_RESOLVER: RecordClassResolver = RecordClassResolver([
     Annotation,
     FragmentTarget,
     OffsetSelector,

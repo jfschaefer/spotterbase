@@ -4,7 +4,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from spotterbase.concept_graphs.sb_support import SB_JSONLD_CONTEXT
+from spotterbase.records.sb_support import SB_JSONLD_CONTEXT
 from spotterbase.rdf.literal import Literal
 from spotterbase.rdf.bnode import BlankNode
 from spotterbase.rdf.uri import NameSpace, Vocabulary, Uri

@@ -20,14 +20,6 @@ spotterbase.annotations.annotation\_creator module
    :undoc-members:
    :show-inheritance:
 
-spotterbase.annotations.concepts module
----------------------------------------
-
-.. automodule:: spotterbase.annotations.concepts
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 spotterbase.annotations.dom\_range module
 -----------------------------------------
 
@@ -40,6 +32,14 @@ spotterbase.annotations.offset\_converter module
 ------------------------------------------------
 
 .. automodule:: spotterbase.annotations.offset_converter
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+spotterbase.annotations.records module
+--------------------------------------
+
+.. automodule:: spotterbase.annotations.records
    :members:
    :undoc-members:
    :show-inheritance:

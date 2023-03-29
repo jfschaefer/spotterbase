@@ -1,17 +1,17 @@
 import datetime
 from typing import Optional
 
-from spotterbase.concept_graphs.concept_graph import Concept, ConceptInfo, AttrInfo
-from spotterbase.concept_graphs.oa_support import OA_PRED
-from spotterbase.concept_graphs.sb_support import SB_PRED
+from spotterbase.records.record import Record, RecordInfo, AttrInfo
+from spotterbase.records.oa_support import OA_PRED
+from spotterbase.records.sb_support import SB_PRED
 from spotterbase.rdf.uri import Uri
 from spotterbase.rdf.vocab import XSD
 from spotterbase.sb_vocab import SB
 
 
-class SpotterRun(Concept):
-    concept_info = ConceptInfo(
-        concept_type=SB.SpotterRun,
+class SpotterRun(Record):
+    record_info = RecordInfo(
+        record_type=SB.SpotterRun,
         attrs=[
             AttrInfo('spotter_uri', pred_info=SB_PRED.withSpotter),
             AttrInfo('spotter_version', pred_info=SB_PRED.spotterVersion),

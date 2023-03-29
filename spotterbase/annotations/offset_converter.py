@@ -72,6 +72,7 @@ class OffsetConverter:
     """ Records offsets in the DOM.
 
     Notes on efficiency:
+
     * Recurses through entire DOM at initialization, which takes time (approximately 1/6th of parsing time).
     * If a single offset is of interest, using an html tree (`lxml.html.parse`) and `.text_content()`
         with a custom implementation is every efficient (10x faster).

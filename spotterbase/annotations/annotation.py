@@ -2,21 +2,21 @@ from __future__ import annotations
 
 from typing import Any, Optional
 
-from spotterbase.concept_graphs.concept_graph import Concept, ConceptInfo, AttrInfo, TargetUnknownConcept
-from spotterbase.concept_graphs.oa_support import OA_PRED
+from spotterbase.records.record import Record, RecordInfo, AttrInfo, FieldUnknownRecord
+from spotterbase.records.oa_support import OA_PRED
 from spotterbase.rdf.uri import Uri
 from spotterbase.rdf.vocab import OA
 
 
-class Annotation(Concept):
-    concept_info = ConceptInfo(
-        concept_type=OA.Annotation,
+class Annotation(Record):
+    record_info = RecordInfo(
+        record_type=OA.Annotation,
         attrs=[
             AttrInfo('target_uri', OA_PRED.target),
-            AttrInfo('body', OA_PRED.body, target_type=TargetUnknownConcept),
+            AttrInfo('body', OA_PRED.body, field_info=FieldUnknownRecord),
             AttrInfo('creator_uri', OA_PRED.creator),
         ],
-        is_root_concept=True,
+        is_root_record=True,
     )
 
     # attributes
