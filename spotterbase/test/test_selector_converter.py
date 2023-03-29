@@ -3,8 +3,8 @@ import unittest
 
 from lxml import etree
 
-from spotterbase.annotations.dom_range import DomPoint
-from spotterbase.annotations.selector_converter import SelectorConverter
+from spotterbase.selectors.dom_range import DomPoint
+from spotterbase.selectors.selector_converter import SelectorConverter
 from spotterbase.rdf.uri import Uri
 
 

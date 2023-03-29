@@ -4,11 +4,11 @@ from pathlib import Path
 
 import rdflib
 
-from spotterbase.annotations.records import ANNOTATION_RECORD_RESOLVER
-from spotterbase.annotations.target import FragmentTarget, populate_standard_selectors
+from spotterbase.anno_core.record_class_resolver import ANNOTATION_RECORD_CLASS_RESOLVER
+from spotterbase.anno_core.target import FragmentTarget, populate_standard_selectors
 from spotterbase.records.jsonld_support import JsonLdRecordConverter
 from spotterbase.records.oa_support import OA_JSONLD_CONTEXT
-from spotterbase.records.sb_support import SB_JSONLD_CONTEXT, SB_CONTEXT_FILE
+from spotterbase.anno_core.sb import SB_JSONLD_CONTEXT, SB_CONTEXT_FILE
 from spotterbase.records.sparql_populate import Populator
 from spotterbase.rdf import to_rdflib
 from spotterbase.sparql.endpoint import RdflibEndpoint
@@ -21,7 +21,7 @@ class TestAnnotationSerialization(GraphTestMixin, unittest.TestCase):
         sb_context = json.load(fp)
     converter = JsonLdRecordConverter(
         contexts=[OA_JSONLD_CONTEXT, SB_JSONLD_CONTEXT],
-        record_type_resolver=ANNOTATION_RECORD_RESOLVER,
+        record_type_resolver=ANNOTATION_RECORD_CLASS_RESOLVER,
     )
     example_json_ld_files: list[Path] = [
         package_root.parent / 'doc' / 'source' / 'codesnippets' / 'example-annotation.jsonld',
@@ -52,7 +52,7 @@ class TestAnnotationSerialization(GraphTestMixin, unittest.TestCase):
                     to_rdflib.triples_to_graph(self.converter.json_ld_to_record(jsonld).to_triples())
                 )
 
-                populator = Populator(record_type_resolver=ANNOTATION_RECORD_RESOLVER,
+                populator = Populator(record_type_resolver=ANNOTATION_RECORD_CLASS_RESOLVER,
                                       endpoint=endpoint,
                                       special_populators={
                                           FragmentTarget: [populate_standard_selectors]

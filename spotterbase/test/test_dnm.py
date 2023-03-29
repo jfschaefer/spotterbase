@@ -3,10 +3,10 @@ import unittest
 
 from lxml import etree
 
-from spotterbase.annotations.dom_range import DomRange
-from spotterbase.annotations.offset_converter import OffsetConverter
-from spotterbase.annotations.selector import PathSelector, OffsetSelector
-from spotterbase.annotations.selector_converter import SelectorConverter
+from spotterbase.selectors.dom_range import DomRange
+from spotterbase.selectors.offset_converter import OffsetConverter
+from spotterbase.anno_core.selector import PathSelector, OffsetSelector
+from spotterbase.selectors.selector_converter import SelectorConverter
 from spotterbase.dnm.token_dnm import TokenBasedDnm
 from spotterbase.dnm.token_generator import SimpleTokenGenerator
 from spotterbase.rdf.uri import Uri

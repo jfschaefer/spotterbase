@@ -5,7 +5,7 @@ from collections import deque
 from pathlib import Path
 from typing import List, IO, Dict, Deque, Tuple
 
-from spotterbase.config_loader import ConfigExtension, ConfigLoader
+from spotterbase.utils.config_loader import ConfigExtension, ConfigLoader
 
 logger = logging.getLogger(__name__)
 

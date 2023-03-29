@@ -4,8 +4,8 @@ import unittest
 from lxml import etree
 from lxml.etree import _Element, _ElementTree
 
-from spotterbase.annotations.dom_range import DomPoint
-from spotterbase.annotations.offset_converter import OffsetConverter, OffsetType
+from spotterbase.selectors.dom_range import DomPoint
+from spotterbase.selectors.offset_converter import OffsetConverter, OffsetType
 
 
 def get_xpath_node(tree: _ElementTree, xpath: str) -> _Element:

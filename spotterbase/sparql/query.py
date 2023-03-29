@@ -2,10 +2,10 @@ from collections import defaultdict
 
 import spotterbase.corpora.arxiv
 import spotterbase.rdf.vocab as vocab
-from spotterbase import sb_vocab
+from spotterbase.anno_core.sb import SB
+from spotterbase.rdf.bnode import BlankNode
 from spotterbase.rdf.literal import Literal
 from spotterbase.rdf.types import Object
-from spotterbase.rdf.bnode import BlankNode
 from spotterbase.rdf.uri import NameSpace, Uri
 
 NAMESPACES: list[NameSpace] = [
@@ -15,7 +15,7 @@ NAMESPACES: list[NameSpace] = [
     vocab.XSD.NS,
     vocab.OA.NS,
 
-    sb_vocab.SB.NS,
+    SB.NS,
 
     spotterbase.corpora.arxiv.ArxivUris.arxiv_cat,
     spotterbase.corpora.arxiv.ArxivUris.arxiv_id,

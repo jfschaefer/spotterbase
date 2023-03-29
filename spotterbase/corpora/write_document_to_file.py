@@ -1,7 +1,7 @@
 import logging
 import sys
 
-from spotterbase.config_loader import ConfigLoader
+from spotterbase.utils.config_loader import ConfigLoader
 from spotterbase.corpora.resolver import Resolver
 from spotterbase.rdf.uri import Uri
 

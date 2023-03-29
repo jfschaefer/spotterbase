@@ -1,9 +1,9 @@
 from typing import Optional
 
-from spotterbase.annotations.tag_body import TagSet, Tag
+from spotterbase.anno_core.tag_body import TagSet, Tag
 from spotterbase.records.record import Record, RecordInfo, AttrInfo
 from spotterbase.rdf.uri import Uri, Vocabulary, NameSpace
-from spotterbase.sbx.sbx import SBX, SBX_PRED
+from spotterbase.anno_extra.sbx import SBX, SBX_PRED
 
 
 class Identifier(Record):

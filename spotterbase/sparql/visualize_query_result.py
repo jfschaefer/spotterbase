@@ -8,7 +8,7 @@ import networkx as nx            # type: ignore
 import rdflib
 from rdflib.extras.external_graph_libs import rdflib_to_networkx_multidigraph
 
-from spotterbase.config_loader import ConfigLoader
+from spotterbase.utils.config_loader import ConfigLoader
 from spotterbase.sparql.sb_sparql import get_data_endpoint
 
 logger = logging.getLogger(__name__)

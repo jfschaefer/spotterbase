@@ -2,8 +2,8 @@ import functools
 import hashlib
 import re
 
-from spotterbase.config_loader import ConfigFlag
-from spotterbase.sb_vocab import SB
+from spotterbase.utils.config_loader import ConfigFlag
+from spotterbase.anno_core.sb import SB
 from spotterbase.rdf.uri import NameSpace, Uri
 
 USE_CENTI_ARXIV = ConfigFlag('--centi-arxiv', 'use a subset of arxiv (≈ 1 percent)')

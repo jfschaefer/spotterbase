@@ -1,10 +1,10 @@
 import nltk.tag
 from lxml import etree
 
-from spotterbase.annotations.annotation import Annotation
-from spotterbase.annotations.selector_converter import SelectorConverter
-from spotterbase.annotations.tag_body import SimpleTagBody, Tag, TagSet
-from spotterbase.annotations.target import FragmentTarget
+from spotterbase.anno_core.annotation import Annotation
+from spotterbase.selectors.selector_converter import SelectorConverter
+from spotterbase.anno_core.tag_body import SimpleTagBody, Tag, TagSet
+from spotterbase.anno_core.target import FragmentTarget
 from spotterbase.corpora.interface import Document
 from spotterbase.dnm.dnm import DnmStr
 from spotterbase.dnm.token_dnm import TokenBasedDnm
@@ -13,7 +13,7 @@ from spotterbase.dnm_nlp.sentence_tokenizer import sentence_tokenize
 from spotterbase.dnm_nlp.word_tokenizer import word_tokenize
 from spotterbase.rdf.types import TripleI
 from spotterbase.rdf.uri import Uri
-from spotterbase.sb_vocab import SB
+from spotterbase.anno_core.sb import SB
 from spotterbase.spotters.spotter import Spotter, UriGeneratorMixin, SpotterContext
 
 _univ_pos_tags: Uri = SB.NS['universal-pos-tags']

@@ -9,7 +9,7 @@ from spotterbase.corpora.interface import Document, Corpus, DocumentNotFoundErro
 from spotterbase.data.locator import Locator, LocatorFailedException
 from spotterbase.data.zipfilecache import SHARED_ZIP_CACHE
 from spotterbase.rdf.uri import Uri
-from spotterbase.sb_vocab import SB
+from spotterbase.anno_core.sb import SB
 
 ARXMLIV_RELEASES: list[str] = ['08.2017', '08.2018', '08.2019', '2020']
 

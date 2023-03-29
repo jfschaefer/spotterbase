@@ -17,7 +17,7 @@ class SpotterContext:
 
 class Spotter(abc.ABC):
     # You can set these
-    spotter_short_id: str     # short id of spotter (e.g. to make unique URIs for annotations)
+    spotter_short_id: str     # short id of spotter (e.g. to make unique URIs for anno_core)
 
     # These are set by the constructor
     ctx: SpotterContext

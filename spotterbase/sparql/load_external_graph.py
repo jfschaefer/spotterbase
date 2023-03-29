@@ -1,6 +1,6 @@
 import logging
 
-from spotterbase.sb_vocab import SB
+from spotterbase.anno_core.sb import SB
 from spotterbase.sparql.sb_sparql import get_data_endpoint
 
 logger = logging.getLogger(__name__)

@@ -1,7 +1,7 @@
 from collections import OrderedDict
 from typing import Optional, Iterable
 
-from spotterbase import config_loader
+from spotterbase.utils import config_loader
 from spotterbase.corpora.arxmliv import ARXMLIV_CORPORA, CENTI_ARXMLIV_CORPORA
 from spotterbase.corpora.interface import Corpus, Document, DocumentNotInCorpusException
 from spotterbase.corpora.test_corpus import TestCorpus

@@ -1,11 +1,49 @@
 import json
 from pathlib import Path
 
-from spotterbase.records.record import PredInfo
+from spotterbase.rdf.uri import NameSpace, Vocabulary, Uri
+from spotterbase.rdf.vocab import RDF, RDFS, XSD
 from spotterbase.records.jsonld_support import JsonLdContext
-from spotterbase.rdf.vocab import RDF, XSD, RDFS
-from spotterbase.sb_vocab import SB
+from spotterbase.records.record import PredInfo
 from spotterbase.utils.resources import RESOURCES_DIR
+
+
+class SB(Vocabulary):
+    NS: NameSpace = NameSpace('http://sigmathling.kwarc.info/spotterbase/', 'sb:')
+
+    # SPOTTER INFO
+    SpotterRun: Uri
+    withSpotter: Uri
+    runDate: Uri
+    spotterVersion: Uri
+
+    # SELECTORS AND TARGETS
+    FragmentTarget: Uri  # type of targets that use selectors
+
+    PathSelector: Uri
+    startPath: Uri
+    endPath: Uri
+
+    ListSelector: Uri
+
+    OffsetSelector: Uri
+
+    # BODIES
+    SimpleTagBody: Uri
+    MultiTagBody: Uri
+    TagSet: Uri
+    Tag: Uri
+
+    # DATASETS (TODO: can this replaced with dublin core?)
+    Dataset: Uri
+    Document: Uri
+
+    isBasedOn: Uri
+
+    # GENERAL-PURPOSE
+    isSubsetOf: Uri
+    belongsTo: Uri
+    contains: Uri
 
 
 class SB_PRED:
@@ -39,7 +77,6 @@ SB_JSONLD_CONTEXT: JsonLdContext = JsonLdContext(
         ('Tag', SB.Tag),
     ]
 )
-
 SB_CONTEXT_FILE: Path = RESOURCES_DIR / 'sb-context.jsonld'
 
 

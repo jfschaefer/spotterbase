@@ -6,7 +6,7 @@ import enum
 
 from lxml.etree import _Element, _Comment
 
-from spotterbase.annotations.dom_range import DomPoint, DomRange
+from spotterbase.selectors.dom_range import DomPoint, DomRange
 
 
 class DomOffsetRange:

@@ -4,7 +4,7 @@ import abc
 import dataclasses
 from typing import TypeVar, Sequence, Optional
 
-from spotterbase.annotations.dom_range import DomRange
+from spotterbase.selectors.dom_range import DomRange
 from spotterbase.dnm.l_str import LStr
 
 

@@ -4,7 +4,11 @@ from typing import Optional
 
 from lxml.etree import _Element
 
-from spotterbase.annotations.utils import get_parent_asserted
+
+def get_parent_asserted(node: _Element) -> _Element:
+    parent = node.getparent()
+    assert parent is not None
+    return parent
 
 
 class DomPoint:
@@ -23,6 +27,7 @@ class DomPoint:
     It also allows us to have `DomPoint` as a simple datastructure without e.g. complex processing code
     for finding whatever comes after.
     """
+
     def __init__(self, node: _Element, *, text_offset: Optional[int] = None, tail_offset: Optional[int] = None,
                  after: bool = False):
         # after indicates that it refer actually refers to the location right after what is specified

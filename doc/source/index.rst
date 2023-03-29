@@ -11,7 +11,7 @@ Content
    config
    annotations
    rdf
-   utils
+   dnm_nlp
    corpora
 
 

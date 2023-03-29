@@ -3,9 +3,9 @@ from typing import Iterable, TypeVar, Optional
 
 from lxml.etree import _ElementTree, _Element
 
-from spotterbase.annotations.offset_converter import OffsetConverter, DomOffsetRange
+from spotterbase.selectors.offset_converter import OffsetConverter, DomOffsetRange
 from spotterbase.dnm.dnm import Dnm, DnmStr, DnmRange, DnmPoint, DnmMatchIssues
-from spotterbase.annotations.dom_range import DomRange
+from spotterbase.selectors.dom_range import DomRange
 from spotterbase.dnm.xml_util import XmlNode
 
 

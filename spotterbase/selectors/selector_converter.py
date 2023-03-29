@@ -5,9 +5,9 @@ from typing import Optional, Any
 
 from lxml.etree import _Element
 
-from spotterbase.annotations.dom_range import DomRange, DomPoint
-from spotterbase.annotations.offset_converter import OffsetConverter, OffsetType
-from spotterbase.annotations.selector import PathSelector, OffsetSelector, ListSelector
+from spotterbase.selectors.dom_range import DomRange, DomPoint
+from spotterbase.selectors.offset_converter import OffsetConverter, OffsetType
+from spotterbase.anno_core.selector import PathSelector, OffsetSelector, ListSelector
 from spotterbase.rdf.uri import Uri
 
 

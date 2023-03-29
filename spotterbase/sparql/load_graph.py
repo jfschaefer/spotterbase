@@ -3,7 +3,7 @@ import logging
 import shutil
 from pathlib import Path
 
-from spotterbase.config_loader import ConfigLoader
+from spotterbase.utils.config_loader import ConfigLoader
 from spotterbase.data.locator import TmpDir
 from spotterbase.rdf.uri import Uri
 from spotterbase.sparql.endpoint import SparqlEndpoint

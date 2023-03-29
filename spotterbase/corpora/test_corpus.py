@@ -3,7 +3,7 @@ from typing import IO, Iterator
 
 from spotterbase.corpora.interface import Corpus, DocumentNotInCorpusException, Document, DocumentNotFoundError
 from spotterbase.rdf.uri import Uri
-from spotterbase.sb_vocab import SB
+from spotterbase.anno_core.sb import SB
 
 TEST_CORPUS_URI: Uri = SB.NS['test-corpus/']
 

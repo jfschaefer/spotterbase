@@ -2,8 +2,8 @@ import logging
 from datetime import datetime
 from typing import Iterable
 
-from spotterbase import config_loader
-from spotterbase.config_loader import ConfigUri, ConfigPath, ConfigInt
+from spotterbase.utils import config_loader
+from spotterbase.utils.config_loader import ConfigUri, ConfigPath, ConfigInt
 from spotterbase.corpora.interface import Document
 from spotterbase.corpora.resolver import Resolver
 from spotterbase.data.locator import DataDir

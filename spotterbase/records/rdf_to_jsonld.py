@@ -1,19 +1,19 @@
 import json
 import logging
 
-from spotterbase import config_loader
-from spotterbase.annotations.records import ANNOTATION_RECORD_RESOLVER
-from spotterbase.annotations.target import FragmentTarget, populate_standard_selectors
+from spotterbase.utils import config_loader
+from spotterbase.anno_core.record_class_resolver import ANNOTATION_RECORD_CLASS_RESOLVER
+from spotterbase.anno_core.target import FragmentTarget, populate_standard_selectors
 from spotterbase.records.record_loading import load_all_records_from_graph
 from spotterbase.records.record_class_resolver import RecordClassResolver
 from spotterbase.records.jsonld_support import JsonLdRecordConverter
 from spotterbase.records.oa_support import OA_JSONLD_CONTEXT
-from spotterbase.records.sb_support import SB_JSONLD_CONTEXT
+from spotterbase.anno_core.sb import SB_JSONLD_CONTEXT
 from spotterbase.records.sparql_populate import Populator
 from spotterbase.rdf.uri import Uri
 from spotterbase.sparql.sb_sparql import get_work_endpoint, get_tmp_graph_uri
-from spotterbase.sbx.sbx import SBX_JSONLD_CONTEXT
-from spotterbase.sbx.sbx_record_class_resolver import SBX_RECORD_CLASS_RESOLVER
+from spotterbase.anno_extra.sbx import SBX_JSONLD_CONTEXT
+from spotterbase.anno_extra.record_class_resolver import SBX_RECORD_CLASS_RESOLVER
 from spotterbase.utils.logutils import ProgressLogger
 
 logger = logging.getLogger(__name__)
@@ -27,7 +27,7 @@ def main():
 
     endpoint = get_work_endpoint()
     populator = Populator(
-        record_type_resolver=RecordClassResolver.merged(ANNOTATION_RECORD_RESOLVER, SBX_RECORD_CLASS_RESOLVER),
+        record_type_resolver=RecordClassResolver.merged(ANNOTATION_RECORD_CLASS_RESOLVER, SBX_RECORD_CLASS_RESOLVER),
         endpoint=endpoint,
         special_populators={FragmentTarget: [populate_standard_selectors]},
         chunk_size=50)

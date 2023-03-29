@@ -3,16 +3,16 @@ import logging
 import zipfile
 from typing import Optional
 
-from spotterbase import config_loader
-from spotterbase.annotations.annotation import Annotation
-from spotterbase.annotations.annotation_creator import SpotterRun
-from spotterbase.annotations.tag_body import TagSet, Tag, SimpleTagBody
-from spotterbase.config_loader import ConfigString
+from spotterbase.utils import config_loader
+from spotterbase.anno_core.annotation import Annotation
+from spotterbase.anno_core.annotation_creator import SpotterRun
+from spotterbase.anno_core.tag_body import TagSet, Tag, SimpleTagBody
+from spotterbase.utils.config_loader import ConfigString
 from spotterbase.corpora.arxiv import USE_CENTI_ARXIV, ArxivUris
 from spotterbase.corpora.arxmliv import ArXMLivUris, ArXMLivCorpus, ARXMLIV_RELEASES
 from spotterbase.corpora.resolver import Resolver
 from spotterbase.data.locator import DataDir
-from spotterbase.sb_vocab import SB
+from spotterbase.anno_core.sb import SB
 from spotterbase.rdf.types import TripleI
 from spotterbase.rdf.serializer import TurtleSerializer
 from spotterbase.rdf.vocab import RDF

@@ -1,11 +1,11 @@
-:mod:`~spotterbase.utils` package
+:mod:`~spotterbase.dnm_nlp` package
 ====================================
 
-The :mod:`spotterbase.utils` provides various tools that
+The :mod:`spotterbase.dnm_nlp` provides various tools that
 may be helpful for the development of spotters.
 
 
-The :mod:`~spotterbase.utils.xml_match` module
+The :mod:`~spotterbase.dnm_nlp.xml_match` module
 ----------------------------------------------
 
 Background
@@ -49,7 +49,7 @@ Matching simple nodes
 Imports and loading the example XML tree::
 
     >>> from lxml import etree
-    >>> import spotterbase.utils.xml_match as xm
+    >>> import spotterbase.dnm_nlp.xml_match as xm
 
 Let's match simple numbers::
 
@@ -113,7 +113,7 @@ where the beginning matches ``a`` and the rest matches ``b``. Longer sequences a
 In the example above, ``neg_int_matcher`` matches any ``<mrow>`` node that has exactly two children:
 an ``<mo>`` with text ``-``, followed by a natural number.
 
-The matches are :class:`~spotterbase.utils.xml_match.MatchTree` objects.
+The matches are :class:`~spotterbase.dnm_nlp.xml_match.MatchTree` objects.
 We will take a closer look at them later on.
 But to give you a first impression::
 
@@ -143,7 +143,7 @@ For illustration, let us develop a matcher for the example from above::
     [<"sci_not": <"factor": <"float">, "exponent": <"negint": <"nat">>>>]
 
 
-Working with the :class:`~spotterbase.utils.xml_match.MatchTree`
+Working with the :class:`~spotterbase.dnm_nlp.xml_match.MatchTree`
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 Every match tree has a label, an associated lxml node and possible one or more children,

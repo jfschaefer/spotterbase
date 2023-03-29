@@ -4,8 +4,7 @@ from typing import Optional
 
 from spotterbase.records.record import Record, RecordInfo, AttrInfo
 from spotterbase.records.oa_support import OA_PRED
-from spotterbase.records.sb_support import SB_PRED
-from spotterbase.sb_vocab import SB
+from spotterbase.anno_core.sb import SB, SB_PRED
 
 
 class PathSelector(Record):

@@ -1,12 +1,12 @@
 import logging
 import urllib.parse
 
-from spotterbase.annotations.annotation import Annotation
-from spotterbase.annotations.tag_body import MultiTagBody, Tag, TagSet
+from spotterbase.anno_core.annotation import Annotation
+from spotterbase.anno_core.tag_body import MultiTagBody, Tag, TagSet
 from spotterbase.corpora.interface import Document
 from spotterbase.rdf import Uri
 from spotterbase.rdf.types import TripleI
-from spotterbase.sb_vocab import SB
+from spotterbase.anno_core.sb import SB
 from spotterbase.spotters.spotter import Spotter, SpotterContext
 
 logger = logging.getLogger(__name__)

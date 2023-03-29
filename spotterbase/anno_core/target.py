@@ -4,17 +4,16 @@ import logging
 from collections import defaultdict
 from typing import Optional
 
-from spotterbase.annotations.selector import PathSelector, OffsetSelector, ListSelector
+from spotterbase.anno_core.selector import PathSelector, OffsetSelector, ListSelector
 from spotterbase.records.record import Record, RecordInfo, AttrInfo, FieldRecordSet
 from spotterbase.records.oa_support import OA_PRED
-from spotterbase.records.sb_support import SB_PRED
 from spotterbase.records.sparql_populate import SubRecords, Populator
 from spotterbase.rdf.literal import Literal
 from spotterbase.rdf.types import Subject
 from spotterbase.rdf.bnode import BlankNode
 from spotterbase.rdf.uri import Uri
 from spotterbase.rdf.vocab import RDF
-from spotterbase.sb_vocab import SB
+from spotterbase.anno_core.sb import SB, SB_PRED
 from spotterbase.sparql.property_path import PropertyPath, UriPath
 
 logger = logging.getLogger(__name__)

@@ -6,10 +6,10 @@ from pathlib import Path
 from typing import IO
 
 from spotterbase import __version__
-from spotterbase import config_loader
-from spotterbase.annotations.annotation import Annotation
-from spotterbase.annotations.annotation_creator import SpotterRun
-from spotterbase.annotations.tag_body import Tag, MultiTagBody, TagSet
+from spotterbase.utils import config_loader
+from spotterbase.anno_core.annotation import Annotation
+from spotterbase.anno_core.annotation_creator import SpotterRun
+from spotterbase.anno_core.tag_body import Tag, MultiTagBody, TagSet
 from spotterbase.corpora.arxiv import ArxivId, ArxivCategory, USE_CENTI_ARXIV, ArxivUris
 from spotterbase.data.locator import Locator, DataDir
 from spotterbase.data.utils import json_lib
@@ -17,7 +17,7 @@ from spotterbase.rdf.literal import Uri
 from spotterbase.rdf.types import TripleI
 from spotterbase.rdf.serializer import TurtleSerializer
 from spotterbase.rdf.vocab import RDF
-from spotterbase.sb_vocab import SB
+from spotterbase.anno_core.sb import SB
 
 logger = logging.getLogger(__name__)
 

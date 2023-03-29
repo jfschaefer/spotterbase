@@ -7,19 +7,19 @@ from lxml import etree
 from lxml.etree import _Element, _ElementTree
 
 from spotterbase import __version__
-import spotterbase.utils.xml_match as xm
-from spotterbase.annotations.annotation import Annotation
-from spotterbase.annotations.annotation_creator import SpotterRun
-from spotterbase.annotations.dom_range import DomPoint
-from spotterbase.annotations.selector_converter import SelectorConverter
-from spotterbase.annotations.target import FragmentTarget
+import spotterbase.dnm_nlp.xml_match as xm
+from spotterbase.anno_core.annotation import Annotation
+from spotterbase.anno_core.annotation_creator import SpotterRun
+from spotterbase.selectors.dom_range import DomPoint
+from spotterbase.selectors.selector_converter import SelectorConverter
+from spotterbase.anno_core.target import FragmentTarget
 from spotterbase.corpora.interface import Document
 from spotterbase.dnm.token_dnm import TokenBasedDnm
 from spotterbase.dnm.token_generator import DefaultGenerators
 from spotterbase.rdf.types import TripleI
 from spotterbase.rdf.uri import Uri
-from spotterbase.sb_vocab import SB
-from spotterbase.sbx.declarations import Identifier, IdentifierDeclaration, IdentifierOccurrence, \
+from spotterbase.anno_core.sb import SB
+from spotterbase.anno_extra.declarations import Identifier, IdentifierDeclaration, IdentifierOccurrence, \
     PolarityVocab, POLARITY_TAG_SET, POLARITY_TAGS
 from spotterbase.spotters.spotter import UriGeneratorMixin, Spotter, SpotterContext
 
