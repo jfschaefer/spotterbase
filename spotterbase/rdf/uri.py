@@ -29,6 +29,9 @@ class NameSpace:
             case other:
                 raise Exception(f'Unsupported format: {other!r}')
 
+    def __repr__(self):
+        return f'{self.__class__.__name__}({self.uri}, prefix={self.prefix})'
+
 
 class VocabularyMeta(type):
     @functools.cache

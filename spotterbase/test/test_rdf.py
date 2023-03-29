@@ -54,7 +54,7 @@ mv:thingA a mv:someClass ;
         self.assertEqual(str(uri), 'http://example.com/abc')
 
     def test_ntriples_serialize(self):
-        BlankNode.counter = 1
+        BlankNode._counter = 1
         stringio = io.StringIO()
         serializer = NTriplesSerializer(stringio)
         serializer.write_comment('this is a comment for ntriples')

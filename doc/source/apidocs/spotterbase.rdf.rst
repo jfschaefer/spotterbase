@@ -12,14 +12,6 @@ spotterbase.rdf.bnode module
    :undoc-members:
    :show-inheritance:
 
-spotterbase.rdf.deserializer module
------------------------------------
-
-.. automodule:: spotterbase.rdf.deserializer
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 spotterbase.rdf.literal module
 ------------------------------
 

@@ -7,45 +7,19 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
-   spotterbase.annotations
+   spotterbase.anno_core
+   spotterbase.anno_extra
    spotterbase.corpora
    spotterbase.data
    spotterbase.dnm
    spotterbase.dnm_nlp
    spotterbase.rdf
    spotterbase.records
-   spotterbase.sbx
+   spotterbase.selectors
    spotterbase.sparql
    spotterbase.spotters
    spotterbase.test
    spotterbase.utils
-
-Submodules
-----------
-
-spotterbase.config\_loader module
----------------------------------
-
-.. automodule:: spotterbase.config_loader
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-spotterbase.dnm\_example module
--------------------------------
-
-.. automodule:: spotterbase.dnm_example
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-spotterbase.sb\_vocab module
-----------------------------
-
-.. automodule:: spotterbase.sb_vocab
-   :members:
-   :undoc-members:
-   :show-inheritance:
 
 Module contents
 ---------------

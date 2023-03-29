@@ -1,12 +1,12 @@
 :mod:`~spotterbase.dnm_nlp` package
-====================================
+===================================
 
 The :mod:`spotterbase.dnm_nlp` provides various tools that
 may be helpful for the development of spotters.
 
 
 The :mod:`~spotterbase.dnm_nlp.xml_match` module
-----------------------------------------------
+------------------------------------------------
 
 Background
 """"""""""
@@ -144,7 +144,7 @@ For illustration, let us develop a matcher for the example from above::
 
 
 Working with the :class:`~spotterbase.dnm_nlp.xml_match.MatchTree`
-""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
 
 Every match tree has a label, an associated lxml node and possible one or more children,
 which are again match trees.

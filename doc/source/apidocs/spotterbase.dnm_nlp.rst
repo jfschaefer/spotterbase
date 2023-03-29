@@ -20,6 +20,14 @@ spotterbase.dnm\_nlp.word\_tokenizer module
    :undoc-members:
    :show-inheritance:
 
+spotterbase.dnm\_nlp.xml\_match module
+--------------------------------------
+
+.. automodule:: spotterbase.dnm_nlp.xml_match
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 Module contents
 ---------------
 

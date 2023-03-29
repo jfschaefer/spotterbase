@@ -52,14 +52,6 @@ spotterbase.records.record\_loading module
    :undoc-members:
    :show-inheritance:
 
-spotterbase.records.sb\_support module
---------------------------------------
-
-.. automodule:: spotterbase.records.sb_support
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 spotterbase.records.sparql\_populate module
 -------------------------------------------
 
