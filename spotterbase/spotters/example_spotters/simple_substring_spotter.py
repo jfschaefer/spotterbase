@@ -67,4 +67,4 @@ class SimpleSubstringSpotter(Spotter):
 
 if __name__ == '__main__':
     from spotterbase.spotters import spotter_runner
-    spotter_runner.main(SimpleSubstringSpotter)
+    spotter_runner.auto_run_spotter(SimpleSubstringSpotter)

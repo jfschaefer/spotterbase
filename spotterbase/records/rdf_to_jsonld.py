@@ -14,7 +14,7 @@ from spotterbase.rdf.uri import Uri
 from spotterbase.sparql.sb_sparql import get_work_endpoint, get_tmp_graph_uri
 from spotterbase.anno_extra.sbx import SBX_JSONLD_CONTEXT
 from spotterbase.anno_extra.record_class_resolver import SBX_RECORD_CLASS_RESOLVER
-from spotterbase.utils.logutils import ProgressLogger
+from spotterbase.utils.progress_updater import ProgressUpdater
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +49,7 @@ def main():
             record_type_resolver=populator.record_type_resolver,
         )
 
-        progress_logger = ProgressLogger(logger, 'Status update: Processed {progress} records')
+        progress_logger = ProgressUpdater('Status update: Processed {progress} records')
 
         logger.info('Loading records and converting them to JSON-LD (this may take a while)')
         results: list = []

@@ -17,13 +17,13 @@ from spotterbase.rdf.uri import Uri
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_CONFIG_PATHS: list[Path] = list(map(lambda p: p.expanduser(), [
+DEFAULT_CONFIG_PATHS: list[Path] = [p.expanduser() for p in [
     Path('~/.config/spotterbase.conf'),
     Path('~/.spotterbase.conf'),
     Path('~/spotterbase.conf'),
     Path('./.spotterbase.conf'),
     Path('./spotterbase.conf'),
-]))
+]]
 
 
 class ConfigExtension:

@@ -1,8 +1,7 @@
 import nltk.tag
-from lxml import etree
 
 from spotterbase.anno_core.annotation import Annotation
-from spotterbase.selectors.selector_converter import SelectorConverter
+from spotterbase.anno_core.sb import SB
 from spotterbase.anno_core.tag_body import SimpleTagBody, Tag, TagSet
 from spotterbase.anno_core.target import FragmentTarget
 from spotterbase.corpora.interface import Document
@@ -13,7 +12,7 @@ from spotterbase.dnm_nlp.sentence_tokenizer import sentence_tokenize
 from spotterbase.dnm_nlp.word_tokenizer import word_tokenize
 from spotterbase.rdf.types import TripleI
 from spotterbase.rdf.uri import Uri
-from spotterbase.anno_core.sb import SB
+from spotterbase.selectors.selector_converter import SelectorConverter
 from spotterbase.spotters.spotter import Spotter, UriGeneratorMixin, SpotterContext
 
 _univ_pos_tags: Uri = SB.NS['universal-pos-tags']
@@ -66,7 +65,8 @@ class SimplePosTagSpotter(UriGeneratorMixin, Spotter):
     def process_document(self, document: Document) -> TripleI:
         uri_generator = self.get_uri_generator_for(document)
 
-        tree = etree.parse(document.open(), parser=etree.HTMLParser())  # type: ignore
+        # tree = etree.parse(document.open(), parser=etree.HTMLParser())  # type: ignore
+        tree = document.get_html_tree(cached=True)
         dnm = TokenBasedDnm.from_token_generator(tree, DefaultGenerators.ARXMLIV_TEXT_ONLY)
         dnm_str: DnmStr = dnm.get_dnm_str()
         selector_converter = SelectorConverter(document.get_uri(), tree.getroot())
@@ -90,4 +90,4 @@ class SimplePosTagSpotter(UriGeneratorMixin, Spotter):
 
 if __name__ == '__main__':
     from spotterbase.spotters import spotter_runner
-    spotter_runner.main(SimplePosTagSpotter)
+    spotter_runner.auto_run_spotter(SimplePosTagSpotter)

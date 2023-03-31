@@ -2,6 +2,7 @@ from __future__ import annotations
 
 
 class BlankNode:
+    __slots__ = ('value',)
     _counter: int = 0
 
     def __init__(self):

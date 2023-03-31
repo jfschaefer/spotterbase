@@ -3,24 +3,23 @@ import re
 from datetime import datetime
 from typing import Iterable, Optional, Iterator
 
-from lxml import etree
 from lxml.etree import _Element, _ElementTree
 
-from spotterbase import __version__
 import spotterbase.dnm_nlp.xml_match as xm
+from spotterbase import __version__
 from spotterbase.anno_core.annotation import Annotation
 from spotterbase.anno_core.annotation_creator import SpotterRun
-from spotterbase.selectors.dom_range import DomPoint
-from spotterbase.selectors.selector_converter import SelectorConverter
+from spotterbase.anno_core.sb import SB
 from spotterbase.anno_core.target import FragmentTarget
+from spotterbase.anno_extra.declarations import Identifier, IdentifierDeclaration, IdentifierOccurrence, \
+    PolarityVocab, POLARITY_TAG_SET, POLARITY_TAGS
 from spotterbase.corpora.interface import Document
 from spotterbase.dnm.token_dnm import TokenBasedDnm
 from spotterbase.dnm.token_generator import DefaultGenerators
 from spotterbase.rdf.types import TripleI
 from spotterbase.rdf.uri import Uri
-from spotterbase.anno_core.sb import SB
-from spotterbase.anno_extra.declarations import Identifier, IdentifierDeclaration, IdentifierOccurrence, \
-    PolarityVocab, POLARITY_TAG_SET, POLARITY_TAGS
+from spotterbase.selectors.dom_range import DomPoint
+from spotterbase.selectors.selector_converter import SelectorConverter
 from spotterbase.spotters.spotter import UriGeneratorMixin, Spotter, SpotterContext
 
 logger = logging.getLogger(__name__)
@@ -116,7 +115,8 @@ class SimpleDeclarationSpotter(UriGeneratorMixin, Spotter):
 
     def process_document(self, document: Document) -> TripleI:
         uri_generator = self.get_uri_generator_for(document)
-        tree = etree.parse(document.open(), parser=etree.HTMLParser())  # type: ignore
+        # tree = etree.parse(document.open(), parser=etree.HTMLParser())  # type: ignore
+        tree = document.get_html_tree(cached=True)
 
         selector_converter = SelectorConverter(document.get_uri(), tree.getroot())
         dnm = TokenBasedDnm.from_token_generator(tree, DefaultGenerators.ARXMLIV_TEXT_ONLY,
@@ -183,4 +183,4 @@ class SimpleDeclarationSpotter(UriGeneratorMixin, Spotter):
 if __name__ == '__main__':
     from spotterbase.spotters import spotter_runner
 
-    spotter_runner.main(SimpleDeclarationSpotter)
+    spotter_runner.auto_run_spotter(SimpleDeclarationSpotter)

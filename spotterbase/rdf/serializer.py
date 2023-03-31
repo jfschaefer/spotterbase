@@ -1,9 +1,10 @@
 import abc
 import gzip
+import pickle
 from collections import OrderedDict, defaultdict
 from io import StringIO
 from pathlib import Path
-from typing import TextIO, Iterable, Optional
+from typing import TextIO, Iterable, Optional, BinaryIO
 
 from spotterbase.rdf.literal import Literal
 from spotterbase.rdf.types import Subject, Predicate, Object, Triple, TripleI
@@ -37,16 +38,16 @@ class Serializer(abc.ABC):
 
 
 class FileSerializer(Serializer):
-    def __init__(self, path: Path):
+    def __init__(self, path: Path, append: bool = False):
         self.path = path
         self.serializer: Serializer
         name = self.path.name
 
         if name.endswith('.gz'):
-            self.fp = gzip.open(path, 'wt')
+            self.fp = gzip.open(path, 'at' if append else 'wt')
             name = name[:-3]
         else:
-            self.fp = open(path, 'w')
+            self.fp = open(path, 'a' if append else 'w')
 
         if name.endswith('.ttl'):
             self.serializer = TurtleSerializer(self.fp)
@@ -196,3 +197,26 @@ def triples_to_nt_string(triples: TripleI) -> str:
     with NTriplesSerializer(strio) as serializer:
         serializer.add_from_iterable(triples)
     return strio.getvalue()
+
+
+class PickleSerializer(Serializer):
+    def __init__(self, fp: BinaryIO):
+        self.fp = fp
+
+    def add(self, s: Subject, p: Predicate, o: Object):
+        pickle.dump((s, p, o), self.fp)
+
+
+def triples_from_pickle(file: BinaryIO | Path) -> TripleI:
+    def load_from_fp(fp: BinaryIO):
+        try:
+            while True:
+                yield pickle.load(fp)
+        except EOFError:
+            pass
+
+    if isinstance(file, Path):
+        with open(file, 'rb') as fp:
+            yield from load_from_fp(fp)
+            return
+    return load_from_fp(file)
