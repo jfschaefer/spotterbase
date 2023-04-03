@@ -63,7 +63,9 @@ class Populator:
                         logger.warning(f'Cannot infer record type for {uri} from types {types}')
                     continue
                 records.append(record_type(uri=uri))
-            self._fill_records([(record, RootUri(record.uri)) for record in records], SequencePropertyPath([]))
+
+            self._fill_records([(record, RootUri(record.require_uri())) for record in records],
+                               SequencePropertyPath([]))
             yield from records
 
     def _record_type_from_uris(self, types: list[Uri]) -> Optional[type[Record]]:

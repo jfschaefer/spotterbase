@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Optional
 
 from spotterbase.records.record import Record, RecordInfo, AttrInfo
-from spotterbase.records.oa_support import OA_PRED
+from spotterbase.anno_core.oa import OA_PRED
 from spotterbase.rdf.literal import Uri
 from spotterbase.rdf.vocab import XSD
 from spotterbase.anno_core.sb import SB, SB_PRED
@@ -20,7 +20,7 @@ class SimpleTagBody(Record):
     tag: Uri
 
     def __init__(self, tag: Optional[Uri] = None):
-        self._set_attr_if_not_none('tag', tag)
+        super().__init__(tag=tag)
 
 
 class MultiTagBody(Record):
@@ -34,7 +34,7 @@ class MultiTagBody(Record):
     tags: list[Uri]
 
     def __init__(self, tags: Optional[list[Uri]] = None):
-        self._set_attr_if_not_none('tags', tags)
+        super().__init__(tags=tags)
 
 
 class Tag(Record):
@@ -47,16 +47,13 @@ class Tag(Record):
         ],
         is_root_record=True
     )
-    label: str
-    belongs_to: Uri
-    comment: str
+    label: Optional[str] = None
+    belongs_to: Optional[Uri] = None
+    comment: Optional[str] = None
 
     def __init__(self, uri: Optional[Uri] = None, label: Optional[str] = None, belongs_to: Optional[Uri] = None,
                  comment: Optional[str] = None):
-        self._set_attr_if_not_none('uri', uri)
-        self._set_attr_if_not_none('label', label)
-        self._set_attr_if_not_none('belongs_to', belongs_to)
-        self._set_attr_if_not_none('comment', comment)
+        super().__init__(uri=uri, label=label, belongs_to=belongs_to, comment=comment)
 
 
 class TagSet(Record):
@@ -71,11 +68,9 @@ class TagSet(Record):
     )
 
     # tags: list[Uri]
-    comment: str
-    label: str
-    tags: list[Uri]
+    comment: Optional[str] = None
+    label: Optional[str] = None
+    tags: Optional[list[Uri]] = None
 
     def __init__(self, uri: Optional[Uri] = None, label: Optional[str] = None, comment: Optional[str] = None):
-        self._set_attr_if_not_none('uri', uri)
-        self._set_attr_if_not_none('label', label)
-        self._set_attr_if_not_none('comment', comment)
+        super().__init__(uri=uri, label=label, comment=comment)

@@ -1,14 +1,19 @@
 import abc
-from typing import IO, Iterator, Optional
+from typing import IO, Iterable, Iterator, Optional
 
-from lxml.etree import _ElementTree
+from lxml.etree import _ElementTree, _Element
 import lxml.etree as etree
 
 from spotterbase.rdf.uri import Uri
+from spotterbase.selectors.offset_converter import OffsetConverter
+from spotterbase.selectors.selector_converter import SelectorConverter
 
 
 class Document(abc.ABC):
     _html_tree: Optional[_ElementTree] = None
+    _offset_converter: Optional[OffsetConverter] = None
+    _selector_converter: Optional[SelectorConverter] = None
+    _node_by_id: Optional[dict[str, _Element]] = None
 
     @abc.abstractmethod
     def get_uri(self) -> Uri:
@@ -18,7 +23,7 @@ class Document(abc.ABC):
     def open(self, *args, **kwargs) -> IO:
         raise NotImplementedError()
 
-    def get_html_tree(self, cached: bool) -> _ElementTree:
+    def get_html_tree(self, *, cached: bool) -> _ElementTree:
         if cached and self._html_tree is not None:
             return self._html_tree
         with self.open() as fp:
@@ -26,6 +31,26 @@ class Document(abc.ABC):
         if cached:
             self._html_tree = tree
         return tree
+
+    def get_node_for_id(self, node_id: str) -> _Element:
+        if self._node_by_id is None:
+            nodes: Iterable[_Element] = self.get_html_tree(cached=True).xpath('//*[@id]')   # type: ignore
+            self._node_by_id = {node.attrib['id']: node for node in nodes}  # type: ignore
+        return self._node_by_id[node_id]
+
+    def get_offset_converter(self) -> OffsetConverter:
+        if self._offset_converter is None:
+            self._offset_converter = OffsetConverter(self.get_html_tree(cached=True).getroot())
+        return self._offset_converter
+
+    def get_selector_converter(self) -> SelectorConverter:
+        if self._selector_converter is None:
+            self._selector_converter = SelectorConverter(
+                document_uri=self.get_uri(),
+                dom=self.get_html_tree(cached=True).getroot(),
+                offset_converter=self.get_offset_converter(),
+            )
+        return self._selector_converter
 
 
 class DocumentNotInCorpusException(Exception):

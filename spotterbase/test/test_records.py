@@ -5,7 +5,7 @@ import rdflib
 from spotterbase.records.record import PredInfo, AttrInfo, Record, RecordInfo, FieldKnownRecord
 from spotterbase.records.record_class_resolver import RecordClassResolver
 from spotterbase.records.jsonld_support import JsonLdRecordConverter
-from spotterbase.records.oa_support import OA_JSONLD_CONTEXT
+from spotterbase.anno_core.oa import OA_JSONLD_CONTEXT
 from spotterbase.records.sparql_populate import Populator
 from spotterbase.rdf.serializer import triples_to_nt_string
 from spotterbase.rdf.uri import Vocabulary, NameSpace, Uri

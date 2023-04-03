@@ -100,10 +100,13 @@ class _DocProcessor:
     def process_doc(self, document: Document) -> _DocResult:
         result: dict[str, Path] = {}
         for spotter in self.spotters:
-            path = TmpDir.get(spotter.spotter_short_id + '-' + uuid.uuid4().hex + '.nt')
-            result[spotter.spotter_short_id] = path
-            with open(path, 'w') as fp, NTriplesSerializer(fp) as serializer:
-                serializer.add_from_iterable(spotter.process_document(document))
+            try:
+                path = TmpDir.get(spotter.spotter_short_id + '-' + uuid.uuid4().hex + '.nt')
+                result[spotter.spotter_short_id] = path
+                with open(path, 'w') as fp, NTriplesSerializer(fp) as serializer:
+                    serializer.add_from_iterable(spotter.process_document(document))
+            except Exception:
+                logger.exception(f'{type(spotter)} raised an exception when processing {document.get_uri()}')
         return _DocResult(result, document.get_uri())
 
 
@@ -160,6 +163,8 @@ def run(spotter_classes: list[type[Spotter]], documents: Iterable[Document], *, 
                                 serializers[spotter_id].fp.write(line)
                         path.unlink()
                     doc_tracker.add(doc_result.doc_uri)
+    except KeyboardInterrupt:
+        logger.info('KeyboardInterrupt... Shutting down')
     finally:
         logger.info('Closing files')
         for serializer in serializers.values():

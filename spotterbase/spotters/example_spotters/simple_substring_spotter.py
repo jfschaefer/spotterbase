@@ -20,7 +20,7 @@ TAG_SET = TagSet(uri=SB.NS['docsubstrings'],
                          '(e.g. to pre-select documents that are interesting for a spotter)')
 
 TAGS: dict[str, Tag] = {
-    ss: Tag(uri=TAG_SET.uri + '#' + urllib.parse.quote_plus(ss), label=ss, belongs_to=TAG_SET.uri,
+    ss: Tag(uri=TAG_SET.require_uri() + '#' + urllib.parse.quote_plus(ss), label=ss, belongs_to=TAG_SET.require_uri(),
             comment=f'Document contains the string {ss!r}')
     for ss in SUBSTRINGS
 }
@@ -57,7 +57,7 @@ class SimpleSubstringSpotter(Spotter):
         return ctx, triple_gen()
 
     def process_document(self, document: Document) -> TripleI:
-        tag_uris: list[Uri] = [TAGS[ss].uri for ss in get_contained_substrings(document)]
+        tag_uris: list[Uri] = [TAGS[ss].require_uri() for ss in get_contained_substrings(document)]
         annotation = Annotation(uri=document.get_uri() + f'#{self.spotter_short_id}.anno',
                                 target_uri=document.get_uri(),
                                 body=MultiTagBody(tags=tag_uris),

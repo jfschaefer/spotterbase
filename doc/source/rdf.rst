@@ -144,7 +144,9 @@ The disadvantage is that (unlike when using e.g. UUIDs) we have to be much more 
 are created from multiple processes.
 
 >>> from spotterbase.rdf import BlankNode
->>> BlankNode.reset_counter()   # for reproducability
+>>> # Switch to counter mode for reproducibility.
+>>> # Warning: This can lead to collisions if you e.g. use multiple processes!
+>>> BlankNode.set_counter_mode_simple(0)
 >>> a = BlankNode()
 >>> a
 BlankNode(0)

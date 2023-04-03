@@ -19,7 +19,6 @@ from spotterbase.dnm.token_generator import DefaultGenerators
 from spotterbase.rdf.types import TripleI
 from spotterbase.rdf.uri import Uri
 from spotterbase.selectors.dom_range import DomPoint
-from spotterbase.selectors.selector_converter import SelectorConverter
 from spotterbase.spotters.spotter import UriGeneratorMixin, Spotter, SpotterContext
 
 logger = logging.getLogger(__name__)
@@ -117,8 +116,7 @@ class SimpleDeclarationSpotter(UriGeneratorMixin, Spotter):
         uri_generator = self.get_uri_generator_for(document)
         # tree = etree.parse(document.open(), parser=etree.HTMLParser())  # type: ignore
         tree = document.get_html_tree(cached=True)
-
-        selector_converter = SelectorConverter(document.get_uri(), tree.getroot())
+        selector_converter = document.get_selector_converter()
         dnm = TokenBasedDnm.from_token_generator(tree, DefaultGenerators.ARXMLIV_TEXT_ONLY,
                                                  selector_converter.offset_converter)
 

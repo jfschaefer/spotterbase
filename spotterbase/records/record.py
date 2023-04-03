@@ -90,24 +90,47 @@ class RecordInfo:
         self.attrs_by_name = {attr.attr_name: attr for attr in self.attrs}
 
 
-class Record:
+class RecordMeta(type):
+    """ Metaclass for Record. Used for some basic checks. """
+    record_info: RecordInfo
+
+    def __init__(self, *args):
+        super().__init__(*args)
+        if self.__qualname__ == 'Record':
+            return
+        assert hasattr(self, 'record_info'), f'No record_info provided for {self.__qualname__}'
+        assert isinstance(self.record_info, RecordInfo)
+        # for a_info in self.record_info.attrs:
+        #     assert hasattr(self, a_info.attr_name),\
+        #         f'{self.__qualname__} does not have a default value for {a_info.attr_name}'
+
+
+class Record(metaclass=RecordMeta):
     record_info: ClassVar[RecordInfo]
 
-    # instance attributes
-    uri: Uri
+    # instance attributes (you can overwrite this for root records with uri: Uri)
+    uri: Optional[Uri] = None
 
     def __init__(self, **kwargs):
         for attr, val in kwargs.items():
-            self._set_attr_if_not_none(attr, val)
+            self.__set_attr(attr, val)
+
+    def require_uri(self) -> Uri:
+        assert self.uri is not None
+        return self.uri
 
     def to_triples(self) -> TripleI:
         assert self.uri
         return _record_to_triples(self, self.uri)
 
-    def _set_attr_if_not_none(self, attr: str, val: Optional[Any]):
+    def __set_attr(self, attr: str, val: Optional[Any]):
         assert attr == 'uri' or attr in self.record_info.attrs_by_name
         if val is not None:
             setattr(self, attr, val)
+
+    def check_attrs(self):
+        # TODO
+        ...
 
 
 def _record_to_triples(record: Record, node: Subject) -> TripleI:
@@ -155,7 +178,7 @@ def _record_to_triples(record: Record, node: Subject) -> TripleI:
 def _to_triples(thing) -> tuple[Subject, TripleI]:
     if isinstance(thing, Record):
         node: Subject
-        if hasattr(thing, 'uri') and thing.uri:
+        if thing.uri is not None:
             node = thing.uri
         else:
             node = BlankNode()

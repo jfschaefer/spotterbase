@@ -12,7 +12,6 @@ from spotterbase.dnm_nlp.sentence_tokenizer import sentence_tokenize
 from spotterbase.dnm_nlp.word_tokenizer import word_tokenize
 from spotterbase.rdf.types import TripleI
 from spotterbase.rdf.uri import Uri
-from spotterbase.selectors.selector_converter import SelectorConverter
 from spotterbase.spotters.spotter import Spotter, UriGeneratorMixin, SpotterContext
 
 _univ_pos_tags: Uri = SB.NS['universal-pos-tags']
@@ -43,7 +42,7 @@ class PosTagContext(SpotterContext):
         ]
     }
 
-    tag_set.tags = [tag.uri for tag in tags.values()]
+    tag_set.tags = [tag.require_uri() for tag in tags.values()]
 
 
 class SimplePosTagSpotter(UriGeneratorMixin, Spotter):
@@ -69,7 +68,7 @@ class SimplePosTagSpotter(UriGeneratorMixin, Spotter):
         tree = document.get_html_tree(cached=True)
         dnm = TokenBasedDnm.from_token_generator(tree, DefaultGenerators.ARXMLIV_TEXT_ONLY)
         dnm_str: DnmStr = dnm.get_dnm_str()
-        selector_converter = SelectorConverter(document.get_uri(), tree.getroot())
+        selector_converter = document.get_selector_converter()
 
         for sentence in sentence_tokenize(dnm_str):
             words = word_tokenize(sentence)

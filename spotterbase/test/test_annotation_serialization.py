@@ -7,7 +7,7 @@ import rdflib
 from spotterbase.anno_core.record_class_resolver import ANNOTATION_RECORD_CLASS_RESOLVER
 from spotterbase.anno_core.target import FragmentTarget, populate_standard_selectors
 from spotterbase.records.jsonld_support import JsonLdRecordConverter
-from spotterbase.records.oa_support import OA_JSONLD_CONTEXT
+from spotterbase.anno_core.oa import OA_JSONLD_CONTEXT
 from spotterbase.anno_core.sb import SB_JSONLD_CONTEXT, SB_CONTEXT_FILE
 from spotterbase.records.sparql_populate import Populator
 from spotterbase.rdf import to_rdflib
@@ -57,7 +57,7 @@ class TestAnnotationSerialization(GraphTestMixin, unittest.TestCase):
                                       special_populators={
                                           FragmentTarget: [populate_standard_selectors]
                                       })
-                uri = self.converter.json_ld_to_record(jsonld).uri
+                uri = self.converter.json_ld_to_record(jsonld).require_uri()
                 record = list(populator.get_records([uri]))[0]
                 new_json_ld = self.converter.record_to_json_ld(record)
                 self.assertEqual(jsonld, new_json_ld)

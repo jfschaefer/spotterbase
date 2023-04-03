@@ -15,7 +15,7 @@ class Identifier(Record):
     )
 
     def __init__(self, uri: Optional[Uri] = None):
-        self._set_attr_if_not_none('uri', uri)
+        self.__set_attr('uri', uri)
 
 
 class IdentifierOccurrence(Record):
@@ -29,8 +29,8 @@ class IdentifierOccurrence(Record):
     occurrence_of: Uri
 
     def __init__(self, uri: Optional[Uri] = None, occurrence_of: Optional[Uri] = None):
-        self._set_attr_if_not_none('uri', uri)
-        self._set_attr_if_not_none('occurrence_of', occurrence_of)
+        self.__set_attr('uri', uri)
+        self.__set_attr('occurrence_of', occurrence_of)
 
 
 class IdentifierDeclaration(Record):
@@ -46,9 +46,9 @@ class IdentifierDeclaration(Record):
     declares: Uri
 
     def __init__(self, uri: Optional[Uri] = None, declares: Optional[Uri] = None, polarity: Optional[Uri] = None):
-        self._set_attr_if_not_none('uri', uri)
-        self._set_attr_if_not_none('declares', declares)
-        self._set_attr_if_not_none('polarity', polarity)
+        self.__set_attr('uri', uri)
+        self.__set_attr('declares', declares)
+        self.__set_attr('polarity', polarity)
 
 
 class PolarityVocab(Vocabulary):

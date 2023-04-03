@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import argparse
 import logging
 import zipfile
@@ -23,6 +25,14 @@ class OpenedZipFile(zipfile.ZipFile):
         self.expiry: int = expiry
         # we need to keep track of opened files to make sure we don't close the zip file too soon
         self.opened_files: List[IO] = []
+        self._is_blocked: bool = False
+
+    def __enter__(self) -> OpenedZipFile:
+        self._is_blocked = True
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self._is_blocked = False
 
     def open(self, *args, **kwargs) -> IO:
         """ Opens a zip file (like ``zipfile.ZipFile.open``) """
@@ -38,6 +48,9 @@ class OpenedZipFile(zipfile.ZipFile):
         if key == '__class__':
             raise Exception('You are doing something that overwrites __class__, which would cause problems later on')
         super().__setattr__(key, value)
+
+    def can_be_closed(self) -> bool:
+        return not self.opened_files and not self._is_blocked
 
 
 class ZipFileCache(object):
@@ -71,7 +84,7 @@ class ZipFileCache(object):
             ozf = self.zipfiles[name]
             ozf.clean()
             if ozf.expiry == expiry:  # otherwise it's an outdated record
-                if not ozf.opened_files:
+                if ozf.can_be_closed():
                     self.zipfiles[name].close()
                     del self.zipfiles[name]
                 else:

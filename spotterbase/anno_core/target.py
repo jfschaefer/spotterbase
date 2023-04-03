@@ -6,7 +6,7 @@ from typing import Optional
 
 from spotterbase.anno_core.selector import PathSelector, OffsetSelector, ListSelector
 from spotterbase.records.record import Record, RecordInfo, AttrInfo, FieldRecordSet
-from spotterbase.records.oa_support import OA_PRED
+from spotterbase.anno_core.oa import OA_PRED
 from spotterbase.records.sparql_populate import SubRecords, Populator
 from spotterbase.rdf.literal import Literal
 from spotterbase.rdf.types import Subject
@@ -36,9 +36,7 @@ class FragmentTarget(Record):
 
     def __init__(self, uri: Optional[Uri] = None, source: Optional[Uri] = None,
                  selectors: Optional[list] = None):
-        self._set_attr_if_not_none('uri', uri)
-        self._set_attr_if_not_none('source', source)
-        self._set_attr_if_not_none('selectors', selectors)
+        super().__init__(uri=uri, source=source, selectors=selectors)
 
 
 def _populate_without_refinements(fragment_targets: SubRecords, property_path: PropertyPath, populator: Populator):

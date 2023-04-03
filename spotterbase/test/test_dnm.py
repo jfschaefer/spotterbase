@@ -42,7 +42,8 @@ class TestDnm(GraphTestMixin, unittest.TestCase):
             dnmstr = dnm.get_dnm_str()
             self.assertEqual(dnmstr[index], substring)
             dom_range: DomRange = dnmstr[index].as_range().to_dom()
-            conv = SelectorConverter(Uri('http://example.org'), dom_range.start.node.getroottree().getroot())
+            conv = SelectorConverter(Uri('http://example.org'), dom_range.start.node.getroottree().getroot(),
+                                     OffsetConverter(dnm.tree.getroot()))
             new_selector = conv.dom_to_path_selector(dom_range)
             self.assertEqual((new_selector.start, new_selector.end), (selector.start, selector.end))
 
@@ -56,7 +57,7 @@ class TestDnm(GraphTestMixin, unittest.TestCase):
         ]:
             with self.subTest(selector=selector, expected_str=expected_str):
                 dnm.offset_converter = OffsetConverter(dnm.tree.getroot())
-                converter = SelectorConverter(Uri('http://example.org'), dnm.tree.getroot())
+                converter = SelectorConverter(Uri('http://example.org'), dnm.tree.getroot(), dnm.offset_converter)
                 dom_range = converter.selector_to_dom(selector)[0]
                 assert isinstance(dom_range, DomRange)
                 dnm_range, _ = dnm.dom_range_to_dnm_range(dom_range)

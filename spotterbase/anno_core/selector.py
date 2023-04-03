@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Optional
 
 from spotterbase.records.record import Record, RecordInfo, AttrInfo
-from spotterbase.records.oa_support import OA_PRED
+from spotterbase.anno_core.oa import OA_PRED
 from spotterbase.anno_core.sb import SB, SB_PRED
 
 

@@ -7,7 +7,7 @@ from spotterbase.anno_core.target import FragmentTarget, populate_standard_selec
 from spotterbase.records.record_loading import load_all_records_from_graph
 from spotterbase.records.record_class_resolver import RecordClassResolver
 from spotterbase.records.jsonld_support import JsonLdRecordConverter
-from spotterbase.records.oa_support import OA_JSONLD_CONTEXT
+from spotterbase.anno_core.oa import OA_JSONLD_CONTEXT
 from spotterbase.anno_core.sb import SB_JSONLD_CONTEXT
 from spotterbase.records.sparql_populate import Populator
 from spotterbase.rdf.uri import Uri

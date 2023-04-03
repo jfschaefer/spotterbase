@@ -1,5 +1,9 @@
+import logging
 import signal
 from typing import Callable, Any
+
+
+logger = logging.getLogger(__name__)
 
 
 class SignalDelayManager:
@@ -19,6 +23,7 @@ class SignalDelayManager:
             if self._exit_started:
                 self._old_handlers[sig](s, f)
             else:
+                logger.info(f'Delaying {sig}')
                 self._calls_on_exit.append(lambda: self._old_handlers[sig](s, f))
 
         self._calls_on_exit: list[Callable] = []

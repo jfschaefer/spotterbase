@@ -14,17 +14,19 @@ from spotterbase.rdf.uri import Uri
 class SelectorConverter:
     _path_regex = re.compile(r'(?P<type>(node)|(after-node)|(char))\((?P<xpath>.*?)(, *(?P<offset>[0-9]+))?\)')
 
-    def __init__(self, document_uri: Uri, dom: _Element):
+    def __init__(self, document_uri: Uri, dom: _Element, offset_converter: OffsetConverter):
         self._document_uri: Uri = document_uri
         self._dom: _Element = dom
-        self._offset_converter: Optional[OffsetConverter] = None
+        self._offset_converter: OffsetConverter = offset_converter
 
     @property
     def offset_converter(self) -> OffsetConverter:
-        """ Creating a text offset tracker is expensive (at least in the current implementation).
-            Do it only if necessary. """
-        if self._offset_converter is None:
-            self._offset_converter = OffsetConverter(self._dom)
+        # TODO: Switch back to lazy loading.
+        # Note on performance: It parsing takes twice as long as creating the offset converter
+        # """ Creating a text offset tracker is expensive (at least in the current implementation).
+        #     Do it only if necessary. """
+        # if self._offset_converter is None:
+        #     self._offset_converter = OffsetConverter(self._dom)
         return self._offset_converter
 
     def selector_to_dom(self, selector: OffsetSelector | PathSelector) -> tuple[DomRange, Optional[list[DomRange]]]:

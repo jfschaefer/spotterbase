@@ -4,6 +4,7 @@ import bisect
 import dataclasses
 import enum
 
+from lxml import etree
 from lxml.etree import _Element, _Comment
 
 from spotterbase.selectors.dom_range import DomPoint, DomRange
@@ -120,14 +121,17 @@ class OffsetConverter:
 
         self.root = root
         self._node_to_offset = node_to_offset
-        self._nodes_pre_order = [(node, self._node_to_offset[node]) for node in nodes_pre_order]
-        self._nodes_post_order = [(node, self._node_to_offset[node]) for node in nodes_post_order]
+        self._nodes_pre_order = [(node, node_to_offset[node]) for node in nodes_pre_order]
+        self._nodes_post_order = [(node, node_to_offset[node]) for node in nodes_post_order]
 
     def get_offset_data(self, node: _Element) -> NodeOffsetData:
         if node in self._node_to_offset:
             return self._node_to_offset[node]
         if node.getroottree().getroot() != self.root:
             raise Exception('Node does not belong to the tree used by this tracker')
+        if not isinstance(node, _Element):
+            raise ValueError(f'{node} is not a valid XML node')
+        print('problem:', etree.tostring(node))
         raise Exception('The node could not be found (maybe you added it to the DOM after creating the tracker?)')
 
     def get_offset(self, point: _Element | DomPoint, offset_type: OffsetType) -> int:

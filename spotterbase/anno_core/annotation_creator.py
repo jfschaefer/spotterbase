@@ -2,7 +2,7 @@ import datetime
 from typing import Optional
 
 from spotterbase.records.record import Record, RecordInfo, AttrInfo
-from spotterbase.records.oa_support import OA_PRED
+from spotterbase.anno_core.oa import OA_PRED
 from spotterbase.rdf.uri import Uri
 from spotterbase.rdf.vocab import XSD
 from spotterbase.anno_core.sb import SB, SB_PRED
@@ -17,13 +17,12 @@ class SpotterRun(Record):
             AttrInfo('label', OA_PRED.label, literal_type=XSD.string),
             AttrInfo('comment', SB_PRED.comment),
             AttrInfo('date', OA_PRED.created),
-            # TODO: date
         ]
     )
 
-    spotter_uri: Optional[Uri]
-    spotter_version: Optional[str]
-    date: Optional[datetime.datetime]
+    spotter_uri: Optional[Uri] = None
+    spotter_version: Optional[str] = None
+    date: Optional[datetime.datetime] = None
     comment: Optional[str] = None
     label: Optional[str] = None
 
