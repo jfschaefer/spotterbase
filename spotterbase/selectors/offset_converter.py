@@ -54,17 +54,17 @@ class NodeOffsetData:
     * text_offset is the offset of the last character before the node
     * node_text_offset is the offset of the node itself
     """
-    text_offset: int
-    node_text_offset: int
+    text_offset_before: int
+    node_text_offset_before: int
 
     text_offset_after: int
     node_text_offset_after: int
 
     def get_offsets_of_type(self, offset_type: OffsetType) -> tuple[int, int]:
         if offset_type == OffsetType.Text:
-            return self.text_offset, self.text_offset_after
+            return self.text_offset_before, self.text_offset_after
         elif offset_type == OffsetType.NodeText:
-            return self.node_text_offset, self.node_text_offset_after
+            return self.node_text_offset_before, self.node_text_offset_after
         else:
             raise Exception('Unsupported offset type')
 
@@ -89,8 +89,8 @@ class OffsetConverter:
         node_to_offset = {}
         nodes_pre_order = []
         nodes_post_order = []
-        text_counter: int = -1
-        node_counter: int = 1
+        text_counter: int = 0
+        node_counter: int = 0
 
         def recurse(node: _Element):
             nonlocal text_counter, node_counter
@@ -109,12 +109,14 @@ class OffsetConverter:
                 if t := child.tail:
                     text_counter += len(t)
 
+            node_counter += 1
+
             nodes_post_order.append(node)
             node_to_offset[node] = NodeOffsetData(
-                text_offset=text_counter_start,
-                node_text_offset=text_counter_start + node_counter_start,
+                text_offset_before=text_counter_start,
+                node_text_offset_before=text_counter_start + node_counter_start,
                 text_offset_after=text_counter,
-                node_text_offset_after=text_counter + node_counter
+                node_text_offset_after=text_counter + node_counter + 1
             )
 
         recurse(root)
@@ -131,7 +133,6 @@ class OffsetConverter:
             raise Exception('Node does not belong to the tree used by this tracker')
         if not isinstance(node, _Element):
             raise ValueError(f'{node} is not a valid XML node')
-        print('problem:', etree.tostring(node))
         raise Exception('The node could not be found (maybe you added it to the DOM after creating the tracker?)')
 
     def get_offset(self, point: _Element | DomPoint, offset_type: OffsetType) -> int:
@@ -141,19 +142,17 @@ class OffsetConverter:
 
         if point.text_offset is not None:
             offset = node_offsets[0] + point.text_offset + 1
-#             if offset_type == OffsetType.NodeText:
-#                 offset += 1
             if point.after:
                 offset += 1
             return offset
         elif point.tail_offset is not None:
-            offset = node_offsets[1] + point.tail_offset + 1
+            offset = node_offsets[1] + point.tail_offset
             if point.after:
                 offset += 1
             return offset
         else:   # simply a node
             if point.after:
-                return node_offsets[1] + 1
+                return node_offsets[1]
             else:
                 return node_offsets[0]
 
@@ -162,20 +161,24 @@ class OffsetConverter:
         if offset > self._nodes_post_order[-1][1].get_offsets_of_type(offset_type)[1] + 1:
             raise Exception('Offset is too large for this DOM. Maybe it refers to a different document?')
         # option 1: it's a text (not a tail)
-        _shift: int = 1 if offset_type == OffsetType.Text else 0
         index = bisect.bisect_right(self._nodes_pre_order, offset,
-                                    key=lambda entry: entry[1].get_offsets_of_type(offset_type)[0] + _shift) - 1
+                                    key=lambda entry: entry[1].get_offsets_of_type(offset_type)[0]) - 1
         node, offset_data = self._nodes_pre_order[index]
         offsets = offset_data.get_offsets_of_type(offset_type)
-        if offsets[1] >= offset and node.text:   # it's indeed a text (not a tail)
+        if offsets[1] >= offset:
             if offset_type == OffsetType.NodeText and offset == offsets[0]:  # actually, it's the node
                 return DomPoint(node)
+            elif offset_type == OffsetType.NodeText and offset == offsets[1]:
+                return DomPoint(node, after=True)
             return DomPoint(node, text_offset=offset - offsets[0] - 1)
         # option 2: it's a tail
         index = bisect.bisect_right(self._nodes_post_order, offset,
                                     key=lambda entry: entry[1].get_offsets_of_type(offset_type)[1]) - 1
         node, offset_data = self._nodes_post_order[index]
-        return DomPoint(node, tail_offset=offset - offset_data.get_offsets_of_type(offset_type)[1] - 1)
+        offsets = offset_data.get_offsets_of_type(offset_type)
+        if offset_type == OffsetType.NodeText and offsets[1] == offset:
+            return DomPoint(node, after=True)
+        return DomPoint(node, tail_offset=offset - offsets[1])
 
     def convert_dom_range(self, dom_range: DomRange) -> DomOffsetRange:
         return DomOffsetRange(

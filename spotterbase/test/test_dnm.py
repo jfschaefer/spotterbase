@@ -51,9 +51,9 @@ class TestDnm(GraphTestMixin, unittest.TestCase):
         for dnm, selector, expected_from, expected_to, expected_str in [
             (DNM_3, OffsetSelector(start=1, end=3), 0, 1, 'AB'),
             (DNM_3, OffsetSelector(start=4, end=5), 2, 1, ''),
-            (DNM_3, OffsetSelector(start=4, end=7), 2, 2, 'E'),
-            (DNM_3, OffsetSelector(start=8, end=9), 3, 4, 'YZ'),
-            (DNM_3, OffsetSelector(start=7, end=9), 3, 4, 'YZ'),
+            (DNM_3, OffsetSelector(start=4, end=8), 2, 2, 'E'),
+            (DNM_3, OffsetSelector(start=9, end=10), 3, 4, 'YZ'),
+            (DNM_3, OffsetSelector(start=8, end=10), 3, 4, 'YZ'),
         ]:
             with self.subTest(selector=selector, expected_str=expected_str):
                 dnm.offset_converter = OffsetConverter(dnm.tree.getroot())

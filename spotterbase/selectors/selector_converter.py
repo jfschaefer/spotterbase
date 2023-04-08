@@ -103,7 +103,7 @@ class SelectorConverter:
             offset = self.offset_converter.get_offset_data(dom_point.node).text_offset_after + dom_point.tail_offset
             parent = dom_point.node.getparent()
             assert parent is not None
-            parent_offset = self.offset_converter.get_offset_data(parent).text_offset
+            parent_offset = self.offset_converter.get_offset_data(parent).text_offset_before
             return f'char({roottree.getpath(parent)},{offset - parent_offset + int(dom_point.after)})'
         else:
             if dom_point.after:
