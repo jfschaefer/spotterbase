@@ -1,25 +1,48 @@
 from __future__ import annotations
 
 import abc
+import bisect
 import dataclasses
-from typing import TypeVar, Sequence, Optional
+from typing import TypeVar, Sequence
 
-from spotterbase.selectors.dom_range import DomRange
+from lxml.etree import _Element
+
+from spotterbase.corpora.interface import Document
 from spotterbase.dnm.l_str import LStr
+from spotterbase.rdf import Uri
+from spotterbase.selectors.dom_range import DomRange
+from spotterbase.selectors.offset_converter import OffsetConverter, DomOffsetRange, OffsetType
+from spotterbase.selectors.selector_converter import SelectorConverter
 
 
-class Dnm(abc.ABC):
+class DnmFactory(abc.ABC):
     @abc.abstractmethod
-    def get_dnm_str(self, dnm_range: Optional[DnmRange] = None) -> DnmStr:
-        raise NotImplementedError()
+    def make_dnm_from_meta(self, dnm_meta: DnmMeta) -> Dnm:
+        ...
 
-    @abc.abstractmethod
-    def offset_to_range(self, offset: int) -> DomRange:
-        raise NotImplementedError()
+    def anonymous_dnm_from_node(self, node: _Element) -> Dnm:
+        offset_converter = OffsetConverter(node)
+        uri = Uri.uuid()
+        return self.make_dnm_from_meta(
+            DnmMeta(
+                node,
+                offset_converter,
+                selector_converter=SelectorConverter(
+                    uri, node, offset_converter
+                ),
+                uri=uri
+            )
+        )
 
-    @abc.abstractmethod
-    def dom_range_to_dnm_range(self, dom_range: DomRange) -> tuple[DnmRange, DnmMatchIssues]:
-        raise NotImplementedError()
+    def dnm_from_document(self, document: Document) -> Dnm:
+        return self.make_dnm_from_meta(
+            DnmMeta(
+                document.get_html_tree(cached=True).getroot(),
+                document.get_offset_converter(),
+                document.get_selector_converter(),
+                document.get_uri(),
+            )
+        )
 
 
 @dataclasses.dataclass
@@ -50,59 +73,64 @@ class DnmMatchIssues:
         return self.dom_start_earlier or self.dom_end_later
 
 
-@dataclasses.dataclass
-class DnmPoint:
-    offset: int
+@dataclasses.dataclass(slots=True, frozen=True)
+class DnmRange:
+    """ A slice of a DNM (more light-weight than creating a sub-DNM) """
+    from_: int
+    to: int    # not inclusive (for consistency)
     dnm: Dnm
 
-    def __eq__(self, other) -> bool:
-        if not isinstance(other, DnmPoint):
-            raise NotImplementedError()
-        return self.dnm == other.dnm and self.offset == other.offset
-
     def to_dom(self) -> DomRange:
-        return self.dnm.offset_to_range(self.offset)
-
-
-class DnmRange:
-    def __init__(self, from_: DnmPoint, to: DnmPoint):
-        self.from_ = from_
-        self.to = to   # NOTE: `to` is included in the range (unlike DomRange etc.)
-
-        assert self.to.dnm == self.from_.dnm
-
-    def to_dom(self) -> DomRange:
-        return DomRange(self.from_.to_dom(), self.to.to_dom())
+        return DomRange(
+            self.dnm.dnm_meta.offset_converter.get_dom_point(self.dnm.start_refs[self.from_], OffsetType.NodeText),
+            self.dnm.dnm_meta.offset_converter.get_dom_point(self.dnm.end_refs[self.to - 1], OffsetType.NodeText),
+        )
+        # return DomRange(self.from_.to_dom(), self.to.to_dom())
 
     def get_offsets(self) -> tuple[int, int]:
-        return self.from_.offset, self.to.offset
+        return self.dnm.start_refs[self.from_], self.dnm.end_refs[self.to - 1]
+
+    def as_dnm(self) -> Dnm:
+        return self.dnm[self.from_:self.to]
 
 
-DnmStrT = TypeVar('DnmStrT', bound='DnmStr')
+@dataclasses.dataclass
+class DnmMeta:
+    dom: _Element
+    offset_converter: OffsetConverter
+    selector_converter: SelectorConverter
+    uri: Uri
 
 
-class DnmStr(LStr):
-    def __init__(self, string: str, backrefs: Sequence[int], dnm: Dnm):
-        LStr.__init__(self, string, backrefs)
-        self.dnm = dnm
+DnmT = TypeVar('DnmT', bound='Dnm')
 
-    def new(self: DnmStrT, new_string: str, new_backrefs: Sequence[int]) -> DnmStrT:
-        return self.__class__(new_string, new_backrefs, self.dnm)
+
+class Dnm(LStr):
+    __slots__ = LStr.__slots__ + ('dnm_meta',)
+    dnm_meta: DnmMeta
+
+    def __init__(self, string: str, start_refs: Sequence[int], end_refs: Sequence[int], dnm_meta: DnmMeta):
+        LStr.__init__(self, string, start_refs, end_refs)
+        self.dnm_meta = dnm_meta
+
+    def dnm_range_from_dom_range(self, dom_range: DomRange) -> tuple[DnmRange, DnmMatchIssues]:
+        required_range: DomOffsetRange = self.dnm_meta.offset_converter.convert_dom_range(dom_range)
+        start_index = bisect.bisect(self.end_refs, required_range.start)
+        end_index = bisect.bisect(self.start_refs, required_range.end - 1) - 1
+        # print('trying', self.end_refs, required_range.end, end_index)
+
+        return (
+            DnmRange(start_index, end_index + 1, self),
+            DnmMatchIssues(
+                dom_start_earlier=required_range.start < self.start_refs[start_index],
+                dom_end_later=required_range.end > self.end_refs[end_index],
+                dom_start_later=required_range.start > self.start_refs[start_index],
+                dom_end_earlier=required_range.end < self.end_refs[end_index]
+            )
+        )
+
+    def new(self: DnmT, new_string: str, new_start_refs: Sequence[int], new_end_refs: Sequence[int]) -> DnmT:
+        return self.__class__(new_string, new_start_refs, new_end_refs, self.dnm_meta)
 
     def as_range(self) -> DnmRange:
-        return DnmRange(DnmPoint(self.backrefs[0], self.dnm), DnmPoint(self.backrefs[-1], self.dnm))
-
-    def normalize_spaces(self) -> DnmStr:
-        """ replace sequences of whitespaces with a single one."""
-        # TODO: clean the code up and potentially move it into LStr
-        new_string = ''
-        new_backrefs = []
-        for i in range(len(self)):
-            if not self.string[i].isspace():
-                new_string += self.string[i]
-                new_backrefs.append(self.backrefs[i])
-            else:
-                if not (i >= 1 and self.string[i - 1].isspace()):
-                    new_string += ' '
-                    new_backrefs.append(self.backrefs[i])
-        return DnmStr(string=new_string, backrefs=new_backrefs, dnm=self.dnm)
+        return DnmRange(0, len(self.string), self)

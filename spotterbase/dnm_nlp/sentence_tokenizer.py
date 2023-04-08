@@ -8,7 +8,7 @@ from typing import Optional
 
 from lxml.etree import _Element
 
-from spotterbase.dnm.dnm import DnmStr
+from spotterbase.dnm.dnm import Dnm
 from spotterbase.dnm.xml_util import get_node_classes
 
 
@@ -31,11 +31,11 @@ def is_in_header(node: _Element) -> bool:
     return False
 
 
-def get_surrounding_node(dnm_str: DnmStr) -> _Element:
+def get_surrounding_node(dnm_str: Dnm) -> _Element:
     return dnm_str.as_range().to_dom().get_containing_node()
 
 
-def sentence_tokenize(substring: DnmStr) -> list[DnmStr]:
+def sentence_tokenize(substring: Dnm) -> list[Dnm]:
     sentences = []
     sent_start = 0
     in_header = False
@@ -61,7 +61,7 @@ def sentence_tokenize(substring: DnmStr) -> list[DnmStr]:
     return sentences
 
 
-def normal_end_of_sentence(substring: DnmStr, i: int) -> bool:
+def normal_end_of_sentence(substring: Dnm, i: int) -> bool:
     if substring.string[i] not in {'.', '!', '?'}:
         return False
     isdot = substring.string[i] == '.'

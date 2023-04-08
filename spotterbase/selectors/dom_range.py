@@ -40,9 +40,6 @@ class DomPoint:
     def is_element(self) -> bool:
         return self.text_offset is None and self.tail_offset is None
 
-    def as_range(self) -> DomRange:
-        return DomRange(self, self.get_after())
-
     def get_after(self) -> DomPoint:
         assert not self.after, '`after` already set'
         return DomPoint(self.node, text_offset=self.text_offset, tail_offset=self.tail_offset, after=True)
@@ -103,3 +100,7 @@ class DomRange:
             n = n.getparent()
             assert n is not None
         return n
+
+    @classmethod
+    def from_node(cls, node: _Element) -> DomRange:
+        return cls(DomPoint(node), DomPoint(node, after=True))

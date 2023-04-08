@@ -1,15 +1,13 @@
 import nltk.tag
 
+from spotterbase.corpora.interface import Document
+from spotterbase.dnm.simple_dnm_factory import ARXMLIV_STANDARD_DNM_FACTORY
+from spotterbase.dnm_nlp.sentence_tokenizer import sentence_tokenize
+from spotterbase.dnm_nlp.word_tokenizer import word_tokenize
 from spotterbase.model_core.annotation import Annotation
 from spotterbase.model_core.sb import SB
 from spotterbase.model_core.tag_body import SimpleTagBody, Tag, TagSet
 from spotterbase.model_core.target import FragmentTarget
-from spotterbase.corpora.interface import Document
-from spotterbase.dnm.dnm import DnmStr
-from spotterbase.dnm.token_dnm import TokenBasedDnm
-from spotterbase.dnm.token_generator import DefaultGenerators
-from spotterbase.dnm_nlp.sentence_tokenizer import sentence_tokenize
-from spotterbase.dnm_nlp.word_tokenizer import word_tokenize
 from spotterbase.rdf.types import TripleI
 from spotterbase.rdf.uri import Uri
 from spotterbase.spotters.spotter import Spotter, UriGeneratorMixin, SpotterContext
@@ -64,13 +62,10 @@ class SimplePosTagSpotter(UriGeneratorMixin, Spotter):
     def process_document(self, document: Document) -> TripleI:
         uri_generator = self.get_uri_generator_for(document)
 
-        # tree = etree.parse(document.open(), parser=etree.HTMLParser())  # type: ignore
-        tree = document.get_html_tree(cached=True)
-        dnm = TokenBasedDnm.from_token_generator(tree, DefaultGenerators.ARXMLIV_TEXT_ONLY)
-        dnm_str: DnmStr = dnm.get_dnm_str()
+        dnm = ARXMLIV_STANDARD_DNM_FACTORY.dnm_from_document(document)
         selector_converter = document.get_selector_converter()
 
-        for sentence in sentence_tokenize(dnm_str):
+        for sentence in sentence_tokenize(dnm):
             words = word_tokenize(sentence)
             pos_tagged = nltk.tag.pos_tag([str(word) for word in words], tagset='universal')
             assert len(words) == len(pos_tagged)

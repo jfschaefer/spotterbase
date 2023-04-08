@@ -4,10 +4,10 @@ As it does not use any DNM-specific features (except for working on DnmDstr),
 it might be better to use an off-the-shelf tokenizer.
 """
 
-from spotterbase.dnm.dnm import DnmStr
+from spotterbase.dnm.dnm import Dnm
 
 
-def word_tokenize(sentence: DnmStr) -> list[DnmStr]:
+def word_tokenize(sentence: Dnm) -> list[Dnm]:
     words = []
     word_start = 0
     for i in range(len(sentence)):

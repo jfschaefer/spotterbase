@@ -4,7 +4,6 @@ import bisect
 import dataclasses
 import enum
 
-from lxml import etree
 from lxml.etree import _Element, _Comment
 
 from spotterbase.selectors.dom_range import DomPoint, DomRange

@@ -7,18 +7,18 @@ from lxml.etree import _Element, _ElementTree
 
 import spotterbase.dnm_nlp.xml_match as xm
 from spotterbase import __version__
+from spotterbase.corpora.interface import Document
+from spotterbase.dnm.dnm import DnmRange, Dnm
+from spotterbase.dnm.simple_dnm_factory import ARXMLIV_STANDARD_DNM_FACTORY
 from spotterbase.model_core.annotation import Annotation
 from spotterbase.model_core.annotation_creator import SpotterRun
 from spotterbase.model_core.sb import SB
 from spotterbase.model_core.target import FragmentTarget
 from spotterbase.model_extra.declarations import Identifier, IdentifierDeclaration, IdentifierOccurrence, \
     PolarityVocab, POLARITY_TAG_SET, POLARITY_TAGS
-from spotterbase.corpora.interface import Document
-from spotterbase.dnm.token_dnm import TokenBasedDnm
-from spotterbase.dnm.token_generator import DefaultGenerators
 from spotterbase.rdf.types import TripleI
 from spotterbase.rdf.uri import Uri
-from spotterbase.selectors.dom_range import DomPoint
+from spotterbase.selectors.dom_range import DomRange
 from spotterbase.spotters.spotter import UriGeneratorMixin, Spotter, SpotterContext
 
 logger = logging.getLogger(__name__)
@@ -117,15 +117,14 @@ class SimpleDeclarationSpotter(UriGeneratorMixin, Spotter):
         # tree = etree.parse(document.open(), parser=etree.HTMLParser())  # type: ignore
         tree = document.get_html_tree(cached=True)
         selector_converter = document.get_selector_converter()
-        dnm = TokenBasedDnm.from_token_generator(tree, DefaultGenerators.ARXMLIV_TEXT_ONLY,
-                                                 selector_converter.offset_converter)
+        dnm = ARXMLIV_STANDARD_DNM_FACTORY.dnm_from_document(document)
 
         regex_univ = re.compile('((let)|(for (every|all))|(where)) (?P<m>mathnode)')
         regex_exist = re.compile('((for some)|(there is an?)) (?P<m>mathnode)')
 
         for para_node in get_para_nodes(tree):
-            para_range = dnm.dom_range_to_dnm_range(DomPoint(para_node).as_range())[0]
-            para_string = dnm.get_dnm_str(para_range).lower()
+            para_range: DnmRange = dnm.dnm_range_from_dom_range(DomRange.from_node(para_node))[0]
+            para_string: Dnm = para_range.as_dnm().lower()
 
             for is_universal, regex in [(True, regex_univ), (False, regex_exist)]:
                 for m in regex.finditer(para_string.string):
@@ -147,7 +146,7 @@ class SimpleDeclarationSpotter(UriGeneratorMixin, Spotter):
                     yield from identifier.to_triples()
                     id_decl_target = FragmentTarget(
                         uri('target'), source=document.get_uri(),
-                        selectors=selector_converter.dom_to_selectors(DomPoint(id_node).as_range())
+                        selectors=selector_converter.dom_to_selectors(DomRange.from_node(id_node))
                     )
                     yield from id_decl_target.to_triples()
                     yield from Annotation(
@@ -169,7 +168,7 @@ class SimpleDeclarationSpotter(UriGeneratorMixin, Spotter):
                             uri = next(uri_generator)
                             id_occ_target = FragmentTarget(
                                 uri('target'), source=document.get_uri(),
-                                selectors=selector_converter.dom_to_selectors(DomPoint(matched_node).as_range())
+                                selectors=selector_converter.dom_to_selectors(DomRange.from_node(matched_node))
                             )
                             yield from id_occ_target.to_triples()
                             yield from Annotation(
