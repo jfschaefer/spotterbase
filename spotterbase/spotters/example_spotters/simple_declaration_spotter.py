@@ -7,11 +7,11 @@ from lxml.etree import _Element, _ElementTree
 
 import spotterbase.dnm_nlp.xml_match as xm
 from spotterbase import __version__
-from spotterbase.anno_core.annotation import Annotation
-from spotterbase.anno_core.annotation_creator import SpotterRun
-from spotterbase.anno_core.sb import SB
-from spotterbase.anno_core.target import FragmentTarget
-from spotterbase.anno_extra.declarations import Identifier, IdentifierDeclaration, IdentifierOccurrence, \
+from spotterbase.model_core.annotation import Annotation
+from spotterbase.model_core.annotation_creator import SpotterRun
+from spotterbase.model_core.sb import SB
+from spotterbase.model_core.target import FragmentTarget
+from spotterbase.model_extra.declarations import Identifier, IdentifierDeclaration, IdentifierOccurrence, \
     PolarityVocab, POLARITY_TAG_SET, POLARITY_TAGS
 from spotterbase.corpora.interface import Document
 from spotterbase.dnm.token_dnm import TokenBasedDnm

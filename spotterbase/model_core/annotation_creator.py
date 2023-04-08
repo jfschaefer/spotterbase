@@ -2,10 +2,10 @@ import datetime
 from typing import Optional
 
 from spotterbase.records.record import Record, RecordInfo, AttrInfo
-from spotterbase.anno_core.oa import OA_PRED
+from spotterbase.model_core.oa import OA_PRED
 from spotterbase.rdf.uri import Uri
 from spotterbase.rdf.vocab import XSD
-from spotterbase.anno_core.sb import SB, SB_PRED
+from spotterbase.model_core.sb import SB, SB_PRED
 
 
 class SpotterRun(Record):

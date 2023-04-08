@@ -6,7 +6,7 @@ from typing import Optional
 
 from spotterbase.utils.config_loader import SimpleConfigExtension
 from spotterbase.rdf.uri import Uri
-from spotterbase.anno_core.sb import SB
+from spotterbase.model_core.sb import SB
 from spotterbase.sparql.endpoint import SparqlEndpoint, Virtuoso, RdflibEndpoint
 
 

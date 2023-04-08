@@ -4,12 +4,12 @@ from pathlib import Path
 from spotterbase.records.record import PredInfo
 from spotterbase.records.jsonld_support import JsonLdContext
 from spotterbase.rdf.uri import Vocabulary, NameSpace, Uri
-from spotterbase.anno_core.sb import SB
+from spotterbase.model_core.sb import SB
 from spotterbase.utils.resources import RESOURCES_DIR
 
 
 class SBX(Vocabulary):
-    NS: NameSpace = NameSpace(SB.NS.uri / 'ext/', prefix='anno_extra:')
+    NS: NameSpace = NameSpace(SB.NS.uri / 'ext/', prefix='model_extra:')
 
     Identifier: Uri
     IdentifierOccurrence: Uri
@@ -38,7 +38,7 @@ SBX_JSONLD_CONTEXT: JsonLdContext = JsonLdContext(
 )
 
 
-SBX_CONTEXT_FILE: Path = RESOURCES_DIR / 'anno_extra-context.jsonld'
+SBX_CONTEXT_FILE: Path = RESOURCES_DIR / 'model_extra-context.jsonld'
 
 
 def _write_to_file():

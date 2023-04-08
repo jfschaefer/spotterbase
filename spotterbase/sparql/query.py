@@ -2,7 +2,7 @@ from collections import defaultdict
 
 import spotterbase.corpora.arxiv
 import spotterbase.rdf.vocab as vocab
-from spotterbase.anno_core.sb import SB
+from spotterbase.model_core.sb import SB
 from spotterbase.rdf.bnode import BlankNode
 from spotterbase.rdf.literal import Literal
 from spotterbase.rdf.types import Object

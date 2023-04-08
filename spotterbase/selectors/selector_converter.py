@@ -7,7 +7,7 @@ from lxml.etree import _Element
 
 from spotterbase.selectors.dom_range import DomRange, DomPoint
 from spotterbase.selectors.offset_converter import OffsetConverter, OffsetType
-from spotterbase.anno_core.selector import PathSelector, OffsetSelector, ListSelector
+from spotterbase.model_core.selector import PathSelector, OffsetSelector, ListSelector
 from spotterbase.rdf.uri import Uri
 
 

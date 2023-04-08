@@ -2,18 +2,18 @@ import json
 import logging
 
 from spotterbase.utils import config_loader
-from spotterbase.anno_core.record_class_resolver import ANNOTATION_RECORD_CLASS_RESOLVER
-from spotterbase.anno_core.target import FragmentTarget, populate_standard_selectors
+from spotterbase.model_core.record_class_resolver import ANNOTATION_RECORD_CLASS_RESOLVER
+from spotterbase.model_core.target import FragmentTarget, populate_standard_selectors
 from spotterbase.records.record_loading import load_all_records_from_graph
 from spotterbase.records.record_class_resolver import RecordClassResolver
 from spotterbase.records.jsonld_support import JsonLdRecordConverter
-from spotterbase.anno_core.oa import OA_JSONLD_CONTEXT
-from spotterbase.anno_core.sb import SB_JSONLD_CONTEXT
+from spotterbase.model_core.oa import OA_JSONLD_CONTEXT
+from spotterbase.model_core.sb import SB_JSONLD_CONTEXT
 from spotterbase.records.sparql_populate import Populator
 from spotterbase.rdf.uri import Uri
 from spotterbase.sparql.sb_sparql import get_work_endpoint, get_tmp_graph_uri
-from spotterbase.anno_extra.sbx import SBX_JSONLD_CONTEXT
-from spotterbase.anno_extra.record_class_resolver import SBX_RECORD_CLASS_RESOLVER
+from spotterbase.model_extra.sbx import SBX_JSONLD_CONTEXT
+from spotterbase.model_extra.record_class_resolver import SBX_RECORD_CLASS_RESOLVER
 from spotterbase.utils.progress_updater import ProgressUpdater
 
 logger = logging.getLogger(__name__)

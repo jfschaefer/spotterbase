@@ -14,6 +14,9 @@ Another option (even more memory efficient than uuid1, also when not compressed)
         global counter
         return start + '-' + hex(os.getpid())[2:] + '-' + hex(counter)[2:] + '\n'
         counter += 1
+
+TODO: The current design should be improved (e.g. by switching to factories and having a default factory in BlankNode,
+      which is used in __new__)
 """
 
 from __future__ import annotations

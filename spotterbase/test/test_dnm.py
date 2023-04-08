@@ -5,7 +5,7 @@ from lxml import etree
 
 from spotterbase.selectors.dom_range import DomRange
 from spotterbase.selectors.offset_converter import OffsetConverter
-from spotterbase.anno_core.selector import PathSelector, OffsetSelector
+from spotterbase.model_core.selector import PathSelector, OffsetSelector
 from spotterbase.selectors.selector_converter import SelectorConverter
 from spotterbase.dnm.token_dnm import TokenBasedDnm
 from spotterbase.dnm.token_generator import SimpleTokenGenerator

@@ -1,9 +1,9 @@
 import nltk.tag
 
-from spotterbase.anno_core.annotation import Annotation
-from spotterbase.anno_core.sb import SB
-from spotterbase.anno_core.tag_body import SimpleTagBody, Tag, TagSet
-from spotterbase.anno_core.target import FragmentTarget
+from spotterbase.model_core.annotation import Annotation
+from spotterbase.model_core.sb import SB
+from spotterbase.model_core.tag_body import SimpleTagBody, Tag, TagSet
+from spotterbase.model_core.target import FragmentTarget
 from spotterbase.corpora.interface import Document
 from spotterbase.dnm.dnm import DnmStr
 from spotterbase.dnm.token_dnm import TokenBasedDnm
