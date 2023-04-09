@@ -22,7 +22,7 @@ class HtmlTokenizer:
                  nodes_to_ignore: Optional[set[str]] = None):
         self.nodes_to_ignore: set[str] = DEFAULT_NODES_TO_IGNORE if nodes_to_ignore is None else nodes_to_ignore
         self.add_word_ids: bool = add_word_ids
-        self.word_class: Optional[None] = word_class
+        self.word_class: Optional[str] = word_class
 
     def process(self, document: Document) -> _ElementTree:
         tree = document.get_html_tree(cached=False)
@@ -61,11 +61,11 @@ class HtmlTokenizer:
                 if words:
                     node.text = original_text[:words[0].get_start_ref()]
                     for i, word in enumerate(words):
-                        span = span_from_word(word, offset=node_offsets.node_text_offset_before+1)
+                        span = span_from_word(word, offset=node_offsets.node_text_offset_before + 1)
                         if i == len(words) - 1:
                             span.tail = original_text[word.get_end_ref():]
                         else:
-                            span.tail = original_text[word.get_end_ref():words[i+1].get_start_ref()]
+                            span.tail = original_text[word.get_end_ref():words[i + 1].get_start_ref()]
                         node.insert(index=i, element=span)
                         number_of_word_nodes_added += 1
 
@@ -78,7 +78,7 @@ class HtmlTokenizer:
 
             if mark_words and node.tail:
                 original_text = node.tail
-                lstr: LStr = string_to_lstr(original_text)
+                lstr = string_to_lstr(original_text)
                 words = word_tokenize(lstr)
                 if words:
                     node.tail = original_text[:words[0].get_start_ref()]
@@ -91,7 +91,7 @@ class HtmlTokenizer:
                         if i == len(words) - 1:
                             span.tail = original_text[word.get_end_ref():]
                         else:
-                            span.tail = original_text[word.get_end_ref():words[i+1].get_start_ref()]
+                            span.tail = original_text[word.get_end_ref():words[i + 1].get_start_ref()]
                         last_element = span
 
         recurse(tree.getroot(), mark_words=True)
@@ -103,12 +103,12 @@ def main():
     document = ConfigUri('--document', 'URI of the document to be tokenized')
     outpath = ConfigPath('--output', 'Path to the tokenized document')
     config_loader.auto()
-    tree = HtmlTokenizer(add_word_ids=True).process(
-        Resolver.get_document(document.value)
-    )
-    # with open('/tmp/original.html', 'wb') as fp:
-    #     with Resolver.get_document(document.value).open('r') as fp2:
-    #         fp.write(fp2.read())
+    assert document.value
+    actual_doc = Resolver.get_document(document.value)
+    assert actual_doc is not None, f'Failed to find {document}'
+    tree = HtmlTokenizer(add_word_ids=True).process(actual_doc)
+
+    assert outpath.value
     with open(outpath.value, 'wb') as fp:
         tree.write(fp)
 

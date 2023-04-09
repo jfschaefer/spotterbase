@@ -17,7 +17,7 @@ class Doc2JsonConverter:
         self.include_replaced_nodes: bool = include_replaced_nodes
 
     def process(self, document: Document) -> dict:
-        tokens = []
+        tokens: list[dict] = []
         result: dict = {
             'document': str(document.get_uri()),
             'converter-settings': {
@@ -49,10 +49,12 @@ def main():
     document = ConfigUri('--document', 'URI of the document to be tokenized')
     outpath = ConfigPath('--output', 'Path to the tokenized document')
     config_loader.auto()
+    assert document.value
+    actual_doc = Resolver.get_document(document.value)
+    assert actual_doc is not None
+    assert outpath.value
     with open(outpath.value, 'w') as fp:
-        json.dump(Doc2JsonConverter(include_replaced_nodes=True).process(Resolver.get_document(document.value)),
-                  fp,
-                  indent=2)
+        json.dump(Doc2JsonConverter(include_replaced_nodes=True).process(actual_doc), fp, indent=2)
 
 
 if __name__ == '__main__':
