@@ -1,9 +1,7 @@
 import re
 from typing import TypeVar, Sequence
 
-__all__ = ['LStr']
-
-T = TypeVar('T', bound='LStr')   # TODO: Replace with ``typing.Self'' in Python 3.11
+LStrT = TypeVar('LStrT', bound='LStr')
 
 
 class LStr:
@@ -14,14 +12,20 @@ class LStr:
         self.start_refs = start_refs
         self.end_refs = end_refs
 
-    def new(self: T, new_string: str, new_start_refs: Sequence[int], new_end_refs) -> T:
+    def get_start_ref(self) -> int:
+        return self.start_refs[0]
+
+    def get_end_ref(self) -> int:
+        return self.end_refs[-1]
+
+    def new(self: LStrT, new_string: str, new_start_refs: Sequence[int], new_end_refs) -> LStrT:
         """ Intended to be overwritten in subclasses if more corpora has to be copied (e.g. a source document) """
         return self.__class__(new_string, new_start_refs, new_end_refs)
 
     def __len__(self) -> int:
         return len(self.string)
 
-    def __getitem__(self: T, item) -> T:
+    def __getitem__(self: LStrT, item) -> LStrT:
         match item:
             case slice():
                 return self.new(self.string[item], self.start_refs[item], self.end_refs[item])
@@ -42,7 +46,7 @@ class LStr:
     def __eq__(self, other) -> bool:
         return self.string == str(other)
 
-    def strip(self: T) -> T:
+    def strip(self: LStrT) -> LStrT:
         str_start = 0
         str_end = 0
         for i in range(len(self.string)):
@@ -55,13 +59,13 @@ class LStr:
                 break
         return self[str_start:str_end]
 
-    def lower(self: T) -> T:
+    def lower(self: LStrT) -> LStrT:
         return self.new(self.string.lower(), self.end_refs, self.start_refs)
 
-    def upper(self: T) -> T:
+    def upper(self: LStrT) -> LStrT:
         return self.new(self.string.upper(), self.end_refs, self.start_refs)
 
-    def normalize_spaces(self: T) -> T:
+    def normalize_spaces(self: LStrT) -> LStrT:
         """ replace sequences of whitespaces with a single one."""
         # TODO: clean the code up and potentially optimize it
         new_string = ''
@@ -78,3 +82,7 @@ class LStr:
                     new_start_refs.append(self.start_refs[i])
                     new_end_refs.append(self.end_refs[i])
         return self.new(new_string=new_string, new_start_refs=new_start_refs, new_end_refs=new_end_refs)
+
+
+def string_to_lstr(string: str) -> LStr:
+    return LStr(string, list(range(len(string))), list(range(1, len(string) + 1)))

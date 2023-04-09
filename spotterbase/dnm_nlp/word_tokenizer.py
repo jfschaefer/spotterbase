@@ -3,11 +3,11 @@
 As it does not use any DNM-specific features (except for working on DnmDstr),
 it might be better to use an off-the-shelf tokenizer.
 """
+from spotterbase.dnm.l_str import LStrT
 
-from spotterbase.dnm.dnm import Dnm
 
-
-def word_tokenize(sentence: Dnm) -> list[Dnm]:
+# TODO: The code also works for normal strings
+def word_tokenize(sentence: LStrT) -> list[LStrT]:
     words = []
     word_start = 0
     for i in range(len(sentence)):
