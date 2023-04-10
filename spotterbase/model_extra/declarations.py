@@ -1,5 +1,6 @@
 from typing import Optional
 
+from spotterbase.model_core.sb import SB_PRED
 from spotterbase.model_core.tag_body import TagSet, Tag
 from spotterbase.records.record import Record, RecordInfo, AttrInfo
 from spotterbase.rdf.uri import Uri, Vocabulary, NameSpace
@@ -10,12 +11,15 @@ class Identifier(Record):
     record_info = RecordInfo(
         record_type=SBX.Identifier,
         attrs=[
+            AttrInfo('id_string', SBX_PRED.idString)
         ],
         is_root_record=True,
     )
 
-    def __init__(self, uri: Optional[Uri] = None):
-        self.__set_attr('uri', uri)
+    id_string: Optional[str] = None
+
+    def __init__(self, uri: Optional[Uri] = None, id_string: Optional[str] = None):
+        super().__init__(uri=uri, id_string=id_string)
 
 
 class IdentifierOccurrence(Record):
@@ -29,8 +33,7 @@ class IdentifierOccurrence(Record):
     occurrence_of: Uri
 
     def __init__(self, uri: Optional[Uri] = None, occurrence_of: Optional[Uri] = None):
-        self.__set_attr('uri', uri)
-        self.__set_attr('occurrence_of', occurrence_of)
+        super().__init__(uri=uri, occurrence_of=occurrence_of)
 
 
 class IdentifierDeclaration(Record):
@@ -46,9 +49,21 @@ class IdentifierDeclaration(Record):
     declares: Uri
 
     def __init__(self, uri: Optional[Uri] = None, declares: Optional[Uri] = None, polarity: Optional[Uri] = None):
-        self.__set_attr('uri', uri)
-        self.__set_attr('declares', declares)
-        self.__set_attr('polarity', polarity)
+        super().__init__(uri=uri, declares=declares, polarity=polarity)
+
+
+class IdentifierTypeRestriction(Record):
+    record_info = RecordInfo(
+        record_type=SBX.IdentifierTypeRestriction,
+        attrs=[
+            AttrInfo('restricts', SBX_PRED.restricts),
+        ],
+    )
+
+    restricts: Uri
+
+    def __init__(self, uri: Optional[Uri] = None, restricts: Optional[Uri] = None):
+        super().__init__(uri=uri, restricts=restricts)
 
 
 class PolarityVocab(Vocabulary):

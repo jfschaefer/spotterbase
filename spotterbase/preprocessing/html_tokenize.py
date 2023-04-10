@@ -5,7 +5,7 @@ from lxml.etree import _ElementTree, _Element, _Comment
 
 from spotterbase.corpora.interface import Document
 from spotterbase.corpora.resolver import Resolver
-from spotterbase.dnm.l_str import string_to_lstr, LStr
+from spotterbase.dnm.linked_str import string_to_lstr, LinkedStr
 from spotterbase.dnm_nlp.word_tokenizer import word_tokenize
 from spotterbase.selectors.offset_converter import OffsetConverter
 from spotterbase.utils import config_loader
@@ -29,7 +29,7 @@ class HtmlTokenizer:
         offset_converter = OffsetConverter(tree.getroot())
         word_counter = 0
 
-        def span_from_word(word: LStr, offset: int) -> _Element:
+        def span_from_word(word: LinkedStr, offset: int) -> _Element:
             nonlocal word_counter
             node = etree.Element('span')
             node.attrib['data-sb-start'] = str(offset + word.get_start_ref())
@@ -45,8 +45,9 @@ class HtmlTokenizer:
 
         def recurse(node: _Element, mark_words: bool):
 
+            child_mark_words = mark_words
             if mark_words and node.tag in self.nodes_to_ignore:
-                mark_words = False
+                child_mark_words = False
 
             node_offsets = offset_converter.get_offset_data(node)
             node.attrib['data-sb-start'] = str(node_offsets.node_text_offset_before)
@@ -54,9 +55,9 @@ class HtmlTokenizer:
 
             number_of_word_nodes_added: int = 0
 
-            if mark_words and node.text:
+            if child_mark_words and node.text:
                 original_text = node.text
-                lstr: LStr = string_to_lstr(original_text)
+                lstr: LinkedStr = string_to_lstr(original_text)
                 words = word_tokenize(lstr)
                 if words:
                     node.text = original_text[:words[0].get_start_ref()]
@@ -74,7 +75,7 @@ class HtmlTokenizer:
                     continue
                 if isinstance(child, _Comment):
                     continue
-                recurse(child, mark_words)
+                recurse(child, child_mark_words)
 
             if mark_words and node.tail:
                 original_text = node.tail

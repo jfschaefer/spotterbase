@@ -38,3 +38,16 @@ Also useful: https://vos.openlinksw.com/owiki/wiki/VOS/VOSSparqlProtocol#HTTP%20
 
 Relevant for using sparql endpoint from browser (e.g. javascript):
 https://vos.openlinksw.com/owiki/wiki/VOS/VirtTipsAndTricksCORsEnableSPARQLURLs
+
+
+
+# isql
+https://docs.openlinksw.com/virtuoso/invokingisql/
+install with https://launchpad.net/ubuntu/trusty/+package/unixodbc
+or in conductor gui
+
+
+# bulk upload
+https://vos.openlinksw.com/owiki/wiki/VOS/VirtBulkRDFLoader
+
+

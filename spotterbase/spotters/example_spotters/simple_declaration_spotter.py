@@ -9,19 +9,55 @@ import spotterbase.dnm_nlp.xml_match as xm
 from spotterbase import __version__
 from spotterbase.corpora.interface import Document
 from spotterbase.dnm.dnm import DnmRange, Dnm
+from spotterbase.dnm.range_subst import RangeSubstituter
 from spotterbase.dnm.simple_dnm_factory import ARXMLIV_STANDARD_DNM_FACTORY
 from spotterbase.model_core.annotation import Annotation
 from spotterbase.model_core.annotation_creator import SpotterRun
 from spotterbase.model_core.sb import SB
 from spotterbase.model_core.target import FragmentTarget
 from spotterbase.model_extra.declarations import Identifier, IdentifierDeclaration, IdentifierOccurrence, \
-    PolarityVocab, POLARITY_TAG_SET, POLARITY_TAGS
+    PolarityVocab, POLARITY_TAG_SET, POLARITY_TAGS, IdentifierTypeRestriction
 from spotterbase.rdf.types import TripleI
 from spotterbase.rdf.uri import Uri
+from spotterbase.rdf.vocab import OA, DCTerms
 from spotterbase.selectors.dom_range import DomRange
+from spotterbase.sparql.sb_sparql import get_data_endpoint
 from spotterbase.spotters.spotter import UriGeneratorMixin, Spotter, SpotterContext
 
 logger = logging.getLogger(__name__)
+
+
+def get_marked_concepts_substituter(doc_uri: Uri) -> RangeSubstituter[Uri]:
+    query = f'''
+SELECT DISTINCT ?target ?start ?end WHERE {{
+    VALUES ?creator {{ <urn:uuid:c84b5401-4cc1-4c23-8e60-df0771d31ef8> }} .
+    ?target {OA.hasSource:<>} {doc_uri:<>} .
+    ?target {OA.hasSelector:<>} [
+        a {SB.OffsetSelector:<>} ;
+        {OA.start:<>} ?start ;
+        {OA.end:<>} ?end
+    ] .
+    ?anno {OA.hasTarget:<>} ?target .
+    ?anno {DCTerms.creator:<>} ?creator .
+}}
+'''
+    results = get_data_endpoint().query(query)
+    l: list[tuple[tuple[int, int], tuple[str, Uri]]] = []
+    for result in results:
+        # type: ignore
+        l.append(((result['start'].to_py_val(), result['end'].to_py_val()), ('SpottedConcept', result['target'])))
+    if not l:
+        return RangeSubstituter(l)
+
+    # deal with overlapping things. E.g. 'positive integer' and 'integer'
+    l.sort()
+    l2 = [l[0]]
+    for e in l[1:]:
+        if e[0][0] < l2[-1][0][1]:
+            continue
+        l2.append(e)
+
+    return RangeSubstituter(l2)
 
 
 def get_para_nodes(tree: _ElementTree) -> Iterable[_Element]:
@@ -117,32 +153,31 @@ class SimpleDeclarationSpotter(UriGeneratorMixin, Spotter):
         # tree = etree.parse(document.open(), parser=etree.HTMLParser())  # type: ignore
         tree = document.get_html_tree(cached=True)
         selector_converter = document.get_selector_converter()
-        dnm = ARXMLIV_STANDARD_DNM_FACTORY.dnm_from_document(document)
+        dnm = ARXMLIV_STANDARD_DNM_FACTORY.dnm_from_document(document).lower()
 
-        regex_univ = re.compile('((let)|(for (every|all))|(where)) (?P<m>mathnode)')
-        regex_exist = re.compile('((for some)|(there is an?)) (?P<m>mathnode)')
+        # regex_univ = re.compile('((let)|(for (every|all))|(where)) (?P<m>mathnode)')
+        regex_univ1 = re.compile('(for ((every)|(all)|(any))) (?P<c>SpottedConcept)?(?P<m>mathnode)')
+        regex_univ2 = re.compile('((let)|(where)) (?P<m>mathnode)( ((is)|(be)) an? (?P<c>SpottedConcept))?')
+        regex_exist = re.compile('((for some)|(there is an?)) (?P<c>SpottedConcept)?(?P<m>mathnode)')
+
+        range_substitutor = get_marked_concepts_substituter(document.get_uri())
+        dnm = range_substitutor.apply(dnm)
 
         for para_node in get_para_nodes(tree):
             para_range: DnmRange = dnm.dnm_range_from_dom_range(DomRange.from_node(para_node))[0]
-            para_string: Dnm = para_range.as_dnm().lower()
+            para_dnm: Dnm = para_range.as_dnm()
 
-            for is_universal, regex in [(True, regex_univ), (False, regex_exist)]:
-                for m in regex.finditer(para_string.string):
+            for is_universal, regex in [(True, regex_univ1), (True, regex_univ2), (False, regex_exist)]:
+                for m in regex.finditer(para_dnm.string):
                     id_node = get_identifier_from_node(
-                        para_string[m.start('m')].as_range().to_dom().get_containing_node()
+                        para_dnm[m.start('m')].as_range().to_dom().get_containing_node()
                     )
                     if id_node is None:
                         continue
 
-                    # uri = next(uri_generator)
-                    # decl_phrase_target = FragmentTarget(
-                    #     uri('target'), source=document.get_uri(),
-                    #     selectors=selector_converter.dom_to_selectors(
-                    #         para_string[m.start():m.end()].as_range().to_dom()))
-
                     # part 1: identifier declaration
                     uri = next(uri_generator)
-                    identifier = Identifier(uri('identifier'))
+                    identifier = Identifier(uri('identifier'), id_string=''.join(id_node.itertext()))
                     yield from identifier.to_triples()
                     id_decl_target = FragmentTarget(
                         uri('target'), source=document.get_uri(),
@@ -157,7 +192,20 @@ class SimpleDeclarationSpotter(UriGeneratorMixin, Spotter):
                         )
                     ).to_triples()
 
-                    # part 2: identifier occurrences
+                    if m.group('c'):
+                        uri = next(uri_generator)
+                        # part 2: type constraint
+                        # dnm_range = DnmRange(m.start('c'), m.end('c'), para_dnm)
+                        a = para_dnm.start_refs[m.start('c') + 1]   # should all have the same back refs
+                        b = para_dnm.end_refs[m.start('c') + 1]
+                        target = range_substitutor.substitution_values[(a, b)]
+                        yield from Annotation(
+                            uri('anno'), target_uri=target, creator_uri=self.ctx.run_uri,
+                            body=IdentifierTypeRestriction(restricts=identifier.uri)
+                        ).to_triples()
+
+
+                    # part 3: identifier occurrences
                     math_nodes_in_para = para_node.xpath('.//math')
                     assert isinstance(math_nodes_in_para, list)
                     for math_node in math_nodes_in_para:

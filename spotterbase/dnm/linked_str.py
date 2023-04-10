@@ -1,10 +1,10 @@
 import re
 from typing import TypeVar, Sequence
 
-LStrT = TypeVar('LStrT', bound='LStr')
+LinkedStr_T = TypeVar('LinkedStr_T', bound='LinkedStr')
 
 
-class LStr:
+class LinkedStr:
     __slots__ = ('string', 'start_refs', 'end_refs')
     """ Should be treated as immutable! For optimization, back_refs can be copied by reference. """
     def __init__(self, string: str, start_refs: Sequence[int], end_refs: Sequence[int]):
@@ -18,14 +18,14 @@ class LStr:
     def get_end_ref(self) -> int:
         return self.end_refs[-1]
 
-    def new(self: LStrT, new_string: str, new_start_refs: Sequence[int], new_end_refs) -> LStrT:
+    def new(self: LinkedStr_T, new_string: str, new_start_refs: Sequence[int], new_end_refs) -> LinkedStr_T:
         """ Intended to be overwritten in subclasses if more corpora has to be copied (e.g. a source document) """
         return self.__class__(new_string, new_start_refs, new_end_refs)
 
     def __len__(self) -> int:
         return len(self.string)
 
-    def __getitem__(self: LStrT, item) -> LStrT:
+    def __getitem__(self: LinkedStr_T, item) -> LinkedStr_T:
         match item:
             case slice():
                 return self.new(self.string[item], self.start_refs[item], self.end_refs[item])
@@ -46,7 +46,7 @@ class LStr:
     def __eq__(self, other) -> bool:
         return self.string == str(other)
 
-    def strip(self: LStrT) -> LStrT:
+    def strip(self: LinkedStr_T) -> LinkedStr_T:
         str_start = 0
         str_end = 0
         for i in range(len(self.string)):
@@ -59,13 +59,13 @@ class LStr:
                 break
         return self[str_start:str_end]
 
-    def lower(self: LStrT) -> LStrT:
+    def lower(self: LinkedStr_T) -> LinkedStr_T:
         return self.new(self.string.lower(), self.end_refs, self.start_refs)
 
-    def upper(self: LStrT) -> LStrT:
+    def upper(self: LinkedStr_T) -> LinkedStr_T:
         return self.new(self.string.upper(), self.end_refs, self.start_refs)
 
-    def normalize_spaces(self: LStrT) -> LStrT:
+    def normalize_spaces(self: LinkedStr_T) -> LinkedStr_T:
         """ replace sequences of whitespaces with a single one."""
         # TODO: clean the code up and potentially optimize it
         new_string = ''
@@ -84,5 +84,5 @@ class LStr:
         return self.new(new_string=new_string, new_start_refs=new_start_refs, new_end_refs=new_end_refs)
 
 
-def string_to_lstr(string: str) -> LStr:
-    return LStr(string, list(range(len(string))), list(range(1, len(string) + 1)))
+def string_to_lstr(string: str) -> LinkedStr:
+    return LinkedStr(string, list(range(len(string))), list(range(1, len(string) + 1)))

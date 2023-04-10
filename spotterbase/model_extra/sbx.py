@@ -1,6 +1,7 @@
 import json
 from pathlib import Path
 
+from spotterbase.rdf.vocab import XSD
 from spotterbase.records.record import PredInfo
 from spotterbase.records.jsonld_support import JsonLdContext
 from spotterbase.rdf.uri import Vocabulary, NameSpace, Uri
@@ -14,14 +15,19 @@ class SBX(Vocabulary):
     Identifier: Uri
     IdentifierOccurrence: Uri
     IdentifierDeclaration: Uri
+    IdentifierTypeRestriction: Uri
 
     occurrenceOf: Uri
+    restricts: Uri
     hasPolarity: Uri
     declares: Uri
+    idString: Uri
 
 
 class SBX_PRED:
     occurrenceOf = PredInfo(SBX.occurrenceOf, json_ld_term='occurrenceOf', json_ld_type_is_id=True)
+    restricts = PredInfo(SBX.restricts, json_ld_term='restricts', json_ld_type_is_id=True)
+    idString = PredInfo(SBX.idString, json_ld_term='idString', literal_type=XSD.string)
     hasPolarity = PredInfo(SBX.hasPolarity, json_ld_term='hasPolarity', json_ld_type_is_id=True)
     declares = PredInfo(SBX.declares, json_ld_term='declares', json_ld_type_is_id=True)
 
@@ -32,6 +38,7 @@ SBX_JSONLD_CONTEXT: JsonLdContext = JsonLdContext(
     pred_infos=list(p_info for p_info in SBX_PRED.__dict__.values() if isinstance(p_info, PredInfo)),
     terms=[
         ('Identifier', SBX.Identifier),
+        ('IdentifierTypeRestriction', SBX.IdentifierTypeRestriction),
         ('IdentifierOccurrence', SBX.IdentifierOccurrence),
         ('IdentifierDeclaration', SBX.IdentifierDeclaration),
     ]

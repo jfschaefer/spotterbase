@@ -8,7 +8,7 @@ from typing import TypeVar, Sequence
 from lxml.etree import _Element
 
 from spotterbase.corpora.interface import Document
-from spotterbase.dnm.l_str import LStr
+from spotterbase.dnm.linked_str import LinkedStr
 from spotterbase.rdf import Uri
 from spotterbase.selectors.dom_range import DomRange
 from spotterbase.selectors.offset_converter import OffsetConverter, DomOffsetRange, OffsetType
@@ -45,7 +45,7 @@ class DnmFactory(abc.ABC):
         )
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(slots=True)
 class DnmMatchIssues:
     """ When mapping a part of the DOM to the DNM, it might not be a perfect match.
         This class contains more detailed information about the problem.
@@ -105,27 +105,29 @@ class DnmMeta:
 DnmT = TypeVar('DnmT', bound='Dnm')
 
 
-class Dnm(LStr):
-    __slots__ = LStr.__slots__ + ('dnm_meta',)
+class Dnm(LinkedStr):
+    __slots__ = LinkedStr.__slots__ + ('dnm_meta',)
     dnm_meta: DnmMeta
 
     def __init__(self, string: str, start_refs: Sequence[int], end_refs: Sequence[int], dnm_meta: DnmMeta):
-        LStr.__init__(self, string, start_refs, end_refs)
+        LinkedStr.__init__(self, string, start_refs, end_refs)
         self.dnm_meta = dnm_meta
 
     def dnm_range_from_dom_range(self, dom_range: DomRange) -> tuple[DnmRange, DnmMatchIssues]:
         required_range: DomOffsetRange = self.dnm_meta.offset_converter.convert_dom_range(dom_range)
-        start_index = bisect.bisect(self.end_refs, required_range.start)
-        end_index = bisect.bisect(self.start_refs, required_range.end - 1) - 1
-        # print('trying', self.end_refs, required_range.end, end_index)
+        return self.dnm_range_from_ref_range(required_range.start, required_range.end)
+
+    def dnm_range_from_ref_range(self, start_ref: int, end_ref: int) -> tuple[DnmRange, DnmMatchIssues]:
+        start_index = bisect.bisect(self.end_refs, start_ref)
+        end_index = bisect.bisect(self.start_refs, end_ref - 1) - 1
 
         return (
             DnmRange(start_index, end_index + 1, self),
             DnmMatchIssues(
-                dom_start_earlier=required_range.start < self.start_refs[start_index],
-                dom_end_later=required_range.end > self.end_refs[end_index],
-                dom_start_later=required_range.start > self.start_refs[start_index],
-                dom_end_earlier=required_range.end < self.end_refs[end_index]
+                dom_start_earlier=start_ref < self.start_refs[start_index],
+                dom_end_later=end_ref > self.end_refs[end_index],
+                dom_start_later=start_ref > self.start_refs[start_index],
+                dom_end_earlier=end_ref < self.end_refs[end_index]
             )
         )
 

@@ -3,11 +3,22 @@
 As it does not use any DNM-specific features (except for working on DnmDstr),
 it might be better to use an off-the-shelf tokenizer.
 """
-from spotterbase.dnm.l_str import LStrT
+import typing
+
+from spotterbase.dnm.linked_str import LinkedStr_T
 
 
-# TODO: The code also works for normal strings
-def word_tokenize(sentence: LStrT) -> list[LStrT]:
+@typing.overload
+def word_tokenize(sentence: LinkedStr_T) -> list[LinkedStr_T]:
+    ...
+
+
+@typing.overload
+def word_tokenize(sentence: str) -> list[str]:
+    ...
+
+
+def word_tokenize(sentence) -> list:
     words = []
     word_start = 0
     for i in range(len(sentence)):

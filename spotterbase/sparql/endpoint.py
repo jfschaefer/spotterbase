@@ -42,16 +42,15 @@ class SparqlEndpoint:
         raise NotImplementedError()
 
 
-class Virtuoso(SparqlEndpoint):
-    def __init__(self, endpoint: str = 'http://localhost:8890/sparql'):
-        self.endpoint = endpoint
+class RemoteSparqlEndpoint(SparqlEndpoint):
+    def __init__(self, url: str, extra_headers: Optional[dict] = None):
+        self.url = url
+        self.extra_headers = extra_headers or {}
 
     def send_query(self, query: str, accept: str = 'application/json'):
-        if len(urllib.parse.quote_plus(query)) > 10000:
-            raise Exception('The query is too long')
-        r = requests.get(self.endpoint, params={'query': query},
+        r = requests.get(self.url, params={'query': query},
                          headers={'Accept': accept},
-                         auth=HTTPBasicAuth('SPARQL', 'SPARQL'),
+                         **self.extra_headers
                          )
         try:
             r.raise_for_status()
@@ -66,6 +65,16 @@ class Virtuoso(SparqlEndpoint):
             return r.json()
         else:
             return r.text
+
+
+class Virtuoso(RemoteSparqlEndpoint):
+    def __init__(self, url: str = 'http://localhost:8890/sparql'):
+        super().__init__(url, {'auth': HTTPBasicAuth('SPARQL', 'SPARQL')})
+
+    def send_query(self, query: str, accept: str = 'application/json'):
+        if len(urllib.parse.quote_plus(query)) > 10000:
+            raise Exception('The query is too long')   # one of the many quirks Virtuoso has
+        return super().send_query(query, accept)
 
     def update(self, query: str):
         return self.send_query(query)
@@ -88,3 +97,6 @@ class RdflibEndpoint(SparqlEndpoint):
         if query.lower().strip().startswith('create graph '):  # not supported by rdflib
             return
         return self.graph.update(query)
+
+
+WIKIDATA = RemoteSparqlEndpoint('https://query.wikidata.org/sparql')
