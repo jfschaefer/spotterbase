@@ -26,13 +26,10 @@ class RangeSubstituter(Generic[_T]):
         assert all(x[1] <= y[0] for x, y in itertools.pairwise(self.ordered_ref_ranges)), 'Some ranges are overlapping'
 
     def apply(self, dnm: Dnm) -> Dnm:
-        if not self.ordered_ref_ranges:   # nothing to do
+        if not self.ordered_ref_ranges:  # nothing to do
             return dnm
 
         dnm_ranges: list[DnmRange] = [dnm.dnm_range_from_ref_range(s, e)[0] for s, e in self.ordered_ref_ranges]
-        # print(self.ordered_ref_ranges)
-        # print(repr(dnm.string[:500]))
-        # print([(r.from_, r.to) for r in dnm_ranges[:10]])
 
         new_start_refs: list[int] = []
         new_end_refs: list[int] = []
@@ -57,6 +54,5 @@ class RangeSubstituter(Generic[_T]):
         new_start_refs.extend(dnm.start_refs[previous_end:])
         new_end_refs.extend(dnm.end_refs[previous_end:])
         strings.append(dnm.string[previous_end:])
-
 
         return dnm.new(''.join(strings), new_start_refs, new_end_refs)

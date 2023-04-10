@@ -1,10 +1,9 @@
 from typing import Optional
 
-from spotterbase.model_core.sb import SB_PRED
 from spotterbase.model_core.tag_body import TagSet, Tag
-from spotterbase.records.record import Record, RecordInfo, AttrInfo
-from spotterbase.rdf.uri import Uri, Vocabulary, NameSpace
 from spotterbase.model_extra.sbx import SBX, SBX_PRED
+from spotterbase.rdf.uri import Uri, Vocabulary, NameSpace
+from spotterbase.records.record import Record, RecordInfo, AttrInfo
 
 
 class Identifier(Record):

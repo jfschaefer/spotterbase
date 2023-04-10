@@ -44,8 +44,11 @@ SELECT DISTINCT ?target ?start ?end WHERE {{
     results = get_data_endpoint().query(query)
     l: list[tuple[tuple[int, int], tuple[str, Uri]]] = []
     for result in results:
-        # type: ignore
-        l.append(((result['start'].to_py_val(), result['end'].to_py_val()), ('SpottedConcept', result['target'])))
+        target_uri = result['target']
+        assert isinstance(target_uri, Uri)
+        start: int = result['start'].to_py_val()  # type: ignore
+        end: int = result['end'].to_py_val()  # type: ignore
+        l.append(((start, end), ('SpottedConcept', target_uri)))
     if not l:
         return RangeSubstituter(l)
 
@@ -177,7 +180,7 @@ class SimpleDeclarationSpotter(UriGeneratorMixin, Spotter):
 
                     # part 1: identifier declaration
                     uri = next(uri_generator)
-                    identifier = Identifier(uri('identifier'), id_string=''.join(id_node.itertext()))
+                    identifier = Identifier(uri('identifier'), id_string=''.join(id_node.itertext()))   # type: ignore
                     yield from identifier.to_triples()
                     id_decl_target = FragmentTarget(
                         uri('target'), source=document.get_uri(),
@@ -196,14 +199,13 @@ class SimpleDeclarationSpotter(UriGeneratorMixin, Spotter):
                         uri = next(uri_generator)
                         # part 2: type constraint
                         # dnm_range = DnmRange(m.start('c'), m.end('c'), para_dnm)
-                        a = para_dnm.start_refs[m.start('c') + 1]   # should all have the same back refs
+                        a = para_dnm.start_refs[m.start('c') + 1]  # should all have the same back refs
                         b = para_dnm.end_refs[m.start('c') + 1]
                         target = range_substitutor.substitution_values[(a, b)]
                         yield from Annotation(
                             uri('anno'), target_uri=target, creator_uri=self.ctx.run_uri,
                             body=IdentifierTypeRestriction(restricts=identifier.uri)
                         ).to_triples()
-
 
                     # part 3: identifier occurrences
                     math_nodes_in_para = para_node.xpath('.//math')
