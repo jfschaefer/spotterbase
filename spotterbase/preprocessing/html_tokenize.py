@@ -106,7 +106,7 @@ def main():
     config_loader.auto()
     assert document.value
     actual_doc = Resolver.get_document(document.value)
-    assert actual_doc is not None, f'Failed to find {document}'
+    assert actual_doc is not None, f'Failed to find {document.value}'
     tree = HtmlTokenizer(add_word_ids=True).process(actual_doc)
 
     assert outpath.value

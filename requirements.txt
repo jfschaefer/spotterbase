@@ -2,3 +2,4 @@ ConfigArgParse
 rdflib
 requests
 lxml
+setuptools

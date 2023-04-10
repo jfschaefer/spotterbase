@@ -1,5 +1,6 @@
 import json
 import logging
+from pathlib import Path
 
 from spotterbase.utils import config_loader
 from spotterbase.model_core.record_class_resolver import ANNOTATION_RECORD_CLASS_RESOLVER
@@ -38,8 +39,8 @@ def main():
         endpoint.update(f'CREATE GRAPH {graph_uri:<>}')
         file = rdf_file.value
         assert file is not None
-        logger.info(f'Loading data from {Uri(file)} into {graph_uri}')
-        endpoint.update(f'LOAD {Uri(file):<>} INTO GRAPH {graph_uri:<>}')
+        logger.info(f'Loading data from {Uri(Path(file).absolute())} into {graph_uri}')
+        endpoint.update(f'LOAD {Uri(Path(file).absolute()):<>} INTO GRAPH {graph_uri:<>}')
         logger.info('Finished loading data')
         records = load_all_records_from_graph(endpoint, graph_uri, populator)
         logger.info('Determined potential records URIs')
