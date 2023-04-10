@@ -5,7 +5,7 @@
 ```
 git clone https://github.com/jfschaefer/spotterbase
 cd spotterbase
-python3 -m pip install requirements.txt
+python3 -m pip install -r requirements.txt
 python3 -m pip install -e .
 ```
 
@@ -31,7 +31,7 @@ python -m spotterbase.preprocessing.html_tokenize --document=http://sigmathling.
 
 
 ### Running the POS Tag spotter
-This requires installing `nltk`.
+This requires installing `nltk` (`python3 -m pip install nltk`) and its part-of-speech data (`python3 -c 'import nltk; nltk.download("universal_tagset")'`).
 ```
 python3 -m spotterbase.spotters.example_spotters.simple_pos_tag_spotter --document=http://sigmathling.kwarc.info/spotterbase/test-corpus/paperA --dir=pos_tag_results
 ```
