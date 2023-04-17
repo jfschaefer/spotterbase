@@ -80,5 +80,5 @@ You can generate it with
 cd doc
 make html
 ```
-This will probably require you to install a few more packages with pip.
 and then open `doc/build/html/index.html` in your browser.
+This will probably require you to install a few more packages with pip.
