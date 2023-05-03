@@ -143,10 +143,10 @@ We use a counter to have relatively short names for blank nodes to keep the gene
 The disadvantage is that (unlike when using e.g. UUIDs) we have to be much more careful if blank nodes
 are created from multiple processes.
 
->>> from spotterbase.rdf import BlankNode
+>>> from spotterbase.rdf import BlankNode, counter_factory
 >>> # Switch to counter mode for reproducibility.
 >>> # Warning: This can lead to collisions if you e.g. use multiple processes!
->>> BlankNode.set_counter_mode_simple(0)
+>>> BlankNode.overwrite_factory(counter_factory())
 >>> a = BlankNode()
 >>> a
 BlankNode(0)

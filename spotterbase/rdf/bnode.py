@@ -22,78 +22,64 @@ TODO: The current design should be improved (e.g. by switching to factories and 
 from __future__ import annotations
 
 import contextlib
-import enum
-import uuid
+import itertools
 import random
-from typing import Optional, ClassVar
+import uuid
+from typing import Optional, ClassVar, TypeAlias, Iterator
+
+BlankNodeFactory: TypeAlias = Iterator['BlankNode']
 
 
-class BNodeGenMode(enum.IntEnum):
-    ANONYMIZED_UUID1 = enum.auto()
-    UUID4 = enum.auto()
-    COUNTER = enum.auto()
+def anonymized_uuid1_factory() -> Iterator[BlankNode]:
+    _uuid_mask: int = random.getrandbits(128)    # to mask the MAC address for privacy
+    while True:
+        guid = uuid.uuid1()
+        # assert guid.is_safe == uuid.SafeUUID.safe
+        yield BlankNode(hex(guid.int ^ _uuid_mask)[2:])
 
 
-DEFAULT_MODE: BNodeGenMode = BNodeGenMode.ANONYMIZED_UUID1
+def counter_factory(start: int = 0) -> Iterator[BlankNode]:
+    for i in itertools.count(start):
+        yield BlankNode(hex(i)[2:])
+
+
+def uuid4_factory() -> Iterator[BlankNode]:
+    while True:
+        yield BlankNode(uuid.uuid4().hex)
 
 
 class BlankNode:
     __slots__ = ('value',)
-    _counter: ClassVar[int] = 0
-    _uuid_mask: ClassVar[int] = random.getrandbits(128)
-    _mode: BNodeGenMode = DEFAULT_MODE
+    _factory: ClassVar[BlankNodeFactory] = anonymized_uuid1_factory()
+
+    def __new__(cls, value: Optional[str] = None):
+        if value is None:
+            return next(cls._factory)
+        return super().__new__(cls)
 
     def __init__(self, value: Optional[str] = None):
-        if value is None:
-            mode = type(self)._mode
-            if mode == BNodeGenMode.ANONYMIZED_UUID1:
-                guid = uuid.uuid1()
-                # assert guid.is_safe == uuid.SafeUUID.safe
-                value = hex(guid.int ^ type(self)._uuid_mask)[2:]
-            elif mode == BNodeGenMode.UUID4:
-                value = uuid.uuid4().hex
-            elif mode == BNodeGenMode.COUNTER:
-                value = hex(type(self)._counter)[2:]
-                type(self)._counter += 1
-            else:
-                raise Exception(f'Unsupported mode {mode}')
-
-        self.value = value
+        if hasattr(self, 'value'):   # This happens if __new__ returns an object that was already initialized
+            return
+        assert value is not None, 'value is None but __new__ should have prevented that'
+        self.value: str = value
 
     @classmethod
-    def get_mode(cls) -> BNodeGenMode:
-        return cls._mode
+    def get_factory(cls) -> BlankNodeFactory:
+        return cls._factory
 
     @classmethod
-    def reset_mode(cls):
-        cls._mode = DEFAULT_MODE
+    def overwrite_factory(cls, factory: BlankNodeFactory):
+        cls._factory = factory
 
     @classmethod
     @contextlib.contextmanager
-    def set_counter_mode(cls, start: Optional[int] = None):
-        if start is not None:
-            cls._counter = start
-        return cls.set_mode(BNodeGenMode.COUNTER)
-
-    @classmethod
-    def set_counter_mode_simple(cls, start: Optional[int] = None):
-        if start is not None:
-            cls._counter = start
-        cls._mode = BNodeGenMode.COUNTER
-
-    @classmethod
-    @contextlib.contextmanager
-    def set_mode(cls, mode: BNodeGenMode):
-        previous_mode = cls._mode
-        cls._mode = mode
+    def use_factory(cls, factory: BlankNodeFactory):
+        previous_factory = cls._factory
         try:
+            cls.overwrite_factory(factory)
             yield
         finally:
-            cls._mode = previous_mode
-
-    @classmethod
-    def set_mode_simple(cls, mode: BNodeGenMode):
-        cls._mode = mode
+            cls._factory = previous_factory
 
     def __repr__(self):
         return f'{self.__class__.__name__}({self.value})'
@@ -106,7 +92,3 @@ class BlankNode:
 
     def __hash__(self):
         return hash(self.value)
-
-    @classmethod
-    def reset_counter(cls):
-        cls._counter = 0

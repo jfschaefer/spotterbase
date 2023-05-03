@@ -6,7 +6,7 @@ from pathlib import Path
 
 from spotterbase.model_core.sb import SB_JSONLD_CONTEXT
 from spotterbase.rdf.literal import Literal
-from spotterbase.rdf.bnode import BlankNode
+from spotterbase.rdf.bnode import BlankNode, counter_factory
 from spotterbase.rdf.uri import NameSpace, Vocabulary, Uri
 from spotterbase.rdf.serializer import TurtleSerializer, NTriplesSerializer, FileSerializer
 from spotterbase.rdf.vocab import RDF, XSD
@@ -54,7 +54,7 @@ mv:thingA a mv:someClass ;
         self.assertEqual(str(uri), 'http://example.com/abc')
 
     def test_ntriples_serialize(self):
-        BlankNode._counter = 1
+        BlankNode.overwrite_factory(counter_factory(1))   # for reproducibility
         stringio = io.StringIO()
         serializer = NTriplesSerializer(stringio)
         serializer.write_comment('this is a comment for ntriples')
