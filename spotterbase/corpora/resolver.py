@@ -4,7 +4,7 @@ from typing import Optional, Iterable
 from spotterbase.utils import config_loader
 from spotterbase.corpora.arxmliv import ARXMLIV_CORPORA, CENTI_ARXMLIV_CORPORA
 from spotterbase.corpora.interface import Corpus, Document, DocumentNotInCorpusException
-from spotterbase.corpora.test_corpus import TestCorpus
+from spotterbase.corpora.test_corpus import TEST_CORPUS
 from spotterbase.rdf.uri import Uri
 
 
@@ -40,7 +40,7 @@ class _Resolver:
 
 
 def _register_standard_corpora(resolver: _Resolver):
-    resolver.register_corpus(TestCorpus())
+    resolver.register_corpus(TEST_CORPUS)
     for corpus in ARXMLIV_CORPORA.values():
         resolver.register_corpus(corpus)
     for corpus in CENTI_ARXMLIV_CORPORA.values():

@@ -12,26 +12,26 @@ spotterbase.dnm.dnm module
    :undoc-members:
    :show-inheritance:
 
-spotterbase.dnm.l\_str module
------------------------------
+spotterbase.dnm.linked\_str module
+----------------------------------
 
-.. automodule:: spotterbase.dnm.l_str
+.. automodule:: spotterbase.dnm.linked_str
    :members:
    :undoc-members:
    :show-inheritance:
 
-spotterbase.dnm.token\_dnm module
----------------------------------
+spotterbase.dnm.range\_subst module
+-----------------------------------
 
-.. automodule:: spotterbase.dnm.token_dnm
+.. automodule:: spotterbase.dnm.range_subst
    :members:
    :undoc-members:
    :show-inheritance:
 
-spotterbase.dnm.token\_generator module
----------------------------------------
+spotterbase.dnm.simple\_dnm\_factory module
+-------------------------------------------
 
-.. automodule:: spotterbase.dnm.token_generator
+.. automodule:: spotterbase.dnm.simple_dnm_factory
    :members:
    :undoc-members:
    :show-inheritance:

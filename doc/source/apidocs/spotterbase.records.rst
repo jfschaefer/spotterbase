@@ -12,14 +12,6 @@ spotterbase.records.jsonld\_support module
    :undoc-members:
    :show-inheritance:
 
-spotterbase.records.oa\_support module
---------------------------------------
-
-.. automodule:: spotterbase.records.oa_support
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 spotterbase.records.rdf\_to\_jsonld module
 ------------------------------------------
 

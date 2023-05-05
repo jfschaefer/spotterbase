@@ -8,8 +8,9 @@ The configuration can be loaded with the :class:`ConfigLoader`.
 import argparse
 import logging
 import sys
+import warnings
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Optional, ClassVar
 
 import configargparse   # type: ignore
 
@@ -37,6 +38,7 @@ class ConfigExtension:
 
 class ConfigLoader:
     default_extensions: list[ConfigExtension] = []
+    config_has_been_loaded: ClassVar[bool] = False
 
     def __init__(self, extensions: Optional[list[ConfigExtension]] = None, config_paths: Optional[list[Path]] = None):
         if extensions is None:
@@ -66,6 +68,9 @@ class ConfigLoader:
         return namespace
 
     def load_from_namespace(self, namespace: argparse.Namespace):
+        if ConfigLoader.config_has_been_loaded:
+            warnings.warn('A configuration is loaded even though one has been loaded before')
+        ConfigLoader.config_has_been_loaded = True
         for extension in self.extensions:
             extension.process_namespace(namespace)
 
@@ -113,6 +118,9 @@ class SimpleConfigExtension(ConfigExtension):
         self.kwargs = kwargs
         if add_to_default_configs:
             ConfigLoader.default_extensions.append(self)
+            if ConfigLoader.config_has_been_loaded:
+                warnings.warn('A new configuration option has been added '
+                              'even though a configuration has already been loaded')
         self.__post_init__()
 
     def __post_init__(self):
@@ -168,5 +176,5 @@ class ConfigPath(SimpleConfigExtension):
         self.kwargs['type'] = Path
 
 
-def auto():
-    ConfigLoader().load_from_args()
+def auto(args: Optional[list[str]] = None):
+    ConfigLoader().load_from_args(args)

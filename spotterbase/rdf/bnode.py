@@ -1,23 +1,19 @@
-""" Provides blank nodes.
+""" Provides RDF blank nodes. """
 
-Notes from compression efficiency experiment (with turtle file, using a typical amount of blank nodes):
-    * Using a counter -> 37 MB (gzipped; uncompressed: 790 MB)
-    * Using uuid4 -> 75 MB (gzipped)
-    * Using uuid1 -> 38 MB (gzipped; uncompressed: 886 MB)
-    * using uuid1 with fake MAC | PID and increasing clock_seq -> 48 MB (gzipped)
-    * using uuid1 with fake MAC | PID and no (i.e. random) clock_seq -> 50 MB (gzipped)
-
-Another option (even more memory efficient than uuid1, also when not compressed):
-    start = hex(int(10*time.time()))[2:]
-    counter = 0
-    def get_value():
-        global counter
-        return start + '-' + hex(os.getpid())[2:] + '-' + hex(counter)[2:] + '\n'
-        counter += 1
-
-TODO: The current design should be improved (e.g. by switching to factories and having a default factory in BlankNode,
-      which is used in __new__)
-"""
+# Notes from compression efficiency experiment (with turtle file, using a typical amount of blank nodes):
+#     * Using a counter -> 37 MB (gzipped; uncompressed: 790 MB)
+#     * Using uuid4 -> 75 MB (gzipped)
+#     * Using uuid1 -> 38 MB (gzipped; uncompressed: 886 MB)
+#     * using uuid1 with fake MAC | PID and increasing clock_seq -> 48 MB (gzipped)
+#     * using uuid1 with fake MAC | PID and no (i.e. random) clock_seq -> 50 MB (gzipped)
+#
+# Another option (even more memory efficient than uuid1, also when not compressed):
+#     start = hex(int(10*time.time()))[2:]
+#     counter = 0
+#     def get_value():
+#         global counter
+#         return start + '-' + hex(os.getpid())[2:] + '-' + hex(counter)[2:] + '\n'
+#         counter += 1
 
 from __future__ import annotations
 

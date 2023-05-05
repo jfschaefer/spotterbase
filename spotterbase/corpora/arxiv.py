@@ -31,6 +31,20 @@ class ArxivId:
             case _:
                 return NotImplemented
 
+    def __str__(self) -> str:
+        return self.identifier
+
+    def __format__(self, format_spec: str) -> str:
+        if format_spec == '':
+            return self.identifier
+        elif format_spec == 'fn':   # filename compatible
+            return self.identifier.replace('/', '')
+        else:
+            raise ValueError(f'Unsupported format spec {format_spec!r}')
+
+    def __repr__(self) -> str:
+        return f'{type(self).__name__}({self.identifier})'
+
     def as_uri(self) -> Uri:
         return ArxivUris.arxiv_id[self.identifier]
 

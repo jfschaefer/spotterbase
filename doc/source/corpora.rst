@@ -1,14 +1,14 @@
 :mod:`~spotterbase.corpora` package
-==================================
+===================================
 
 The :mod:`~spotterbase.corpora` package provides functionality for working
 with corpora (in particular the arXMLiv corpus).
 
 
-Using the :class:``~spotterbase.corpora.resolver.Resolver``
------------------------------------------------------------
+Using the :class:`~spotterbase.corpora.resolver.Resolver`
+---------------------------------------------------------
 
-The ``Resolver`` can be used to load a document if you have their URI.
+The ``Resolver`` can be used to load a document if you have its URI.
 Usually, it is required that you have downloaded the corpus and SpotterBase is able to find it.
 SpotterBase comes with a test corpus, which we will use for the examples:
 

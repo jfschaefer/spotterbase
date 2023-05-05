@@ -12,10 +12,18 @@ spotterbase.utils.config\_loader module
    :undoc-members:
    :show-inheritance:
 
-spotterbase.utils.logutils module
----------------------------------
+spotterbase.utils.exit module
+-----------------------------
 
-.. automodule:: spotterbase.utils.logutils
+.. automodule:: spotterbase.utils.exit
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+spotterbase.utils.progress\_updater module
+------------------------------------------
+
+.. automodule:: spotterbase.utils.progress_updater
    :members:
    :undoc-members:
    :show-inheritance:

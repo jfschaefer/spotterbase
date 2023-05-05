@@ -20,7 +20,7 @@ class TestDocument(Document):
         return self._path.open(*args, **kwargs)
 
 
-class TestCorpus(Corpus):
+class _TestCorpus(Corpus):
     def get_uri(self) -> Uri:
         return TEST_CORPUS_URI
 
@@ -38,3 +38,8 @@ class TestCorpus(Corpus):
         for path in sorted(directory.glob('*.html')):
             uri = TEST_CORPUS_URI / path.name.removesuffix('.html')
             yield TestDocument(uri, path)
+
+
+TEST_CORPUS: Corpus = _TestCorpus()
+
+TEST_DOC_A: Document = TEST_CORPUS.get_document(TEST_CORPUS_URI / 'paperA')

@@ -1,6 +1,7 @@
 import argparse
 import logging
 import tempfile
+import warnings
 from pathlib import Path
 from typing import Optional, Iterator
 
@@ -24,6 +25,9 @@ class Locator(ConfigExtension):
         self.specified_location: Optional[str] = None
 
         if add_to_default_configs:
+            if ConfigLoader.config_has_been_loaded:
+                warnings.warn('A new configuration option has been added '
+                              'even though a configuration has already been loaded')
             ConfigLoader.default_extensions.append(self)
 
     def prepare_argparser(self, argparser: argparse.ArgumentParser):
