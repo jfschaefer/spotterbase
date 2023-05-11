@@ -51,7 +51,7 @@ class SimpleDnmFactory(DnmFactory):
 
         recurse(dnm_meta.dom)
 
-        return Dnm(''.join(strings), start_refs=start_refs, end_refs=end_refs, dnm_meta=dnm_meta)
+        return Dnm(meta_info=dnm_meta, string=''.join(strings), start_refs=start_refs, end_refs=end_refs)
 
     def _get_replacement(self, node: _Element) -> Optional[str]:
         if node.tag in self.nodes_to_replace:

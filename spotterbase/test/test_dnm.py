@@ -9,7 +9,7 @@ from spotterbase.model_core.selector import PathSelector, OffsetSelector
 from spotterbase.selectors.dom_range import DomRange
 from spotterbase.test.mixins import GraphTestMixin
 
-# Example Dnm's:
+# Example DNMs:
 DNM_1: Dnm = SimpleDnmFactory(nodes_to_replace={'c': 'C'}, classes_to_replace={'skip': ''}).anonymous_dnm_from_node(
     etree.parse(io.StringIO('<a>t1<b class="standard">t2</b>t3<c/>t4<d class="skip">D</d>t5</a>')).getroot()
 )
@@ -26,8 +26,8 @@ DNM_3: Dnm = SimpleDnmFactory(nodes_to_replace={'x': '', 'y': 'YZ'}).anonymous_d
 class TestDnm(GraphTestMixin, unittest.TestCase):
     def test_basic_string(self):
         dnm = DNM_1
-        self.assertEqual(dnm, 't1t2t3Ct4t5')
-        self.assertEqual(dnm[5], '3')
+        self.assertEqual(str(dnm), 't1t2t3Ct4t5')
+        self.assertEqual(str(dnm[5]), '3')
 
     def test_path_selector(self):
         for dnm, index, substring, selector in [
@@ -36,9 +36,9 @@ class TestDnm(GraphTestMixin, unittest.TestCase):
             (DNM_2, slice(1, 2), 'b', PathSelector('char(/p,1)', 'char(/p,2)'))
         ]:
             with self.subTest(substring=substring, selector=selector):
-                self.assertEqual(dnm[index], substring)
-                dom_range: DomRange = dnm[index].as_range().to_dom()
-                conv = dnm.dnm_meta.selector_converter
+                self.assertEqual(str(dnm[index]), substring)
+                dom_range: DomRange = dnm[index].to_dom()
+                conv = dnm.get_meta_info().selector_converter
                 new_selector = conv.dom_to_path_selector(dom_range)
                 self.assertEqual((new_selector.start, new_selector.end), (selector.start, selector.end))
 
@@ -51,10 +51,14 @@ class TestDnm(GraphTestMixin, unittest.TestCase):
             (DNM_3, OffsetSelector(start=8, end=10), 3, 5, 'YZ'),
         ]:
             with self.subTest(selector=selector, expected_str=expected_str):
-                converter = dnm.dnm_meta.selector_converter
+                converter = dnm.get_meta_info().selector_converter
                 dom_range = converter.selector_to_dom(selector)[0]
                 assert isinstance(dom_range, DomRange)
-                dnm_range, _ = dnm.dnm_range_from_dom_range(dom_range)
-                self.assertEqual(dnm_range.from_, expected_from)
-                self.assertEqual(dnm_range.to, expected_to)
-                self.assertEqual(dnm_range.as_dnm().string, expected_str)
+
+                sub_dnm, _ = dnm.sub_dnm_from_dom_range(dom_range)
+                self.assertEqual(str(sub_dnm), expected_str)
+
+                required_range = dnm.get_meta_info().offset_converter.convert_dom_range(dom_range)
+                from_, to = dnm.get_indices_from_ref_range(required_range.start, required_range.end)
+                self.assertEqual(from_, expected_from)
+                self.assertEqual(to, expected_to)

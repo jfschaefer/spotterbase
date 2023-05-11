@@ -72,7 +72,7 @@ class SimplePosTagSpotter(UriGeneratorMixin, Spotter):
             for dnm_word, tagged_word in zip(words, pos_tagged):
                 uri = next(uri_generator)
                 target = FragmentTarget(uri('target'), document.get_uri(),
-                                        selector_converter.dom_to_selectors(dnm_word.as_range().to_dom()))
+                                        selector_converter.dom_to_selectors(dnm_word.to_dom()))
                 yield from target.to_triples()
                 yield from Annotation(
                     uri=uri('anno'),

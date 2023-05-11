@@ -1,7 +1,7 @@
 import itertools
 from typing import TypeVar, Generic, Iterable
 
-from spotterbase.dnm.dnm import Dnm, DnmRange
+from spotterbase.dnm.linked_str import LinkedStr_T
 
 _T = TypeVar('_T')
 
@@ -25,23 +25,26 @@ class RangeSubstituter(Generic[_T]):
         self.ordered_ref_ranges.sort()
         assert all(x[1] <= y[0] for x, y in itertools.pairwise(self.ordered_ref_ranges)), 'Some ranges are overlapping'
 
-    def apply(self, dnm: Dnm) -> Dnm:
+    def apply(self, dnm: LinkedStr_T) -> LinkedStr_T:
         if not self.ordered_ref_ranges:  # nothing to do
             return dnm
 
-        dnm_ranges: list[DnmRange] = [dnm.dnm_range_from_ref_range(s, e)[0] for s, e in self.ordered_ref_ranges]
+        ranges: list[tuple[int, int]] = [dnm.get_indices_from_ref_range(s, e) for s, e in self.ordered_ref_ranges]
 
         new_start_refs: list[int] = []
         new_end_refs: list[int] = []
         strings: list[str] = []
 
+        start_refs = dnm.get_start_refs()
+        end_refs = dnm.get_end_refs()
+
         previous_end: int = 0
-        for dnm_range, ref_range in zip(dnm_ranges, self.ordered_ref_ranges):
+        for (from_, to), ref_range in zip(ranges, self.ordered_ref_ranges):
             # TODO: I'm not sure why we need the -1 and +1. We should find out if there is an off-by-one error elsewhere
             # copy until start of range
-            new_start_refs.extend(dnm.start_refs[previous_end:dnm_range.from_ - 1])
-            new_end_refs.extend(dnm.end_refs[previous_end:dnm_range.from_ - 1])
-            strings.append(dnm.string[previous_end:dnm_range.from_ - 1])
+            new_start_refs.extend(start_refs[previous_end:from_ - 1])
+            new_end_refs.extend(end_refs[previous_end:from_ - 1])
+            strings.append(str(dnm)[previous_end:from_ - 1])
 
             # put replacement string
             replacement = self.replacement_values[ref_range]
@@ -49,10 +52,11 @@ class RangeSubstituter(Generic[_T]):
             new_end_refs.extend(itertools.repeat(ref_range[1], len(replacement)))
             strings.append(replacement)
 
-            previous_end = dnm_range.to + 1
+            previous_end = to + 1
 
-        new_start_refs.extend(dnm.start_refs[previous_end:])
-        new_end_refs.extend(dnm.end_refs[previous_end:])
-        strings.append(dnm.string[previous_end:])
+        new_start_refs.extend(start_refs[previous_end:])
+        new_end_refs.extend(end_refs[previous_end:])
+        strings.append(str(dnm)[previous_end:])
 
-        return dnm.new(''.join(strings), new_start_refs, new_end_refs)
+        return type(dnm)(meta_info=dnm.get_meta_info(), string=''.join(strings), start_refs=new_start_refs,
+                         end_refs=new_end_refs)

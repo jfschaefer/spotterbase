@@ -1,9 +1,8 @@
 from __future__ import annotations
 
 import abc
-import bisect
 import dataclasses
-from typing import TypeVar, Sequence
+from typing import TypeVar
 
 from lxml.etree import _Element
 
@@ -73,27 +72,6 @@ class DnmMatchIssues:
         return self.dom_start_earlier or self.dom_end_later
 
 
-@dataclasses.dataclass(slots=True, frozen=True)
-class DnmRange:
-    """ A slice of a DNM (more light-weight than creating a sub-DNM) """
-    from_: int
-    to: int    # not inclusive (for consistency)
-    dnm: Dnm
-
-    def to_dom(self) -> DomRange:
-        return DomRange(
-            self.dnm.dnm_meta.offset_converter.get_dom_point(self.dnm.start_refs[self.from_], OffsetType.NodeText),
-            self.dnm.dnm_meta.offset_converter.get_dom_point(self.dnm.end_refs[self.to - 1], OffsetType.NodeText),
-        )
-        # return DomRange(self.from_.to_dom(), self.to.to_dom())
-
-    def get_offsets(self) -> tuple[int, int]:
-        return self.dnm.start_refs[self.from_], self.dnm.end_refs[self.to - 1]
-
-    def as_dnm(self) -> Dnm:
-        return self.dnm[self.from_:self.to]
-
-
 @dataclasses.dataclass
 class DnmMeta:
     dom: _Element
@@ -105,34 +83,26 @@ class DnmMeta:
 DnmT = TypeVar('DnmT', bound='Dnm')
 
 
-class Dnm(LinkedStr):
-    __slots__ = LinkedStr.__slots__ + ('dnm_meta',)
-    dnm_meta: DnmMeta
+class Dnm(LinkedStr[DnmMeta]):
+    def sub_dnm_from_dom_range(self, dom_range: DomRange) -> tuple[Dnm, DnmMatchIssues]:
+        required_range: DomOffsetRange = self.get_meta_info().offset_converter.convert_dom_range(dom_range)
+        return self.sub_dnm_from_ref_range(required_range.start, required_range.end)
 
-    def __init__(self, string: str, start_refs: Sequence[int], end_refs: Sequence[int], dnm_meta: DnmMeta):
-        LinkedStr.__init__(self, string, start_refs, end_refs)
-        self.dnm_meta = dnm_meta
-
-    def dnm_range_from_dom_range(self, dom_range: DomRange) -> tuple[DnmRange, DnmMatchIssues]:
-        required_range: DomOffsetRange = self.dnm_meta.offset_converter.convert_dom_range(dom_range)
-        return self.dnm_range_from_ref_range(required_range.start, required_range.end)
-
-    def dnm_range_from_ref_range(self, start_ref: int, end_ref: int) -> tuple[DnmRange, DnmMatchIssues]:
-        start_index = bisect.bisect(self.end_refs, start_ref)
-        end_index = bisect.bisect(self.start_refs, end_ref - 1) - 1
+    def sub_dnm_from_ref_range(self, start_ref: int, end_ref: int) -> tuple[Dnm, DnmMatchIssues]:
+        start_index, end_index = self.get_indices_from_ref_range(start_ref, end_ref)
 
         return (
-            DnmRange(start_index, end_index + 1, self),
+            self[start_index:end_index],
             DnmMatchIssues(
-                dom_start_earlier=start_ref < self.start_refs[start_index],
-                dom_end_later=end_ref > self.end_refs[end_index],
-                dom_start_later=start_ref > self.start_refs[start_index],
-                dom_end_earlier=end_ref < self.end_refs[end_index]
+                dom_start_earlier=start_ref < self.get_start_refs()[start_index],
+                dom_end_later=end_ref > self.get_end_refs()[end_index - 1],
+                dom_start_later=start_ref > self.get_start_refs()[start_index],
+                dom_end_earlier=end_ref < self.get_end_refs()[end_index - 1]
             )
         )
 
-    def new(self: DnmT, new_string: str, new_start_refs: Sequence[int], new_end_refs: Sequence[int]) -> DnmT:
-        return self.__class__(new_string, new_start_refs, new_end_refs, self.dnm_meta)
-
-    def as_range(self) -> DnmRange:
-        return DnmRange(0, len(self.string), self)
+    def to_dom(self) -> DomRange:
+        return DomRange(
+            self.get_meta_info().offset_converter.get_dom_point(self.get_start_ref(), OffsetType.NodeText),
+            self.get_meta_info().offset_converter.get_dom_point(self.get_end_ref(), OffsetType.NodeText),
+        )

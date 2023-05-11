@@ -8,7 +8,7 @@ from lxml.etree import _Element, _ElementTree
 import spotterbase.dnm_nlp.xml_match as xm
 from spotterbase import __version__
 from spotterbase.corpora.interface import Document
-from spotterbase.dnm.dnm import DnmRange, Dnm
+from spotterbase.dnm.dnm import Dnm
 from spotterbase.dnm.range_subst import RangeSubstituter
 from spotterbase.dnm.simple_dnm_factory import ARXMLIV_STANDARD_DNM_FACTORY
 from spotterbase.model_core.annotation import Annotation
@@ -167,13 +167,12 @@ class SimpleDeclarationSpotter(UriGeneratorMixin, Spotter):
         dnm = range_substitutor.apply(dnm)
 
         for para_node in get_para_nodes(tree):
-            para_range: DnmRange = dnm.dnm_range_from_dom_range(DomRange.from_node(para_node))[0]
-            para_dnm: Dnm = para_range.as_dnm()
+            para_dnm: Dnm = dnm.sub_dnm_from_dom_range(DomRange.from_node(para_node))[0]
 
             for is_universal, regex in [(True, regex_univ1), (True, regex_univ2), (False, regex_exist)]:
-                for m in regex.finditer(para_dnm.string):
+                for m in regex.finditer(str(para_dnm)):
                     id_node = get_identifier_from_node(
-                        para_dnm[m.start('m')].as_range().to_dom().get_containing_node()
+                        para_dnm[m.start('m')].to_dom().get_containing_node()
                     )
                     if id_node is None:
                         continue
@@ -199,8 +198,8 @@ class SimpleDeclarationSpotter(UriGeneratorMixin, Spotter):
                         uri = next(uri_generator)
                         # part 2: type constraint
                         # dnm_range = DnmRange(m.start('c'), m.end('c'), para_dnm)
-                        a = para_dnm.start_refs[m.start('c') + 1]  # should all have the same back refs
-                        b = para_dnm.end_refs[m.start('c') + 1]
+                        a = para_dnm.get_start_refs()[m.start('c') + 1]  # should all have the same back refs
+                        b = para_dnm.get_start_refs()[m.start('c') + 1]
                         target = range_substitutor.substitution_values[(a, b)]
                         yield from Annotation(
                             uri('anno'), target_uri=target, creator_uri=self.ctx.run_uri,

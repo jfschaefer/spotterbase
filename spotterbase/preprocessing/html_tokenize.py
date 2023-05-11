@@ -38,7 +38,7 @@ class HtmlTokenizer:
                 node.attrib['id'] = f'sb:w{word_counter}'
             if self.word_class:
                 node.attrib['class'] = self.word_class
-            node.text = word.string
+            node.text = word._string
 
             word_counter += 1
             return node
