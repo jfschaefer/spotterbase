@@ -7,10 +7,12 @@ Content
 .. toctree::
    :maxdepth: 1
 
+   getting_started
    contribute
    config
    annotations
    rdf
+   dnm
    dnm_nlp
    corpora
 

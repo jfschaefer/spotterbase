@@ -1,4 +1,4 @@
-:mod:`~spotterbase.rdf` package
+:mod:`~spotterbase.dnm` package
 ===============================
 
 A DNM (Document Narrative Model) is an plaintext representation that is linked to the DOM (Document Object Model).
@@ -44,6 +44,8 @@ Dnm('\n\n\n\n\n\n\n\n\n\nTest Document: There are interesting triangles\n')
 >>> beginning = beginning.strip()
 >>> beginning
 Dnm('Test Document: There are interesting triangles')
+>>> beginning.upper()
+Dnm('TEST DOCUMENT: THERE ARE INTERESTING TRIANGLES')
 >>> str(beginning[0:4]) == 'Test'
 True
 >>> len(beginning) == len('Test Document: There are interesting triangles')
@@ -58,5 +60,16 @@ You can also get the actual string:
 
 
 DNMs are considered immutable (like Python strings).
-Selecting a sub-DNM (e.g. ``dnm[:57]``) therefore creates a completely new DNM, which can be costly for long sub-DNMs.
+Any operation therefore creates a ``Dnm``, which can be costly (though some optimizations are in place to create some attributes lazily).
+
+
+
+Back to the DOM
+---------------
+
+We can easily convert a DNM to a ``DomRange``:
+
+>>> dom_range = beginning[3].to_dom()
+>>> print('Containing tag is', dom_range.get_containing_node().tag)
+Containing tag is h1
 
