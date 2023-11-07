@@ -110,6 +110,10 @@ class LinkedStr(Generic[_MetaInfoType]):
             return type(self)(meta_info=self._meta_info, string=str(self)[item],
                               start_refs=[self.get_start_refs()[item]],
                               end_refs=[self.get_end_refs()[item]])
+        elif isinstance(item, LinkedStr):
+            # TODO: Should we check that it's based on the same document?
+            start_index, end_index = self.get_indices_from_ref_range(item.get_start_ref(), item.get_end_ref())
+            return self[start_index:end_index]
         elif isinstance(item, re.Match):
             return self[item.start():item.end()]
         else:

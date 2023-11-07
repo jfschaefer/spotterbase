@@ -40,6 +40,15 @@ PREFIXES = '''
 '''
 
 
+def result_rows(query_result: rdflib.query.Result) -> list[rdflib.query.ResultRow]:
+    """ needed to make mypy happy """
+    result: list[rdflib.query.ResultRow] = []
+    for row in query_result:
+        assert isinstance(row, rdflib.query.ResultRow)
+        result.append(row)
+    return result
+
+
 def create_from(ontology: str, namespace: str):
     graph = rdflib.Graph()
     response = requests.get(ontology)
@@ -53,7 +62,7 @@ def create_from(ontology: str, namespace: str):
     graph.parse(data=response.text, format=format)
 
     # PROPERTIES
-    property_results = graph.query(PREFIXES + '''
+    property_results = result_rows(graph.query(PREFIXES + '''
     SELECT ?prop ?comm WHERE {
         { ?prop a rdf:Property }
         UNION { ?prop a owl:ObjectProperty }
@@ -61,7 +70,7 @@ def create_from(ontology: str, namespace: str):
         UNION { ?prop rdfs:domain ?domain }
         OPTIONAL { ?prop rdfs:comment ?comm }
     }
-    ''')
+    '''))
     comments = {row.prop: row.comm.strip().replace('\n', '\n    # ') for row in property_results if row.comm}
     properties = set(row.prop for row in property_results)
     if properties:
@@ -75,14 +84,14 @@ def create_from(ontology: str, namespace: str):
         print('    ' + prop[len(namespace):] + ': Uri')
 
     # CLASSES
-    class_results = graph.query(PREFIXES + '''
+    class_results = result_rows(graph.query(PREFIXES + '''
     SELECT DISTINCT ?thing ?comm WHERE {
         { ?thing a rdfs:Class }
         UNION
         { ?thing a owl:Class }
         OPTIONAL { ?thing rdfs:comment ?comm }
     }
-    ''')
+    '''))
     comments = {row.thing: row.comm.strip().replace('\n', '\n    # ') for row in class_results if row.comm}
     classes = set(row.thing for row in class_results)
     if classes:
@@ -97,13 +106,13 @@ def create_from(ontology: str, namespace: str):
             print('    ' + class_[len(namespace):] + ': Uri')
 
     # OTHER
-    other_results = graph.query(PREFIXES + f'''
+    other_results = result_rows(graph.query(PREFIXES + f'''
     SELECT DISTINCT ?thing ?type ?comm WHERE {{
         ?thing a ?type
         FILTER (strstarts(str(?thing), '{namespace}'))
         OPTIONAL {{ ?thing rdfs:comment ?comm }}
     }}
-    ''')
+    '''))
     comments = {row.thing: '\n    # '.join(line.strip() for line in row.comm.strip().splitlines()) for row in
                 other_results if row.comm}
     covered = classes | properties

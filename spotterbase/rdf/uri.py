@@ -53,18 +53,17 @@ class Uri:
 
     def __init__(self, uri: str | URIRef | pathlib.Path, namespace: Optional[NameSpace] = None):
         self.namespace = namespace
-        match uri:
-            case str():
-                if uri.startswith('<') and uri.endswith('>'):
-                    self._suffix = uri[1:-1]
-                else:
-                    self._suffix = uri
-            case URIRef():
-                self._suffix = str(uri)
-            case pathlib.Path():
-                self._suffix = uri.as_uri()
-            case _:
-                raise NotImplementedError(f'Unsupported type {type(uri)}')
+        if isinstance(uri, str):
+            if uri.startswith('<') and uri.endswith('>'):
+                self._suffix = uri[1:-1]
+            else:
+                self._suffix = uri
+        elif isinstance(uri, URIRef):
+            self._suffix = str(uri)
+        elif isinstance(uri, pathlib.Path):
+            self._suffix = uri.as_uri()
+        else:
+            raise NotImplementedError(f'Unsupported type {type(uri)}')
         if namespace:
             assert self.full_uri().startswith(namespace.uri.full_uri())
 

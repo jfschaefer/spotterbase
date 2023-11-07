@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import functools
 import json
 import logging
 import urllib.parse
@@ -83,6 +84,7 @@ class Virtuoso(RemoteSparqlEndpoint):
 class RdflibEndpoint(SparqlEndpoint):
     def __init__(self, graph: Optional[rdflib.Graph] = None):
         # rdflib.ConjunctiveGraph allows named graphs
+        self.rdflib_version_warn()
         self.graph: rdflib.Graph = graph or rdflib.ConjunctiveGraph()
 
     def send_query(self, query: str, accept: str = 'application/json'):
@@ -92,6 +94,13 @@ class RdflibEndpoint(SparqlEndpoint):
             return json.loads(results)
         else:
             return results.decode('utf-8')
+
+    @classmethod
+    @functools.cache
+    def rdflib_version_warn(cls):
+        if rdflib.__version__ == '7.0.0':
+            logger.warning('rdflib version 7.0.0 has a bug that breaks some SpotterBase functionality. '
+                           'It has already been patched (https://github.com/RDFLib/rdflib/pull/2554).')
 
     def update(self, query: str):
         if query.lower().strip().startswith('create graph '):  # not supported by rdflib

@@ -39,8 +39,11 @@ class Doc2JsonConverter:
                     word.get_end_refs()[0] == word.get_end_refs()[-1]:
                 # a node was replaced with a token
                 if self.include_replaced_nodes:
-                    record['replaced-node'] = etree.tostring(word.to_dom().get_containing_node(),
-                                                             encoding='utf-8').decode('utf-8')
+                    node = word.to_dom().get_containing_node()
+                    tail = node.tail
+                    node.tail = None
+                    record['replaced-node'] = etree.tostring(node, encoding='utf-8').decode('utf-8')
+                    node.tail = tail
             tokens.append(record)
 
         return result
