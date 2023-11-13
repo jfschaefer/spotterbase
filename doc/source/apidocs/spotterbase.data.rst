@@ -4,18 +4,18 @@ spotterbase.data package
 Submodules
 ----------
 
-spotterbase.data.locator module
--------------------------------
+spotterbase.data.fast\_json module
+----------------------------------
 
-.. automodule:: spotterbase.data.locator
+.. automodule:: spotterbase.data.fast_json
    :members:
    :undoc-members:
    :show-inheritance:
 
-spotterbase.data.utils module
------------------------------
+spotterbase.data.locator module
+-------------------------------
 
-.. automodule:: spotterbase.data.utils
+.. automodule:: spotterbase.data.locator
    :members:
    :undoc-members:
    :show-inheritance:

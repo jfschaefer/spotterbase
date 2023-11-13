@@ -4,6 +4,14 @@ spotterbase.corpora package
 Submodules
 ----------
 
+spotterbase.corpora.ar5iv module
+--------------------------------
+
+.. automodule:: spotterbase.corpora.ar5iv
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 spotterbase.corpora.arxiv module
 --------------------------------
 
