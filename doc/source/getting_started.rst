@@ -35,11 +35,11 @@ SpotterBase can be used in different ways:
 How can I develop a spotter?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-There are two different approaches you can take:
+There are three different approaches you can take:
 
 1. Use the SpotterBase command line tools and develop your own spotter as a separate program.
 
-   - **Steps:**
+   - **Approach:**
 
       1. Use the SpotterBase command line tools to pre-process the documents or download
          an existing pre-processed corpus.
@@ -67,9 +67,8 @@ There are two different approaches you can take:
 
    - **Approach:** Implement your spotter as a subclass of :class:`spotterbase.spotters.spotter.Spotter` class.
      In particular, you will have to implement a method that takes a document and returns annotations
-     as an interator over RDF triples.
+     as RDF triples.
    - **Advantages:** You can use SpotterBase functionality for running your spotter over a corpus
      and aggregating the results.
    - **Disadvantages:** You have to get to know the SpotterBase code base and have SpotterBase
      as a dependency.
-

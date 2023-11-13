@@ -95,9 +95,9 @@ class RdflibEndpoint(SparqlEndpoint):
         else:
             return results.decode('utf-8')
 
-    @classmethod
-    @functools.cache
-    def rdflib_version_warn(cls):
+    @staticmethod
+    @functools.cache    # only warn once
+    def rdflib_version_warn():
         if rdflib.__version__ == '7.0.0':
             logger.warning('rdflib version 7.0.0 has a bug that breaks some SpotterBase functionality. '
                            'It has already been patched (https://github.com/RDFLib/rdflib/pull/2554).')

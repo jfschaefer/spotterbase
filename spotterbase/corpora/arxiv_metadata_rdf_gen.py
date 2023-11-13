@@ -6,13 +6,13 @@ from pathlib import Path
 from typing import IO
 
 from spotterbase import __version__
+from spotterbase.data import fast_json
 from spotterbase.utils import config_loader
 from spotterbase.model_core.annotation import Annotation
 from spotterbase.model_core.annotation_creator import SpotterRun
 from spotterbase.model_core.tag_body import Tag, MultiTagBody, TagSet
 from spotterbase.corpora.arxiv import ArxivId, ArxivCategory, USE_CENTI_ARXIV, ArxivUris
 from spotterbase.data.locator import Locator, DataDir
-from spotterbase.data.utils import json_lib
 from spotterbase.rdf.literal import Uri
 from spotterbase.rdf.types import TripleI
 from spotterbase.rdf.serializer import TurtleSerializer
@@ -36,7 +36,7 @@ class MetatdataAccumulator(dict[ArxivId, list[str]]):
         super().__init__()
 
     def load_from_io(self, file: IO):
-        json = json_lib()
+        json = fast_json.load(file)
         if USE_CENTI_ARXIV:
             logger.info(f'Note: Since `{USE_CENTI_ARXIV.name}` was set, most documents will be ignored')
         for line in file:

@@ -21,8 +21,10 @@ class SelectorConverter:
 
     @property
     def offset_converter(self) -> OffsetConverter:
-        # TODO: Switch back to lazy loading.
-        # Note on performance: It parsing takes twice as long as creating the offset converter
+        # Should we switch to lazy initialization?
+        #   current answer: no, not worth it because the offset converter is required for most contexts anyway.
+        #       by making it optional to pass an existing offset converter, we risk creating it twice.
+        # Note on performance: parsing takes twice as long as creating the offset converter
         # """ Creating a text offset tracker is expensive (at least in the current implementation).
         #     Do it only if necessary. """
         # if self._offset_converter is None:

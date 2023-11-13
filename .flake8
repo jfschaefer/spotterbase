@@ -14,4 +14,4 @@ exclude =
     ./spotterbase/rdf/vocab.py
 per-file-ignores =
     # ignore unused imports as they are intended as export
-    ./spotterbase/rdf/__init__.py: F401
+    ./spotterbase/*/__init__.py: F401

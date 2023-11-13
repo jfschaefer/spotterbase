@@ -51,7 +51,7 @@ class Uri:
     namespace: Optional[NameSpace]
     _full_uri: Optional[str] = None
 
-    def __init__(self, uri: str | URIRef | pathlib.Path, namespace: Optional[NameSpace] = None):
+    def __init__(self, uri: str | URIRef | pathlib.Path | Uri, namespace: Optional[NameSpace] = None):
         self.namespace = namespace
         if isinstance(uri, str):
             if uri.startswith('<') and uri.endswith('>'):
@@ -62,6 +62,10 @@ class Uri:
             self._suffix = str(uri)
         elif isinstance(uri, pathlib.Path):
             self._suffix = uri.as_uri()
+        elif isinstance(uri, Uri):
+            self._suffix = uri._suffix
+            self.namespace = uri.namespace
+            self._full_uri = uri._full_uri
         else:
             raise NotImplementedError(f'Unsupported type {type(uri)}')
         if namespace:
@@ -160,3 +164,7 @@ class Uri:
 
     def __hash__(self):
         return hash(self.full_uri())
+
+
+# Anything that can be converted to a Uri
+UriLike = str | Uri | URIRef | pathlib.Path
