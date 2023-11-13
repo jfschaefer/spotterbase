@@ -15,34 +15,34 @@ options in action:
 
 .. code:: python
 
-   import spotterbase.config_loader as config_loader
+    import spotterbase.config_loader as config_loader
 
-   greeting = config_loader.ConfigString('--greeting',
+    greeting = config_loader.ConfigString('--greeting',
             description='the greeting', default='hi')
-   config_loader.auto()
-   print(f'Your greeting is {greeting.value}')
+    config_loader.auto()
+    print(f'Your greeting is {greeting.value}')
 
 Let us try it out:
 
 .. code::
 
-   $ python3 greeting.py
-   Your greeting is hi
-   $ python3 greeting.py --greating hello
-   Your greeting is hello
+    $ python3 greeting.py
+    Your greeting is hi
+    $ python3 greeting.py --greating hello
+    Your greeting is hello
 
 We can also create a configuration file ``greeting.config`` with the following content:
 
 .. code::
 
-   greeting='good morning'
+    greeting='good morning'
 
 and then use it with
 
 .. code::
 
-   $ python3 greeting.py --config greeting.config
-   Your greeting is good morning
+    $ python3 greeting.py --config greeting.config
+    Your greeting is good morning
 
 The config loader automatically looks for configuration files
 with the name ``spotterbase.conf`` or ``.spotterbase.conf`` in

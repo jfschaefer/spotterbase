@@ -23,18 +23,18 @@ Example word:
 
 .. code-block:: json
 
-   {
+    {
      "token": "triangle",
      "start-ref": 302,
      "end-ref": 310
-   }
+    }
 
 
 Example call:
 
 .. code-block:: bash
 
-   python3 -m spotterbase.convert.document_to_json \
+    python3 -m spotterbase.convert.document_to_json \
        --include-replaced-nodes \
        --document=http://sigmathling.kwarc.info/spotterbase/test-corpus/paperA \
        --output=tokenized.json

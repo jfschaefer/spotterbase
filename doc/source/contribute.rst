@@ -9,14 +9,14 @@ You can run the tests with (assuming you are in the root of the spotterbase repo
 
 .. code-block:: console
 
-   $ python -m spotterbase.test
+    $ python -m spotterbase.test
 
 We also use ``flake8`` and ``mypy`` to check the code for style and type errors:
 
 .. code-block:: console
 
-   $ flake8 spotterbase
-   $ mypy spotterbase
+    $ flake8 spotterbase
+    $ mypy spotterbase
 
 Documentation
 -------------
@@ -25,7 +25,7 @@ You can generate the documentation by running
 
 .. code-block:: console
 
-   $ make html
+    $ make html
 
 in the ``doc`` folder. This will likely require installing some additional packages.
 You can view the documentation by opening ``doc/build/html/index.html``.

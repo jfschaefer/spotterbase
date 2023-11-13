@@ -19,7 +19,7 @@ which would have the following presentation MathML:
 
 .. code:: XML
 
-   <mrow>
+    <mrow>
      <mn>5.3</mn>
      <mo>×</mo>
      <msup>
@@ -29,7 +29,7 @@ which would have the following presentation MathML:
          <mn>2</mn>
        </mrow>
      </msup>
-   </mrow>
+    </mrow>
 
 Developing an XPath expression would be rather difficult and
 the goal of this module is to make the whole thing easier and more modular.

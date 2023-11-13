@@ -30,7 +30,7 @@ The hope is that makes the development of applications much easier, especially f
 not familiar with RDF and SPARQL.
 
 .. literalinclude:: codesnippets/example-annotation.jsonld
-   :language: JSON-LD
+    :language: JSON-LD
 
 
 Design decisions
@@ -62,26 +62,26 @@ Consider, for example, these triples with our custom selector:
 
 .. code-block:: Turtle
 
-  _:selector rdf:type sb:PathSelector .
-  _:selector sb:startPath  "node(/html/body/p[2]/math[3])" .
-  _:selector sb:endPath  "node(/html/body/p[2]/math[5])" .
+    _:selector rdf:type sb:PathSelector .
+    _:selector sb:startPath  "node(/html/body/p[2]/math[3])" .
+    _:selector sb:endPath  "node(/html/body/p[2]/math[5])" .
 
 
 might have these triples if expressed with the standard selectors:
 
 .. code-block:: Turtle
 
-  _:selector rdf:type oa:RangeSelector .
-  _:selector oa:hasStartSelector _:start_selector .
-  _:selector oa:hasEndSelector _:end_selector .
+    _:selector rdf:type oa:RangeSelector .
+    _:selector oa:hasStartSelector _:start_selector .
+    _:selector oa:hasEndSelector _:end_selector .
 
-  _:start_selector rdf:type oa:FragmentSelector .
-  _:start_selector rdf:value "node(/html/body/p[2]/math[3])" .
-  _:start_selector dc:conformsTo sb:pathFragmentSelector .
+    _:start_selector rdf:type oa:FragmentSelector .
+    _:start_selector rdf:value "node(/html/body/p[2]/math[3])" .
+    _:start_selector dc:conformsTo sb:pathFragmentSelector .
 
-  _:end_selector rdf:type oa:FragmentSelector .
-  _:end_selector rdf:value "node(/html/body/p[2]/math[5])" .
-  _:end_selector dc:conformsTo sb:pathFragmentSelector .
+    _:end_selector rdf:type oa:FragmentSelector .
+    _:end_selector rdf:value "node(/html/body/p[2]/math[5])" .
+    _:end_selector dc:conformsTo sb:pathFragmentSelector .
 
 The translation to/from standard selectors is easy enough that we could support them as well if necessary.
 
