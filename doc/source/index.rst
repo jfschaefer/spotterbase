@@ -9,6 +9,7 @@ Content
 
    getting_started
    contribute
+   convert
    config
    annotations
    rdf
