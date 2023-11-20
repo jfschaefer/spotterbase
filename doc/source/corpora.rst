@@ -25,7 +25,7 @@ http://sigmathling.kwarc.info/spotterbase/test-corpus/paperB
 >>> document = Resolver.get_document(uri / 'paperB')
 >>> document.get_uri()
 Uri('http://sigmathling.kwarc.info/spotterbase/test-corpus/paperB')
->>> with document.open() as fp:
+>>> with document.open(encoding='utf8') as fp:
 ...     print(fp.read(21))
 <!DOCTYPE html><html>
 
