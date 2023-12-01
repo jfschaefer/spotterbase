@@ -8,6 +8,8 @@ from lxml.etree import _Element, _ElementUnicodeResult
 class XmlNode:
     """ the lxml implementation of text nodes is not very convenient, so we will have wrapper for the needed nodes. """
 
+    # TODO: Can we remove this?
+
     node: _Element
     text: bool = False
     tail: bool = False

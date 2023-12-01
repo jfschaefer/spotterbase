@@ -2,12 +2,14 @@ from __future__ import annotations
 
 import abc
 import dataclasses
-from typing import TypeVar
+from collections import defaultdict
+from typing import Iterator
 
 from lxml.etree import _Element
 
 from spotterbase.corpora.interface import Document
 from spotterbase.dnm.linked_str import LinkedStr
+from spotterbase.model_core.annotation import Annotation
 from spotterbase.rdf import Uri
 from spotterbase.selectors.dom_range import DomRange
 from spotterbase.selectors.offset_converter import OffsetConverter, DomOffsetRange, OffsetType
@@ -72,15 +74,43 @@ class DnmMatchIssues:
         return self.dom_start_earlier or self.dom_end_later
 
 
-@dataclasses.dataclass
+class EmbeddedAnnotations:
+    def __init__(self):
+        self._annotations: list[tuple[str, Annotation]] = []
+        self._annotations_by_unique_replacement: dict[str, Annotation] = {}
+        self._category_counters: dict[str, int] = defaultdict(int)
+
+    def insert(self, replacement: str, annotation: Annotation, replacement_unique: bool = True):
+        self._annotations.append((replacement, annotation))
+        if replacement_unique:
+            if replacement in self._annotations_by_unique_replacement:
+                raise ValueError(f'Replacement {replacement} already exists')
+            self._annotations_by_unique_replacement[replacement] = annotation
+
+    def get_next_replacement_number(self, category: str) -> int:
+        self._category_counters[category] += 1
+        return self._category_counters[category] - 1
+
+#     def __getitem__(self, item) -> Annotation:
+#         return self._annotations_by_unique_replacement[item]
+#
+#     def __contains__(self, item):
+#         return item in self._annotations_by_unique_replacement
+
+    def __iter__(self) -> Iterator[tuple[str, Annotation]]:
+        return iter(self._annotations)
+
+    def __bool__(self) -> bool:
+        return bool(self._annotations)
+
+
+@dataclasses.dataclass(frozen=True)
 class DnmMeta:
     dom: _Element
     offset_converter: OffsetConverter
     selector_converter: SelectorConverter
     uri: Uri
-
-
-DnmT = TypeVar('DnmT', bound='Dnm')
+    embedded_annotations: EmbeddedAnnotations = dataclasses.field(init=False, default_factory=EmbeddedAnnotations)
 
 
 class Dnm(LinkedStr[DnmMeta]):

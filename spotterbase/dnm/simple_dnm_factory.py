@@ -1,5 +1,5 @@
 import itertools
-from typing import Optional, Callable
+from typing import Optional
 
 from lxml.etree import _Element
 
@@ -14,6 +14,9 @@ class SimpleDnmFactory(DnmFactory):
         self.classes_to_replace = classes_to_replace or {}
 
     def make_dnm_from_meta(self, dnm_meta: DnmMeta) -> Dnm:
+        if dnm_meta.embedded_annotations:
+            raise ValueError('dnm_meta should not contain embedded annotations before creating the DNM')
+
         start_refs: list[int] = []
         end_refs: list[int] = []
         strings: list[str] = []
@@ -60,43 +63,3 @@ class SimpleDnmFactory(DnmFactory):
             if c in self.classes_to_replace:
                 return self.classes_to_replace[c]
         return None
-
-
-def _default_core_token_processor(token: str) -> str:
-    return token.title().replace(' ', '')   # camel case
-
-
-def get_arxmliv_factory(
-        *,   # only keyword arguments
-        token_prefix: str = '',
-        token_suffix: str = '',
-        keep_titles: bool = True,
-        core_token_processor: Callable[[str], str] = _default_core_token_processor,
-) -> SimpleDnmFactory:
-
-    def tp(token: str) -> str:  # token processor
-        return token_prefix + core_token_processor(token) + token_suffix
-
-    node_rules: dict[str, str] = {
-        'head': '', 'figure': '', 'script': '',
-        'math': tp('math node'),
-    }
-    class_rules: dict[str, str] = {
-        # to ignore
-        'ltx_bibliography': '', 'ltx_page_footer': '', 'ltx_dates': '', 'ltx_authors': '',
-        'ltx_role_affiliationtext': '', 'ltx_tag_equation': '', 'ltx_classification': '',
-        'ltx_tag_section': '', 'ltx_tag_subsection': '', 'ltx_note_mark': '',
-        'ar5iv-footer': '', 'ltx_role_institutetext': '',
-        # to replace
-        'ltx_equationgroup': tp('math group'), 'ltx_equation': tp('math equation'),
-        'ltx_cite': tp('ltx cite'), 'ltx_ref': tp('ltx ref'), 'ltx_ref_tag': tp('ltx ref'),
-    }
-    if not keep_titles:
-        class_rules['ltx_title'] = ''
-    return SimpleDnmFactory(
-        nodes_to_replace=node_rules,
-        classes_to_replace=class_rules
-    )
-
-
-ARXMLIV_STANDARD_DNM_FACTORY = get_arxmliv_factory()

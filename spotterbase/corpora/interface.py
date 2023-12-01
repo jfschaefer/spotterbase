@@ -26,7 +26,8 @@ class Document(abc.ABC):
     def get_html_tree(self, *, cached: bool) -> _ElementTree:
         if cached and self._html_tree is not None:
             return self._html_tree
-        with self.open(encoding='utf8') as fp:
+        # with self.open(encoding='utf8') as fp:
+        with self.open() as fp:
             tree: _ElementTree = etree.parse(fp, parser=etree.HTMLParser())  # type: ignore
         if cached:
             self._html_tree = tree

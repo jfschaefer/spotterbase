@@ -1,7 +1,7 @@
 import nltk.tag
 
 from spotterbase.corpora.interface import Document
-from spotterbase.dnm.simple_dnm_factory import ARXMLIV_STANDARD_DNM_FACTORY
+from spotterbase.dnm.defaults import ARXMLIV_STANDARD_DNM_FACTORY_SIMPLE
 from spotterbase.dnm_nlp.sentence_tokenizer import sentence_tokenize
 from spotterbase.dnm_nlp.word_tokenizer import word_tokenize
 from spotterbase.model_core.annotation import Annotation
@@ -62,7 +62,7 @@ class SimplePosTagSpotter(UriGeneratorMixin, Spotter):
     def process_document(self, document: Document) -> TripleI:
         uri_generator = self.get_uri_generator_for(document)
 
-        dnm = ARXMLIV_STANDARD_DNM_FACTORY.dnm_from_document(document)
+        dnm = ARXMLIV_STANDARD_DNM_FACTORY_SIMPLE.dnm_from_document(document)
         selector_converter = document.get_selector_converter()
 
         for sentence in sentence_tokenize(dnm):

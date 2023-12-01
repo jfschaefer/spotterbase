@@ -8,9 +8,9 @@ from lxml.etree import _Element, _ElementTree
 import spotterbase.dnm_nlp.xml_match as xm
 from spotterbase import __version__
 from spotterbase.corpora.interface import Document
+from spotterbase.dnm.defaults import ARXMLIV_STANDARD_DNM_FACTORY_SIMPLE
 from spotterbase.dnm.dnm import Dnm
 from spotterbase.dnm.range_subst import RangeSubstituter
-from spotterbase.dnm.simple_dnm_factory import ARXMLIV_STANDARD_DNM_FACTORY
 from spotterbase.model_core.annotation import Annotation
 from spotterbase.model_core.annotation_creator import SpotterRun
 from spotterbase.model_core.sb import SB
@@ -156,7 +156,7 @@ class SimpleDeclarationSpotter(UriGeneratorMixin, Spotter):
         # tree = etree.parse(document.open(), parser=etree.HTMLParser())  # type: ignore
         tree = document.get_html_tree(cached=True)
         selector_converter = document.get_selector_converter()
-        dnm = ARXMLIV_STANDARD_DNM_FACTORY.dnm_from_document(document).lower()
+        dnm = ARXMLIV_STANDARD_DNM_FACTORY_SIMPLE.dnm_from_document(document).lower()
 
         # regex_univ = re.compile('((let)|(for (every|all))|(where)) (?P<m>mathnode)')
         regex_univ1 = re.compile('(for ((every)|(all)|(any))) (?P<c>SpottedConcept)?(?P<m>mathnode)')

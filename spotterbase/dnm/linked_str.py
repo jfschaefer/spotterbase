@@ -2,8 +2,9 @@ from __future__ import annotations
 
 import bisect
 import dataclasses
+import itertools
 import re
-from typing import TypeVar, Sequence, Generic, Optional
+from typing import TypeVar, Sequence, Generic, Optional, Iterable
 
 LinkedStr_T = TypeVar('LinkedStr_T', bound='LinkedStr')
 
@@ -152,33 +153,82 @@ class LinkedStr(Generic[_MetaInfoType]):
 
     def normalize_spaces(self: LinkedStr_T) -> LinkedStr_T:
         """ replace sequences of whitespaces with a single one."""
-        # TODO: clean the code up and potentially optimize it
-        new_string = ''
-        new_start_refs = []
-        new_end_refs = []
-
-        start_refs = self.get_start_refs()
-        end_refs = self.get_end_refs()
-        string = str(self)
-        for i in range(len(self)):
-            if not string[i].isspace():
-                new_string += string[i]
-                new_start_refs.append(start_refs[i])
-                new_end_refs.append(end_refs[i])
-            else:
-                if not (i >= 1 and string[i - 1].isspace()):
-                    new_string += ' '
-                    new_start_refs.append(start_refs[i])
-                    new_end_refs.append(end_refs[i])
-        # return self.new(new_string=new_string, new_start_refs=new_start_refs, new_end_refs=new_end_refs)
-        return type(self)(meta_info=self._meta_info, string=new_string, start_refs=new_start_refs,
-                          end_refs=new_end_refs)
+        # the following is much more efficient than iterating character by character
+        return self.replacements_at_positions(
+            [
+                (match.start(), match.end(), ' ')
+                for match in re.finditer(r'\s+', str(self))
+                if match.group() != ' '
+            ],
+            positions_are_references=False
+        )
 
     def get_meta_info(self) -> _MetaInfoType:
         return self._meta_info
 
     def char_at(self, pos: int) -> str:
         return str(self)[pos]
+
+    def replacements_at_positions(
+            self: LinkedStr_T,
+            replacements: Iterable[tuple[int, int, str]],   # more efficient if we do all at once
+            positions_are_references: bool = True,    # if False, positions are indices into the string
+    ) -> LinkedStr_T:
+
+        @dataclasses.dataclass(frozen=True, slots=True)
+        class Entry:
+            start_str: int
+            end_str: int
+            start_ref: int
+            end_ref: int
+            replacement: str
+
+        entries: list[Entry] = []
+        for start, end, replacement in replacements:
+            if positions_are_references:
+                start_ref, end_ref = start, end
+                start_str, end_str = self.get_indices_from_ref_range(start, end)
+            else:
+                start_str, end_str = start, end
+                start_ref, end_ref = self.get_start_refs()[start], self.get_end_refs()[end - 1]
+            entries.append(Entry(start_str, end_str, start_ref, end_ref, replacement))
+
+        if not entries:
+            return self   # nothing to do
+
+        entries.sort(key=lambda e: e.start_str)
+
+        # TODO: maybe we can support for overlapping replacements (just concatenate the replacements)
+        assert all(x.end_str <= y.start_str for x, y in itertools.pairwise(entries)), 'Some ranges are overlapping'
+
+        new_start_refs: list[int] = []
+        new_end_refs: list[int] = []
+        strings: list[str] = []
+
+        start_refs = self.get_start_refs()
+        end_refs = self.get_end_refs()
+        string = str(self)
+
+        previous_end: int = 0
+        for entry in entries:
+            # copy until start of range
+            new_start_refs.extend(start_refs[previous_end:entry.start_str])
+            new_end_refs.extend(end_refs[previous_end:entry.start_str])
+            strings.append(string[previous_end:entry.start_str])
+
+            # put replacement string
+            new_start_refs.extend(itertools.repeat(entry.start_ref, len(entry.replacement)))
+            new_end_refs.extend(itertools.repeat(entry.end_ref, len(entry.replacement)))
+            strings.append(entry.replacement)
+
+            previous_end = entry.end_str
+
+        new_start_refs.extend(start_refs[previous_end:])
+        new_end_refs.extend(end_refs[previous_end:])
+        strings.append(string[previous_end:])
+
+        return type(self)(meta_info=self.get_meta_info(), string=''.join(strings), start_refs=new_start_refs,
+                          end_refs=new_end_refs)
 
 
 def string_to_lstr(string: str) -> LinkedStr[None]:
