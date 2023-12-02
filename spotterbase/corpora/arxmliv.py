@@ -44,17 +44,14 @@ class ArXMLivDocument(Document, abc.ABC):
     def get_uri(self) -> Uri:
         return ArXMLivUris.get_corpus_uri(self.release) + self.arxivid.identifier
 
-    def open(self, *args, **kwargs) -> IO:
-        raise NotImplementedError()
-
 
 class SimpleArXMLivDocument(ArXMLivDocument):
     def __init__(self, arxivid: ArxivId, release: str, path: Path):
         super().__init__(arxivid, release)
         self.path = path
 
-    def open(self, *args, **kwargs) -> IO:
-        return self.path.open(*args, **kwargs)
+    def open_binary(self) -> IO[bytes]:
+        return self.path.open('rb')
 
 
 class ZipArXMLivDocument(ArXMLivDocument):
@@ -63,12 +60,12 @@ class ZipArXMLivDocument(ArXMLivDocument):
         self.path_to_zipfile = path_to_zipfile
         self.filename = filename
 
-    def open(self, *args, **kwargs) -> IO:
+    def open_binary(self) -> IO[bytes]:
         zf = SHARED_ZIP_CACHE[self.path_to_zipfile]
         try:
             # Creating zipfile.Path overwrites __class__, which is a problem as we are subclassing...
             # return (zipfile.Path(zf) / self.filename).open(*args, **kwargs)
-            return zf.open(self.filename, *args, **kwargs)
+            return zf.open(self.filename)
         except KeyError as e:
             missing = DocumentNotFoundError(f'Failed to find {self.filename} in {self.path_to_zipfile}: {e}')
             missing.__suppress_context__ = True

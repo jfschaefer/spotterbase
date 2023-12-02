@@ -31,7 +31,7 @@ SUBSTRING_URI = SB.NS['substring']
 def get_contained_substrings(document: Document) -> list[str]:
     """ Returns contained substrings """
     try:
-        with document.open('rb') as fp:
+        with document.open_binary() as fp:
             content = fp.read()
             return [s for s in SUBSTRINGS if s.encode('utf-8') in content]
     except Exception as e:

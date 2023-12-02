@@ -20,7 +20,7 @@ def main():
         logger.error(f'Failed to resolve document {uri}')
         sys.exit(1)
     with open(args.filename, 'w') as outfp:
-        with document.open('r') as infp:
+        with document.open_text() as infp:
             outfp.write(infp.read())
     logger.info(f'Successfully wrote {uri} to {args.filename}')
 

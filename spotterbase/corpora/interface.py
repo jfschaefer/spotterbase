@@ -1,5 +1,6 @@
 import abc
-from typing import IO, Iterable, Iterator, Optional
+from io import TextIOWrapper
+from typing import IO, Iterable, Iterator, Optional, TextIO
 
 from lxml.etree import _ElementTree, _Element
 import lxml.etree as etree
@@ -19,15 +20,17 @@ class Document(abc.ABC):
     def get_uri(self) -> Uri:
         raise NotImplementedError()
 
+    def open_text(self, encoding: str = 'utf-8') -> TextIO:
+        return TextIOWrapper(self.open_binary(), encoding=encoding)
+
     @abc.abstractmethod
-    def open(self, *args, **kwargs) -> IO:
+    def open_binary(self) -> IO[bytes]:
         raise NotImplementedError()
 
     def get_html_tree(self, *, cached: bool) -> _ElementTree:
         if cached and self._html_tree is not None:
             return self._html_tree
-        # with self.open(encoding='utf8') as fp:
-        with self.open() as fp:
+        with self.open_binary() as fp:
             tree: _ElementTree = etree.parse(fp, parser=etree.HTMLParser())  # type: ignore
         if cached:
             self._html_tree = tree

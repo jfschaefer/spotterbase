@@ -16,8 +16,8 @@ class TestDocument(Document):
     def get_uri(self) -> Uri:
         return self._uri
 
-    def open(self, *args, **kwargs) -> IO:
-        return self._path.open(*args, **kwargs)
+    def open_binary(self) -> IO[bytes]:
+        return self._path.open('rb')
 
 
 class _TestCorpus(Corpus):

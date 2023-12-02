@@ -1,5 +1,5 @@
 import logging
-from io import StringIO
+from io import BytesIO
 from typing import IO, Iterator
 
 import requests
@@ -19,7 +19,7 @@ class Ar5ivDoc(Document):
     def get_uri(self) -> Uri:
         return Uri('https://ar5iv.org/abs') / str(self.identifier)
 
-    def open(self, *args, **kwargs) -> IO:
+    def open_binary(self) -> IO[bytes]:
         # TODO: Caching
         try:
             result = requests.get(str(self.get_uri()))
@@ -29,7 +29,8 @@ class Ar5ivDoc(Document):
             raise DocumentNotFoundError(f'Failed to load {self.get_uri()} (response code {result.status_code})')
         warn_once(logger, 'ar5iv.org documents may change over time. '
                           'As SpotterBase assumes a frozen corpus, this may lead to unexpected problems.')
-        return StringIO(requests.get(str(self.get_uri())).text)
+        # return StringIO(requests.get(str(self.get_uri())).text)
+        return BytesIO(requests.get(str(self.get_uri())).raw)
 
 
 class Ar5ivCorpus(Corpus):
