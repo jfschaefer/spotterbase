@@ -2,12 +2,15 @@ import abc
 from itertools import chain, repeat
 from typing import Iterable, Optional
 
-from lxml.etree import _Element
+from lxml.etree import _Element, Element
 
 from spotterbase.dnm.dnm import DnmMeta, DnmFactory, Dnm
 from spotterbase.dnm.replacement_pattern import ReplacementPattern
 from spotterbase.dnm.xml_util import get_node_classes
 from spotterbase.model_core.annotation import Annotation
+from spotterbase.model_core.body import ReplacedHtmlBody
+from spotterbase.rdf.literal import HtmlFragment
+from spotterbase.selectors.dom_range import DomRange
 
 
 class NodeProcessor(abc.ABC):
@@ -25,24 +28,32 @@ class ReplacingNP(NodeProcessor):
         self.keep_annotation = keep_annotation
 
     def apply(self, node: _Element, dnm_meta: DnmMeta) -> tuple[Iterable[int], Iterable[int], Iterable[str]]:
-        offs = dnm_meta.offset_converter.get_offset_data(node)
+        dom_offset_range = dnm_meta.offset_converter.convert_dom_range(DomRange.from_node(node))
         replacement: str
+        number = dnm_meta.embedded_annotations.get_next_replacement_number(self.category)
         if self.number_replacements:
-            number = dnm_meta.embedded_annotations.get_next_replacement_number(self.category)
             replacement = self.replacement_pattern(self.category, number)
         else:
             replacement = self.replacement_pattern(self.category)
 
         if self.keep_annotation:
+            # we need to make a copy without the tail
+            node_copy = Element(node.tag, attrib=node.attrib)    # type: ignore
+            node_copy.text = node.text
+
             dnm_meta.embedded_annotations.insert(
                 replacement,
-                Annotation(),       # TODO
+                dom_offset_range,
+                Annotation(
+                    uri=dnm_meta.uri / f'dnm-replacement/{self.category.replace(" ", "-")}#{number}',
+                    body=ReplacedHtmlBody(HtmlFragment(node_copy, wrapped_in_div=False)),
+                ),
                 replacement_unique=self.number_replacements,
             )
 
         return (
-            repeat(offs.node_text_offset_before, len(replacement)),
-            repeat(offs.node_text_offset_after, len(replacement)),
+            repeat(dom_offset_range.start, len(replacement)),
+            repeat(dom_offset_range.end, len(replacement)),
             [replacement]
         )
 
@@ -130,10 +141,11 @@ class TextExtractingNP(NodeProcessor):
                     if child.tail:
                         tail = child.tail
                         strings.append([tail])
-                        start_refs.append(range(offs.node_text_offset_after,
-                                                offs.node_text_offset_after + len(tail)))
-                        end_refs.append(range(offs.node_text_offset_after + 1,
-                                              offs.node_text_offset_after + len(tail) + 1))
+                        child_offs = dnm_meta.offset_converter.get_offset_data(child)
+                        start_refs.append(range(child_offs.node_text_offset_after,
+                                                child_offs.node_text_offset_after + len(tail)))
+                        end_refs.append(range(child_offs.node_text_offset_after + 1,
+                                              child_offs.node_text_offset_after + len(tail) + 1))
 
         recurse(node)
 
@@ -171,10 +183,11 @@ class TextExtractingBlockedNP(NodeProcessor):
             if child.tail:
                 tail = child.tail
                 strings.append([tail])
-                start_refs.append(range(offs.node_text_offset_after,
-                                        offs.node_text_offset_after + len(tail)))
-                end_refs.append(range(offs.node_text_offset_after + 1,
-                                      offs.node_text_offset_after + len(tail) + 1))
+                child_offs = dnm_meta.offset_converter.get_offset_data(child)
+                start_refs.append(range(child_offs.node_text_offset_after,
+                                        child_offs.node_text_offset_after + len(tail)))
+                end_refs.append(range(child_offs.node_text_offset_after + 1,
+                                      child_offs.node_text_offset_after + len(tail) + 1))
 
         return chain(*start_refs), chain(*end_refs), chain(*strings)
 

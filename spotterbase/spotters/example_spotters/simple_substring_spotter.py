@@ -2,7 +2,7 @@ import logging
 import urllib.parse
 
 from spotterbase.model_core.annotation import Annotation
-from spotterbase.model_core.tag_body import MultiTagBody, Tag, TagSet
+from spotterbase.model_core.body import MultiTagBody, Tag, TagSet
 from spotterbase.corpora.interface import Document
 from spotterbase.rdf import Uri
 from spotterbase.rdf.types import TripleI

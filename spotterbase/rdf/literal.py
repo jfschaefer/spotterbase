@@ -4,11 +4,50 @@ import datetime
 from typing import Callable, Any
 from typing import Optional
 
+import lxml.html.diff
+import lxml.etree as etree
+
 from spotterbase.rdf.uri import Uri
 from spotterbase.rdf.vocab import XSD, RDF
 
 
 __all__ = ['Literal']
+
+
+class HtmlFragment:
+    """Value corresponding to rdf:HTML.
+
+    This is still somewhat improvised.
+    One requirement is that, unlike rdflib, I want to support lxml.
+    Another requirement is that I want this to be lazy.
+    I don't think lxml supports document fragments very much, so as a work-around,
+    we will wrap the fragment into a <div>
+    (as is also done e.g. by lxml.html.diff.[parse_html/serialize_html_fragment]).
+    """
+    _lxml_root: Optional[etree._Element] = None
+    _literal_string: Optional[str] = None
+
+    def __init__(self, value: etree._Element | str, wrapped_in_div: Optional[bool] = None):
+        if isinstance(value, str):
+            self._literal_string = value
+        elif isinstance(value, etree._Element):
+            if wrapped_in_div is None:
+                raise ValueError('wrapped_in_div must be specified if value is an Element')
+            if wrapped_in_div:
+                self._lxml_root = value
+            else:
+                self._lxml_root = etree.Element('div')
+                self._lxml_root.append(value)
+
+    def get_wrapped_lxml_element(self) -> etree._Element:
+        if self._lxml_root is None:
+            self._lxml_root = lxml.html.diff.parse_html_fragment(self._literal_string)
+        return self._lxml_root
+
+    def get_literal_string(self) -> str:
+        if self._literal_string is None:
+            self._literal_string = lxml.html.diff.serialize_html_fragment(self._lxml_root, skip_outer=True)
+        return self._literal_string
 
 
 _LITERAL_TO_PYTHON_FUNCTIONS: dict[Uri, Callable[[str], Any]] = {
@@ -19,6 +58,7 @@ _LITERAL_TO_PYTHON_FUNCTIONS: dict[Uri, Callable[[str], Any]] = {
     XSD.boolean: lambda s: {'false': False, 'true': True, '0': False, '1': True}[s],
     XSD.nonNegativeInteger: int,    # TODO: check that not negative
     XSD.dateTime: datetime.datetime.fromisoformat,
+    RDF.HTML: lambda s: HtmlFragment(s),
 }
 
 _PYTHON_TO_LITERAL: list[tuple[type, Callable[[Any], Literal]]] = [
@@ -27,6 +67,7 @@ _PYTHON_TO_LITERAL: list[tuple[type, Callable[[Any], Literal]]] = [
     (float, lambda f: Literal(f'{f:E}', XSD.double)),
     (bool, lambda b: Literal(str(b).lower(), XSD.boolean)),
     (datetime.datetime, lambda d: Literal(d.isoformat(), XSD.dateTime)),
+    (HtmlFragment, lambda h: Literal(h.get_literal_string(), RDF.HTML)),
 ]
 
 _PYTHON_TO_LITERAL_WITH_DATATYPE: dict[Uri, tuple[list[type], Callable[[Any], str]]] = {
@@ -36,7 +77,8 @@ _PYTHON_TO_LITERAL_WITH_DATATYPE: dict[Uri, tuple[list[type], Callable[[Any], st
     XSD.float: ([float, int], lambda f: f'{f:E}'),
     XSD.boolean: ([bool], lambda b: str(b).lower()),
     XSD.dateTime: ([datetime.datetime], lambda d: d.isoformat()),
-    XSD.nonNegativeInteger: ([int], lambda i: str(i))
+    XSD.nonNegativeInteger: ([int], lambda i: str(i)),
+    RDF.HTML: ([HtmlFragment], lambda h: h.get_literal_string()),
 }
 
 

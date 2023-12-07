@@ -2,11 +2,11 @@ from __future__ import annotations
 
 from typing import Optional
 
-from spotterbase.records.record import Record, RecordInfo, AttrInfo
 from spotterbase.model_core.oa import OA_PRED
-from spotterbase.rdf.literal import Uri
-from spotterbase.rdf.vocab import XSD
 from spotterbase.model_core.sb import SB, SB_PRED
+from spotterbase.rdf.literal import Uri, HtmlFragment
+from spotterbase.rdf.vocab import XSD, RDF
+from spotterbase.records.record import Record, RecordInfo, AttrInfo
 
 
 class SimpleTagBody(Record):
@@ -74,3 +74,17 @@ class TagSet(Record):
 
     def __init__(self, uri: Optional[Uri] = None, label: Optional[str] = None, comment: Optional[str] = None):
         super().__init__(uri=uri, label=label, comment=comment)
+
+
+class ReplacedHtmlBody(Record):
+    record_info = RecordInfo(
+        record_type=SB.ReplacedHtmlBody,
+        attrs=[
+            AttrInfo('html_frag', SB_PRED.html_val, literal_type=RDF.HTML),
+        ]
+    )
+
+    html_frag: HtmlFragment
+
+    def __init__(self, html_frag: Optional[HtmlFragment] = None):
+        super().__init__(html_frag=html_frag)

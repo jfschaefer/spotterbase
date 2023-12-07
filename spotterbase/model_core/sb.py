@@ -33,6 +33,7 @@ class SB(Vocabulary):
     MultiTagBody: Uri
     TagSet: Uri
     Tag: Uri
+    ReplacedHtmlBody: Uri
 
     # DATASETS (TODO: can this replaced with dublin core?)
     Dataset: Uri
@@ -54,6 +55,9 @@ class SB_PRED:
     belongsTo_Rev = PredInfo(SB.belongsTo, json_ld_term='belongsTo_Rev', json_ld_type_is_id=True, is_reversed=True)
     contains = PredInfo(SB.contains, json_ld_term='contains', json_ld_type_is_id=True)
     comment = PredInfo(RDFS.comment, json_ld_term='comment', literal_type=XSD.string)
+
+    # different value literals
+    html_val = PredInfo(RDF.value, json_ld_term='html-value', literal_type=RDF.HTML)
 
     # selectors:
     endPath = PredInfo(SB.endPath, json_ld_term='endPath', literal_type=XSD.string)

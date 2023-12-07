@@ -1,17 +1,20 @@
 import datetime
 import json
 import logging
-
-from lxml import etree
+from collections import defaultdict
 
 import spotterbase
 from spotterbase.corpora.interface import Document
 from spotterbase.corpora.resolver import Resolver
-from spotterbase.dnm.defaults import get_simple_arxmliv_factory
+from spotterbase.dnm.defaults import get_arxmliv_dnm_factory
 from spotterbase.dnm_nlp.word_tokenizer import word_tokenize
+from spotterbase.model_core.annotation import Annotation
+from spotterbase.model_core.oa import OA_JSONLD_CONTEXT
+from spotterbase.model_core.record_class_resolver import ANNOTATION_RECORD_CLASS_RESOLVER
+from spotterbase.model_core.sb import SB_JSONLD_CONTEXT
+from spotterbase.records.jsonld_support import JsonLdRecordConverter
 from spotterbase.utils import config_loader
-from spotterbase.utils.config_loader import ConfigUri, ConfigPath
-
+from spotterbase.utils.config_loader import ConfigUri, ConfigPath, ConfigFlag
 
 logger = logging.getLogger(__name__)
 
@@ -21,51 +24,87 @@ class Doc2JsonConverter:
         self.include_replaced_nodes: bool = include_replaced_nodes
         self.skip_titles: bool = skip_titles
         self.tokenize = tokenize
-        self.dnm_factory = get_simple_arxmliv_factory(
+        self.dnm_factory = get_arxmliv_dnm_factory(
             keep_titles=not skip_titles,
-            # wrapping with spaces that they will be treated as separate words by word tokenizer
-            token_prefix=' ' if tokenize else '',
-            token_suffix=' ' if tokenize else '',
         )
 
-    def process(self, document: Document) -> dict:
-        result: dict = {
+    def _get_meta_dict(self, document: Document) -> dict:
+        return {
             'document': str(document.get_uri()),
             'converter-settings': {
                 'include-replaced-nodes': self.include_replaced_nodes,
                 'skip-titles': self.skip_titles,
+                'tokenize': self.tokenize,
             },
             'conversion-date': datetime.datetime.now().isoformat(),
             'spotterbase-version': spotterbase.__version__,
         }
-        tokens: list[dict] = []
 
+    def _process_tokenized(self, document: Document) -> dict:
+        result = self._get_meta_dict(document)
         dnm = self.dnm_factory.dnm_from_document(document)
-        if self.tokenize:
-            result['tokens'] = tokens
-            for word in word_tokenize(dnm):
-                record = {
-                    'token': str(word),
-                    'start-ref': word.get_start_ref(),
-                    'end-ref': word.get_end_ref(),
-                }
-                # if word in {'MathNode', 'MathGroup', 'LtxCite', 'LtxRef', 'MathEquation'}
-                if len(word) > 1 and word.get_start_refs()[0] == word.get_start_refs()[-1] and \
-                        word.get_end_refs()[0] == word.get_end_refs()[-1]:
-                    # a node was replaced with a token
-                    if self.include_replaced_nodes:
-                        node = word.to_dom().get_containing_node()
-                        tail = node.tail
-                        node.tail = None
-                        record['replaced-node'] = etree.tostring(node, encoding='utf-8').decode('utf-8')
-                        node.tail = tail
-                tokens.append(record)
-        else:
-            result['plaintext'] = str(dnm)
-            result['start-refs'] = list(dnm.get_start_refs())
-            result['end-refs'] = list(dnm.get_end_refs())
+
+        converter = JsonLdRecordConverter(
+            contexts=[OA_JSONLD_CONTEXT, SB_JSONLD_CONTEXT],
+            record_type_resolver=ANNOTATION_RECORD_CLASS_RESOLVER,
+        )
+
+        tokens: list[dict] = []
+        result['tokens'] = tokens
+
+        embedded_annos: dict[tuple[int, int], list[Annotation]] = defaultdict(list)
+        for _, offsets, anno in dnm.get_meta_info().embedded_annotations:
+            embedded_annos[(offsets.start, offsets.end)].append(anno)
+
+        for word in word_tokenize(dnm, keep_as_words=[
+            dnm.get_indices_from_ref_range(*offset_tuple)
+            # for _, offsets, _ in dnm.get_meta_info().embedded_annotations
+            for offset_tuple in embedded_annos.keys()
+        ]):
+            record = {
+                'token': str(word),
+                'start-ref': word.get_start_ref(),
+                'end-ref': word.get_end_ref(),
+            }
+
+            if self.include_replaced_nodes and (word.get_start_ref(), word.get_end_ref()) in embedded_annos:
+                record['annotations'] = [
+                    converter.record_to_json_ld(anno)
+                    for anno in embedded_annos[(word.get_start_ref(), word.get_end_ref())]
+                ]
+            tokens.append(record)
 
         return result
+
+    def _process_untokenized(self, document: Document) -> dict:
+        converter = JsonLdRecordConverter(
+            contexts=[OA_JSONLD_CONTEXT, SB_JSONLD_CONTEXT],
+            record_type_resolver=ANNOTATION_RECORD_CLASS_RESOLVER,
+        )
+
+        result = self._get_meta_dict(document)
+        dnm = self.dnm_factory.dnm_from_document(document)
+        result['plaintext'] = str(dnm)
+        result['start-refs'] = list(dnm.get_start_refs())
+        result['end-refs'] = list(dnm.get_end_refs())
+        if self.include_replaced_nodes:
+            result['annotations'] = [
+                {
+                    'start-ref': offrange.start,
+                    'end-ref': offrange.end,
+                    'string': string,
+                    'annotation': converter.record_to_json_ld(anno),
+                }
+                for string, offrange, anno in dnm.get_meta_info().embedded_annotations
+            ]
+
+        return result
+
+    def process(self, document: Document) -> dict:
+        if self.tokenize:
+            return self._process_tokenized(document)
+        else:
+            return self._process_untokenized(document)
 
 
 class Doc2JsonConverterCmdFactory:
@@ -78,12 +117,16 @@ class Doc2JsonConverterCmdFactory:
             '--skip-titles',
             'Skip titles in the document'
         )
+        self.tokenize = ConfigFlag(
+            '--tokenize',
+            'Return a document tokenized into works'
+        )
 
     def create(self) -> Doc2JsonConverter:
         return Doc2JsonConverter(
             include_replaced_nodes=self.include_replaced_nodes.value,
             skip_titles=self.skip_titles.value,
-            tokenize=False,
+            tokenize=self.tokenize.value,
         )
 
 

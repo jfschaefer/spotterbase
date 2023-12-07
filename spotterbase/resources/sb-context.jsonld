@@ -29,6 +29,10 @@
             "@id": "http://www.w3.org/2000/01/rdf-schema#comment",
             "@type": "http://www.w3.org/2001/XMLSchema#string"
         },
+        "html-value": {
+            "@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#value",
+            "@type": "http://www.w3.org/1999/02/22-rdf-syntax-ns#HTML"
+        },
         "endPath": {
             "@id": "http://sigmathling.kwarc.info/spotterbase/endPath",
             "@type": "http://www.w3.org/2001/XMLSchema#string"

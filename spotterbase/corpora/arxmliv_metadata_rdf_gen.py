@@ -6,7 +6,7 @@ from typing import Optional
 from spotterbase.utils import config_loader
 from spotterbase.model_core.annotation import Annotation
 from spotterbase.model_core.annotation_creator import SpotterRun
-from spotterbase.model_core.tag_body import TagSet, Tag, SimpleTagBody
+from spotterbase.model_core.body import TagSet, Tag, SimpleTagBody
 from spotterbase.utils.config_loader import ConfigString
 from spotterbase.corpora.arxiv import USE_CENTI_ARXIV, ArxivUris
 from spotterbase.corpora.arxmliv import ArXMLivUris, ArXMLivCorpus, ARXMLIV_RELEASES

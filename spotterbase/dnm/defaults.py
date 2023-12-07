@@ -30,12 +30,14 @@ def get_arxmliv_dnm_factory(
         keep_titles: bool = True,
         keep_replacements_as_annotations: bool = True,
         normalize_white_space: bool = True,
+        wrap_replacements_with_spaces: bool = False,
 ) -> DnmFactory:
     processor = TextExtractingNP()
 
     base_affix = '@' if decorate_replacements else ''
+    extra_space = ' ' if wrap_replacements_with_spaces else ''
     replacement_pattern = StandardReplacementPattern(
-        prefix=base_affix, infix=':', suffix=base_affix
+        prefix=extra_space + base_affix, infix=':', suffix=base_affix + extra_space
     )
 
     replacing_np = functools.partial(

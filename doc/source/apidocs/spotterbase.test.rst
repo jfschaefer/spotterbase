@@ -36,6 +36,14 @@ spotterbase.test.test\_dnm module
    :undoc-members:
    :show-inheritance:
 
+spotterbase.test.test\_dnm\_nlp module
+--------------------------------------
+
+.. automodule:: spotterbase.test.test_dnm_nlp
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 spotterbase.test.test\_documentation module
 -------------------------------------------
 

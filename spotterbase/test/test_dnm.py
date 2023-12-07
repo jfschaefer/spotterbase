@@ -4,6 +4,8 @@ import unittest
 from lxml import etree
 
 from spotterbase.dnm.dnm import Dnm
+from spotterbase.dnm.node_based_dnm_factory import TextExtractingNP, SkippingNP, ReplacingNP, NodeBasedDnmFactory
+from spotterbase.dnm.replacement_pattern import StandardReplacementPattern, CategoryStyle
 from spotterbase.dnm.simple_dnm_factory import SimpleDnmFactory
 from spotterbase.model_core.selector import PathSelector, OffsetSelector
 from spotterbase.selectors.dom_range import DomRange
@@ -21,6 +23,22 @@ DNM_2: Dnm = SimpleDnmFactory().anonymous_dnm_from_node(
 DNM_3: Dnm = SimpleDnmFactory(nodes_to_replace={'x': '', 'y': 'YZ'}).anonymous_dnm_from_node(
     etree.parse(io.StringIO('<a>AB<x>CD</x>E<y>FG</y>H</a>')).getroot()
 )
+
+
+def _compute_dnm_3_with_nodebased_factory():
+    processor = TextExtractingNP()
+    processor.register_tag_processor('x', SkippingNP())
+    processor.register_tag_processor('y', ReplacingNP(
+        StandardReplacementPattern(category_style=CategoryStyle.ALL_CAPS),
+        'yz',
+        number_replacements=False,
+    ))
+    return NodeBasedDnmFactory(processor).anonymous_dnm_from_node(
+        etree.parse(io.StringIO('<a>AB<x>CD</x>E<y>FG</y>H</a>')).getroot()
+    )
+
+
+DNM_3_NODEBASED: Dnm = _compute_dnm_3_with_nodebased_factory()
 
 
 class TestDnm(GraphTestMixin, unittest.TestCase):
@@ -41,6 +59,12 @@ class TestDnm(GraphTestMixin, unittest.TestCase):
                 conv = dnm.get_meta_info().selector_converter
                 new_selector = conv.dom_to_path_selector(dom_range)
                 self.assertEqual((new_selector.start, new_selector.end), (selector.start, selector.end))
+
+    def test_node_based_matches_simple(self):
+        """Test that the node-based factory creates the same DNM as the simple factory"""
+        self.assertEqual(str(DNM_3), str(DNM_3_NODEBASED))
+        self.assertEqual((DNM_3.get_start_refs(), DNM_3.get_end_refs()),
+                         (DNM_3_NODEBASED.get_start_refs(), DNM_3_NODEBASED.get_end_refs()))
 
     def test_dom_range_to_dnm_range(self):
         for dnm, selector, expected_from, expected_to, expected_str in [

@@ -6,7 +6,7 @@ from spotterbase.dnm_nlp.sentence_tokenizer import sentence_tokenize
 from spotterbase.dnm_nlp.word_tokenizer import word_tokenize
 from spotterbase.model_core.annotation import Annotation
 from spotterbase.model_core.sb import SB
-from spotterbase.model_core.tag_body import SimpleTagBody, Tag, TagSet
+from spotterbase.model_core.body import SimpleTagBody, Tag, TagSet
 from spotterbase.model_core.target import FragmentTarget
 from spotterbase.rdf.types import TripleI
 from spotterbase.rdf.uri import Uri

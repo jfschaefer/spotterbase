@@ -111,5 +111,7 @@ mv:thingA mv:someRel mv:thingA,
         SB_CONTEXT_FILE: Path = RESOURCES_DIR / 'sb-context.jsonld'
         with open(SB_CONTEXT_FILE, 'r') as fp:
             sb_context = json.load(fp)
+        import spotterbase.model_core.sb
         self.assertEqual(sb_context, updated_sb_context,
-                         msg='\n The "sb-context.jsonld" file is not up-to-date. Please re-run "sb_support.py"')
+                         msg='\n The "sb-context.jsonld" file is not up-to-date. '
+                             f'Please re-run the "{spotterbase.model_core.sb.__name__}" module')

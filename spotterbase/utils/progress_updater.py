@@ -5,6 +5,9 @@ import time
 from typing import Optional
 
 
+# TODO: Move this to utils.logging and use a logger instead of print
+
+
 class PrintTimerStrategy(abc.ABC):
     @abc.abstractmethod
     def get_delay_in_sec(self) -> float:

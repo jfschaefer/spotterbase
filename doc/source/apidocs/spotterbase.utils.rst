@@ -20,6 +20,14 @@ spotterbase.utils.exit module
    :undoc-members:
    :show-inheritance:
 
+spotterbase.utils.intervals module
+----------------------------------
+
+.. automodule:: spotterbase.utils.intervals
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 spotterbase.utils.logging module
 --------------------------------
 

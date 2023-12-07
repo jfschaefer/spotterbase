@@ -76,16 +76,16 @@ class DnmMatchIssues:
 
 class EmbeddedAnnotations:
     def __init__(self):
-        self._annotations: list[tuple[str, Annotation]] = []
-        self._annotations_by_unique_replacement: dict[str, Annotation] = {}
+        self._annotations: list[tuple[str, DomOffsetRange, Annotation]] = []
+        self._annotations_by_unique_replacement: dict[str, int] = {}
         self._category_counters: dict[str, int] = defaultdict(int)
 
-    def insert(self, replacement: str, annotation: Annotation, replacement_unique: bool = True):
-        self._annotations.append((replacement, annotation))
+    def insert(self, replacement: str, range_: DomOffsetRange, annotation: Annotation, replacement_unique: bool = True):
+        self._annotations.append((replacement, range_, annotation))
         if replacement_unique:
             if replacement in self._annotations_by_unique_replacement:
                 raise ValueError(f'Replacement {replacement} already exists')
-            self._annotations_by_unique_replacement[replacement] = annotation
+            self._annotations_by_unique_replacement[replacement] = len(self._annotations) - 1
 
     def get_next_replacement_number(self, category: str) -> int:
         self._category_counters[category] += 1
@@ -97,7 +97,7 @@ class EmbeddedAnnotations:
 #     def __contains__(self, item):
 #         return item in self._annotations_by_unique_replacement
 
-    def __iter__(self) -> Iterator[tuple[str, Annotation]]:
+    def __iter__(self) -> Iterator[tuple[str, DomOffsetRange, Annotation]]:
         return iter(self._annotations)
 
     def __bool__(self) -> bool:

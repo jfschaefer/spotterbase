@@ -4,6 +4,14 @@ spotterbase.dnm package
 Submodules
 ----------
 
+spotterbase.dnm.defaults module
+-------------------------------
+
+.. automodule:: spotterbase.dnm.defaults
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 spotterbase.dnm.dnm module
 --------------------------
 
@@ -20,10 +28,34 @@ spotterbase.dnm.linked\_str module
    :undoc-members:
    :show-inheritance:
 
+spotterbase.dnm.node\_based\_dnm\_factory module
+------------------------------------------------
+
+.. automodule:: spotterbase.dnm.node_based_dnm_factory
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+spotterbase.dnm.post\_processing\_dnm\_factory module
+-----------------------------------------------------
+
+.. automodule:: spotterbase.dnm.post_processing_dnm_factory
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 spotterbase.dnm.range\_subst module
 -----------------------------------
 
 .. automodule:: spotterbase.dnm.range_subst
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+spotterbase.dnm.replacement\_pattern module
+-------------------------------------------
+
+.. automodule:: spotterbase.dnm.replacement_pattern
    :members:
    :undoc-members:
    :show-inheritance:

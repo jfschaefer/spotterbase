@@ -31,6 +31,14 @@ class Document(abc.ABC):
         if cached and self._html_tree is not None:
             return self._html_tree
         with self.open_binary() as fp:
+            # note: the choice of parser is difficult.
+            # Options:
+            # - HTMLParser:  has some weird bugs that are hard to re-produce
+            #                (something like: if character 10000 is an & and part of an attribute value,
+            #                 then the parser will silently fail and recover by making a different DOM)
+            # - XMLParser:   cannot parse all documents
+            # - html5parser: introduces new nodes (e.g. tbody), which breaks offsets and XPaths.
+            #                Unfortunately, modern browsers do the same.
             tree: _ElementTree = etree.parse(fp, parser=etree.HTMLParser())  # type: ignore
         if cached:
             self._html_tree = tree

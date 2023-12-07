@@ -51,6 +51,11 @@ class LinkedStr(Generic[_MetaInfoType]):
                 raise ValueError('No _RelData provided for incompletely populated instantiation')
             self._rel_data = rel_data
 
+        # self.get_start_refs()
+        # self.get_end_refs()
+        # str(self)
+        # assert len(self._string) == len(self._start_refs) == len(self._end_refs)
+
     def get_indices_from_ref_range(self, start_ref, end_ref) -> tuple[int, int]:
         # Note: could also work from rel data
         # Note: this looks easy, but getting it right was surprisingly challenging
@@ -80,7 +85,7 @@ class LinkedStr(Generic[_MetaInfoType]):
     def get_start_ref(self) -> int:
         # more efficient than calling self.get_start_refs
         if (sr := self._start_refs) is not None:
-            return sr[-1]
+            return sr[0]
         rd = self._rel_data
         assert rd is not None
         return rd.based_on.get_start_refs()[rd.start_offset]

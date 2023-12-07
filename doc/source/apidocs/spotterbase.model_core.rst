@@ -20,6 +20,14 @@ spotterbase.model\_core.annotation\_creator module
    :undoc-members:
    :show-inheritance:
 
+spotterbase.model\_core.body module
+-----------------------------------
+
+.. automodule:: spotterbase.model_core.body
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 spotterbase.model\_core.oa module
 ---------------------------------
 
@@ -48,14 +56,6 @@ spotterbase.model\_core.selector module
 ---------------------------------------
 
 .. automodule:: spotterbase.model_core.selector
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-spotterbase.model\_core.tag\_body module
-----------------------------------------
-
-.. automodule:: spotterbase.model_core.tag_body
    :members:
    :undoc-members:
    :show-inheritance:
