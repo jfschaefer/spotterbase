@@ -30,7 +30,7 @@ class Ar5ivDoc(Document):
         warn_once(logger, 'ar5iv.org documents may change over time. '
                           'As SpotterBase assumes a frozen corpus, this may lead to unexpected problems.')
         # return StringIO(requests.get(str(self.get_uri())).text)
-        return BytesIO(requests.get(str(self.get_uri())).raw)
+        return BytesIO(requests.get(str(self.get_uri())).content)
 
 
 class Ar5ivCorpus(Corpus):
