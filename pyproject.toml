@@ -1,0 +1,41 @@
+[build-system]
+requires = ["flit_core >= 3.4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "spotterbase"
+version = "0.0.2"
+requires-python = ">= 3.10"
+authors = [{name="Jan Frederik Schaefer"}]
+description = "SpotterBase supports working with annotations on HTML5 documents the development of spotters."
+readme = "README.md"
+license.text = "MIT"
+
+dependencies = [
+    "ConfigArgParse",
+    "rdflib",
+    "requests",
+    "lxml",
+    "setuptools",
+    "intervaltree"
+]
+
+[project.urls]
+Documentation = "https://spotterbase.readthedocs.io/en/latest/"
+Repository = "https://github.com/jfschaefer/spotterbase"
+Issues = "https://github.com/jfschaefer/spotterbase/issues"
+
+
+[project.optional-dependencies]
+# dependencies for generating documentation
+# install with `pip install spotterbase[docs]`
+docs = [
+    # "sphinxcontrib.apidoc",
+    "sphinx-rtd-theme",
+    "graphviz"
+]
+
+# STANDARD PLUGINS (provided as part of the SpotterBase package)
+[project.entry-points."spotterbase.plugins"]
+arxiv = "spotterbase.plugins.arxiv"
+model_extra = "spotterbase.plugins.model_extra"

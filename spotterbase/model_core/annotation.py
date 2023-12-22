@@ -3,9 +3,8 @@ from __future__ import annotations
 from typing import Any, Optional
 
 from spotterbase.records.record import Record, RecordInfo, AttrInfo, FieldUnknownRecord
-from spotterbase.model_core.oa import OA_PRED
+from spotterbase.model_core.oa import OA_PRED, OA
 from spotterbase.rdf.uri import Uri
-from spotterbase.rdf.vocab import OA
 
 
 class Annotation(Record):

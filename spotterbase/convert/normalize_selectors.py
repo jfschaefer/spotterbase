@@ -4,9 +4,6 @@ import logging
 
 from spotterbase.corpora.resolver import Resolver
 from spotterbase.data import fast_json
-from spotterbase.model_core.oa import OA_JSONLD_CONTEXT
-from spotterbase.model_core.record_class_resolver import ANNOTATION_RECORD_CLASS_RESOLVER
-from spotterbase.model_core.sb import SB_JSONLD_CONTEXT
 from spotterbase.model_core.selector import PathSelector, OffsetSelector
 from spotterbase.model_core.target import FragmentTarget
 from spotterbase.rdf import Uri
@@ -59,11 +56,7 @@ def normalize_target(target: FragmentTarget):
 
 def process(input_json_records: list) -> list:
     result: list = []
-
-    converter = JsonLdRecordConverter(
-        contexts=[OA_JSONLD_CONTEXT, SB_JSONLD_CONTEXT],
-        record_type_resolver=ANNOTATION_RECORD_CLASS_RESOLVER,
-    )
+    converter = JsonLdRecordConverter.default()
 
     for obj in input_json_records:
         is_frag_target: bool = True

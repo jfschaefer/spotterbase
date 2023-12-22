@@ -13,24 +13,34 @@ class NameSpace:
     def __init__(self, uri: Uri | str, prefix: Optional[str] = None):
         if prefix and not re.match(r'([A-Za-z0-9:_]([A-Za-z0-9:_.-]*[A-Za-z0-9:_])?)?:', prefix):
             raise Exception(f'Invalid prefix: {prefix!r}')  # note: the regex does not cover all legal cases
-        self.uri = uri if isinstance(uri, Uri) else Uri(uri)
-        self.prefix = prefix
+        self._uri = uri if isinstance(uri, Uri) else Uri(uri)
+        self._prefix = prefix
+
+    @property
+    def prefix(self) -> Optional[str]:
+        return self._prefix
+
+    @property
+    def uri(self) -> Uri:
+        return self._uri
 
     def __getitem__(self, item) -> Uri:
         assert isinstance(item, str)
-        return Uri(item, self)
+        return Uri(self._uri + item, self)
 
     def __format__(self, format_spec) -> str:
+        if self._prefix is None:
+            raise Exception(f'Cannot format namespace {self!r} without prefix')
         match format_spec:
             case 'sparql':
-                return f'PREFIX {self.prefix} {self.uri:<>}'
+                return f'PREFIX {self._prefix} {self._uri:<>}'
             case 'turtle' | 'ttl':
-                return f'@prefix {self.prefix} {self.uri:<>} .'
+                return f'@prefix {self._prefix} {self._uri:<>} .'
             case other:
                 raise Exception(f'Unsupported format: {other!r}')
 
     def __repr__(self):
-        return f'{self.__class__.__name__}({self.uri}, prefix={self.prefix})'
+        return f'{self.__class__.__name__}({self._uri}, prefix={self._prefix})'
 
 
 class VocabularyMeta(type):
@@ -47,123 +57,115 @@ class Vocabulary(metaclass=VocabularyMeta):
 
 
 class Uri:
-    _suffix: str
-    namespace: Optional[NameSpace]
-    _full_uri: Optional[str] = None
+    __slots__ = ('_full_uri', '_namespace')
 
-    def __init__(self, uri: str | URIRef | pathlib.Path | Uri, namespace: Optional[NameSpace] = None):
-        self.namespace = namespace
+    _namespace: Optional[NameSpace]
+    _full_uri: str
+
+    def __init__(self, uri: UriLike, namespace: Optional[NameSpace] = None):
         if isinstance(uri, str):
             if uri.startswith('<') and uri.endswith('>'):
-                self._suffix = uri[1:-1]
+                self._full_uri = uri[1:-1]
             else:
-                self._suffix = uri
+                self._full_uri = uri
         elif isinstance(uri, URIRef):
-            self._suffix = str(uri)
+            self._full_uri = str(uri)
         elif isinstance(uri, pathlib.Path):
-            self._suffix = uri.as_uri()
+            self._full_uri = uri.as_uri()
         elif isinstance(uri, Uri):
-            self._suffix = uri._suffix
-            self.namespace = uri.namespace
             self._full_uri = uri._full_uri
+            self._namespace = uri._namespace
         else:
-            raise NotImplementedError(f'Unsupported type {type(uri)}')
+            raise TypeError(f'Unsupported argument type {type(uri)}')
+
         if namespace:
-            assert self.full_uri().startswith(namespace.uri.full_uri())
+            assert self._full_uri.startswith(str(namespace.uri))
+            self._namespace = namespace
+        elif not hasattr(self, '_namespace'):
+            self._namespace = None
+
+    @property
+    def namespace(self) -> Optional[NameSpace]:
+        return self._namespace
 
     @classmethod
     def uuid(cls) -> Uri:
         return Uri(uuid.uuid4().urn)
 
-    def with_namespace_from(self, namespaces: list[NameSpace]) -> Optional[Uri]:
-        for namespace in sorted(namespaces, key=lambda ns: len(ns.uri.full_uri()), reverse=True):
-            if self.full_uri().startswith(namespace.uri.full_uri()):
-                return Uri(self.relative_to(namespace), namespace)
-        return None
-
     def relative_to(self, other: NameSpace | str | Uri) -> str:
         other_as_str: str
         match other:
             case str():
-                other_as_str = Uri(other).full_uri()
+                other_as_str = str(Uri(other))
             case Uri():
-                other_as_str = other.full_uri()
+                other_as_str = str(other)
             case NameSpace():
-                other_as_str = other.uri.full_uri()
+                other_as_str = str(other.uri)
             case _:
-                raise NotImplementedError(f'Unsupported type of other: {type(other)}')
-        if not self.full_uri().startswith(other_as_str):
-            raise Exception(f'{self.full_uri()} does not start with {other_as_str}')
-        return self.full_uri()[len(other_as_str):]
+                raise TypeError(f'Unsupported type of other: {type(other)}')
+        if not str(self).startswith(other_as_str):
+            raise Exception(f'{str(self)} does not start with {other_as_str}')
+        return str(self)[len(other_as_str):]
 
     def starts_with(self, prefix: str | Uri | NameSpace) -> bool:
         match prefix:
             case str():
-                return self.full_uri().startswith(prefix)
+                return str(self).startswith(prefix)
             case Uri():
-                return self.full_uri().startswith(prefix.full_uri())
+                return str(self).startswith(str(prefix))
             case NameSpace():
-                return self.full_uri().startswith(prefix.uri.full_uri())
+                return str(self).startswith(str(prefix.uri))
             case _:
                 raise TypeError(f'Unsupported type {type(prefix)}')
 
     def __truediv__(self, other) -> Uri:
-        if self._suffix.endswith('/'):
-            return Uri(self._suffix + other, self.namespace)
+        if self._full_uri.endswith('/'):
+            return Uri(self._full_uri + other, self._namespace)
         else:
-            return Uri(self._suffix + '/' + other, self.namespace)
+            return Uri(self._full_uri + '/' + other, self._namespace)
 
     def __add__(self, other) -> Uri:
-        return Uri(self._suffix + other, self.namespace)
+        return Uri(self._full_uri + other, self._namespace)
 
     def to_rdflib(self) -> URIRef:
-        return URIRef(self._suffix)
+        return URIRef(self._full_uri)
 
     def __str__(self) -> str:
-        return self.full_uri()
+        return self._full_uri
 
-    # Note: caching might make sense, but it is not straight-forward.
-    # We have Uri('http://example.org/abc') == Uri('abc', namespace=...).
-    # Formatting the former with prefix will give us <http://example.org/abc>,
-    # and caching that would give us the same result for the latter, which is of course undesired.
+    # Note: caching might make sense, but it is not straight-forward
+    # (equal URIs can be associated with different namespaces/prefixes)
     def __format__(self, format_spec) -> str:
         reserved_chars = "~.-!$&'()*+,;=/?#@%_"
         match format_spec:
             case '' | 'plain':
-                return self.full_uri()
+                return str(self)
             case '<>':
-                return f'<{self.full_uri()}>'
+                return f'<{str(self)}>'
             case 'nrprefix':  # prefixed only if no reserved characters
-                if self.namespace and self.namespace.prefix and not \
-                        re.match('.*[' + re.escape(reserved_chars) + '].*', self._suffix):
-                    return self.namespace.prefix + self._suffix
-                else:
-                    return f'<{self.full_uri()}>'
+                if self._namespace and self._namespace.prefix:
+                    suffix = str(self)[len(str(self._namespace.uri)):]
+                    if not re.match('.*[' + re.escape(reserved_chars) + '].*', suffix):
+                        return self._namespace.prefix + suffix
+                return f'<{str(self)}>'
             case ':' | 'prefix':
-                if self.namespace and self.namespace.prefix:
-                    uri = re.sub('([' + re.escape(reserved_chars) + '])', r'\\\1', self._suffix)
-                    return self.namespace.prefix + uri
+                if self._namespace and self._namespace.prefix:
+                    suffix = str(self)[len(str(self._namespace.uri)):]
+                    uri = re.sub('([' + re.escape(reserved_chars) + '])', r'\\\1', suffix)
+                    return self._namespace.prefix + uri
                 else:
-                    return f'<{self.full_uri()}>'
+                    return f'<{str(self)}>'
             case _:
-                raise NotImplementedError(f'Unsupported format specification: {format_spec!r}')
-
-    def full_uri(self) -> str:
-        if not self._full_uri:
-            if self.namespace:
-                self._full_uri = self.namespace.uri.full_uri() + self._suffix
-            else:
-                self._full_uri = self._suffix
-        return self._full_uri
+                raise ValueError(f'Unsupported format specification: {format_spec!r}')
 
     def __repr__(self) -> str:
-        return f'{self.__class__.__name__}({self.full_uri()!r})'
+        return f'{self.__class__.__name__}({str(self)!r})'
 
     def __eq__(self, other) -> bool:
-        return self.full_uri() == str(other)
+        return str(self) == str(other)
 
     def __hash__(self):
-        return hash(self.full_uri())
+        return hash(str(self))
 
 
 # Anything that can be converted to a Uri

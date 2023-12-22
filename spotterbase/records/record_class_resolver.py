@@ -42,3 +42,6 @@ class RecordClassResolver:
                 raise Exception(f'failed to map {type_} to {record_type.__qualname__} '
                                 f'because it already refers to {self._lookup[type_].__qualname__}')
         self._lookup[type_] = record_type
+
+
+DefaultRecordClassResolver = RecordClassResolver()

@@ -1,12 +1,10 @@
 from collections import OrderedDict
 from typing import Optional, Iterable
 
-from spotterbase.corpora.ar5iv import AR5IV_CORPUS
-from spotterbase.utils import config_loader
-from spotterbase.corpora.arxmliv import ARXMLIV_CORPORA, CENTI_ARXMLIV_CORPORA
 from spotterbase.corpora.interface import Corpus, Document, DocumentNotInCorpusException
-from spotterbase.corpora.test_corpus import TEST_CORPUS
+from spotterbase.rdf import as_uri
 from spotterbase.rdf.uri import Uri, UriLike
+from spotterbase.utils import config_loader
 
 
 class _Resolver:
@@ -18,7 +16,7 @@ class _Resolver:
 
     def get_corpus(self, uri: UriLike) -> Optional[Corpus]:
         if uri in self._corpora:
-            return self._corpora[Uri(uri)]
+            return self._corpora[as_uri(uri)]
         return None
 
     def get_document(self, uri: UriLike) -> Optional[Document]:
@@ -27,7 +25,7 @@ class _Resolver:
         for corpus in self._corpora.values():
             try:
                 correct_corpus = corpus
-                document = corpus.get_document(Uri(uri))
+                document = corpus.get_document(as_uri(uri))
                 break
             except DocumentNotInCorpusException:
                 pass
@@ -40,18 +38,7 @@ class _Resolver:
         yield from self._corpora.values()
 
 
-def _register_standard_corpora(resolver: _Resolver):
-    resolver.register_corpus(TEST_CORPUS)
-    for corpus in ARXMLIV_CORPORA.values():
-        resolver.register_corpus(corpus)
-    for corpus in CENTI_ARXMLIV_CORPORA.values():
-        resolver.register_corpus(corpus)
-    resolver.register_corpus(AR5IV_CORPUS)
-
-
 Resolver: _Resolver = _Resolver()
-_register_standard_corpora(Resolver)
-
 
 if __name__ == '__main__':
     config_loader.auto()

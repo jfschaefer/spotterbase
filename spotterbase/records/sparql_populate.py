@@ -6,13 +6,14 @@ from typing import Iterator, Optional, NewType, Callable, TypeAlias, Iterable
 
 from spotterbase.records.record import Record, RecordInfo, AttrInfo, FieldKnownRecord, \
     FieldNoRecord, FieldUnknownRecord, FieldRecordSet
-from spotterbase.records.record_class_resolver import RecordClassResolver
+from spotterbase.records.record_class_resolver import RecordClassResolver, DefaultRecordClassResolver
 from spotterbase.rdf.literal import Literal
 from spotterbase.rdf.bnode import BlankNode
 from spotterbase.rdf.uri import Uri
 from spotterbase.rdf.vocab import RDF
 from spotterbase.sparql.endpoint import SparqlEndpoint
 from spotterbase.sparql.property_path import PropertyPath, UriPath, SequencePropertyPath
+from spotterbase.sparql.sb_sparql import get_work_endpoint
 
 logger = logging.getLogger(__name__)
 
@@ -33,14 +34,24 @@ RootUri = NewType('RootUri', Uri)
 SubRecords: TypeAlias = list[tuple[Record, RootUri]]
 SpecialPopulator: TypeAlias = Callable[[SubRecords, PropertyPath, 'Populator'], None]
 
+DefaultSpecialPopulators: dict[type[Record], list[SpecialPopulator]] = {}
+
 
 class Populator:
-    def __init__(self, record_type_resolver: RecordClassResolver, endpoint: SparqlEndpoint,
+    def __init__(self, record_type_resolver: RecordClassResolver = DefaultRecordClassResolver,
+                 endpoint: Optional[SparqlEndpoint] = None,
                  special_populators: Optional[dict[type[Record], list[SpecialPopulator]]] = None,
                  chunk_size: int = 1000):
+
+        if special_populators is None:
+            special_populators = DefaultSpecialPopulators
+
+        if endpoint is None:
+            endpoint = get_work_endpoint()
+
         self.record_type_resolver: RecordClassResolver = record_type_resolver
         self.endpoint = endpoint
-        self.special_populators: dict[type[Record], list[SpecialPopulator]] = special_populators or {}
+        self.special_populators: dict[type[Record], list[SpecialPopulator]] = special_populators
         self.chunk_size: int = chunk_size
 
     def get_records(self, uris: Iterable[Uri], warn_if_initial_uri_unresolvable: bool = True) -> Iterator[Record]:

@@ -4,7 +4,7 @@ from typing import IO, Iterator
 
 import requests
 
-from spotterbase.corpora.arxiv import ArxivId
+from spotterbase.plugins.arxiv.arxiv import ArxivId
 from spotterbase.corpora.interface import Document, DocumentNotFoundError, Corpus, DocumentNotInCorpusException
 from spotterbase.rdf import Uri
 from spotterbase.utils.logging import warn_once

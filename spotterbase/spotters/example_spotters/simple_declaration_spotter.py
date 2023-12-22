@@ -11,15 +11,16 @@ from spotterbase.corpora.interface import Document
 from spotterbase.dnm.defaults import ARXMLIV_STANDARD_DNM_FACTORY_SIMPLE
 from spotterbase.dnm.dnm import Dnm
 from spotterbase.dnm.range_subst import RangeSubstituter
+from spotterbase.model_core import OA
 from spotterbase.model_core.annotation import Annotation
 from spotterbase.model_core.annotation_creator import SpotterRun
 from spotterbase.model_core.sb import SB
 from spotterbase.model_core.target import FragmentTarget
-from spotterbase.model_extra.declarations import Identifier, IdentifierDeclaration, IdentifierOccurrence, \
+from spotterbase.plugins.model_extra.declarations import Identifier, IdentifierDeclaration, IdentifierOccurrence, \
     PolarityVocab, POLARITY_TAG_SET, POLARITY_TAGS, IdentifierTypeRestriction
 from spotterbase.rdf.types import TripleI
 from spotterbase.rdf.uri import Uri
-from spotterbase.rdf.vocab import OA, DCTerms
+from spotterbase.rdf.vocab import DCTerms
 from spotterbase.selectors.dom_range import DomRange
 from spotterbase.sparql.sb_sparql import get_data_endpoint
 from spotterbase.spotters.spotter import UriGeneratorMixin, Spotter, SpotterContext

@@ -2,19 +2,12 @@ import json
 import logging
 from pathlib import Path
 
-from spotterbase.utils import config_loader
-from spotterbase.model_core.record_class_resolver import ANNOTATION_RECORD_CLASS_RESOLVER
-from spotterbase.model_core.target import FragmentTarget, populate_standard_selectors
-from spotterbase.records.record_loading import load_all_records_from_graph
-from spotterbase.records.record_class_resolver import RecordClassResolver
-from spotterbase.records.jsonld_support import JsonLdRecordConverter
-from spotterbase.model_core.oa import OA_JSONLD_CONTEXT
-from spotterbase.model_core.sb import SB_JSONLD_CONTEXT
-from spotterbase.records.sparql_populate import Populator
 from spotterbase.rdf.uri import Uri
+from spotterbase.records.jsonld_support import JsonLdRecordConverter
+from spotterbase.records.record_loading import load_all_records_from_graph
+from spotterbase.records.sparql_populate import Populator
 from spotterbase.sparql.sb_sparql import get_work_endpoint, get_tmp_graph_uri
-from spotterbase.model_extra.sbx import SBX_JSONLD_CONTEXT
-from spotterbase.model_extra.record_class_resolver import SBX_RECORD_CLASS_RESOLVER
+from spotterbase.utils import config_loader
 from spotterbase.utils.progress_updater import ProgressUpdater
 
 logger = logging.getLogger(__name__)
@@ -27,11 +20,7 @@ def main():
     config_loader.auto()
 
     endpoint = get_work_endpoint()
-    populator = Populator(
-        record_type_resolver=RecordClassResolver.merged(ANNOTATION_RECORD_CLASS_RESOLVER, SBX_RECORD_CLASS_RESOLVER),
-        endpoint=endpoint,
-        special_populators={FragmentTarget: [populate_standard_selectors]},
-        chunk_size=50)
+    populator = Populator(endpoint=endpoint, chunk_size=50)
 
     graph_uri = get_tmp_graph_uri()
 
@@ -45,10 +34,7 @@ def main():
         records = load_all_records_from_graph(endpoint, graph_uri, populator)
         logger.info('Determined potential records URIs')
 
-        converter = JsonLdRecordConverter(
-            contexts=[OA_JSONLD_CONTEXT, SB_JSONLD_CONTEXT, SBX_JSONLD_CONTEXT],
-            record_type_resolver=populator.record_type_resolver,
-        )
+        converter = JsonLdRecordConverter.default()
 
         progress_logger = ProgressUpdater('Status update: Processed {progress} records')
 

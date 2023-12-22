@@ -3,7 +3,7 @@ import re
 from pathlib import Path
 from typing import IO, Iterator, Optional
 
-from spotterbase.corpora.arxiv import ArxivId
+from spotterbase.plugins.arxiv.arxiv import ArxivId
 from spotterbase.corpora.interface import Document, Corpus, DocumentNotFoundError, CannotLocateCorpusDataError, \
     DocumentNotInCorpusException
 from spotterbase.data.locator import Locator, LocatorFailedException

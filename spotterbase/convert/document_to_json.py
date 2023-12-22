@@ -9,9 +9,6 @@ from spotterbase.corpora.resolver import Resolver
 from spotterbase.dnm.defaults import get_arxmliv_dnm_factory
 from spotterbase.dnm_nlp.word_tokenizer import word_tokenize
 from spotterbase.model_core.annotation import Annotation
-from spotterbase.model_core.oa import OA_JSONLD_CONTEXT
-from spotterbase.model_core.record_class_resolver import ANNOTATION_RECORD_CLASS_RESOLVER
-from spotterbase.model_core.sb import SB_JSONLD_CONTEXT
 from spotterbase.records.jsonld_support import JsonLdRecordConverter
 from spotterbase.utils import config_loader
 from spotterbase.utils.config_loader import ConfigUri, ConfigPath, ConfigFlag
@@ -44,10 +41,7 @@ class Doc2JsonConverter:
         result = self._get_meta_dict(document)
         dnm = self.dnm_factory.dnm_from_document(document)
 
-        converter = JsonLdRecordConverter(
-            contexts=[OA_JSONLD_CONTEXT, SB_JSONLD_CONTEXT],
-            record_type_resolver=ANNOTATION_RECORD_CLASS_RESOLVER,
-        )
+        converter = JsonLdRecordConverter.default()
 
         tokens: list[dict] = []
         result['tokens'] = tokens
@@ -77,11 +71,7 @@ class Doc2JsonConverter:
         return result
 
     def _process_untokenized(self, document: Document) -> dict:
-        converter = JsonLdRecordConverter(
-            contexts=[OA_JSONLD_CONTEXT, SB_JSONLD_CONTEXT],
-            record_type_resolver=ANNOTATION_RECORD_CLASS_RESOLVER,
-        )
-
+        converter = JsonLdRecordConverter.default()
         result = self._get_meta_dict(document)
         dnm = self.dnm_factory.dnm_from_document(document)
         result['plaintext'] = str(dnm)

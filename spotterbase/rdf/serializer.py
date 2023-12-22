@@ -199,6 +199,13 @@ def triples_to_nt_string(triples: TripleI) -> str:
     return strio.getvalue()
 
 
+def triples_to_turtle(triples: TripleI) -> str:
+    strio = StringIO()
+    with TurtleSerializer(strio) as serializer:
+        serializer.add_from_iterable(triples)
+    return strio.getvalue()
+
+
 class PickleSerializer(Serializer):
     def __init__(self, fp: BinaryIO):
         self.fp = fp

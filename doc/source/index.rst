@@ -9,20 +9,21 @@ Content
 
     getting_started
     contribute
-    convert
+    anno_format
     config
+    convert
     annotations
     rdf
     dnm
     dnm_nlp
     corpora
 
+..
+    API reference
+    -------------
 
-API reference
--------------
+    .. toctree::
+        :maxdepth: 3
 
-.. toctree::
-    :maxdepth: 3
-
-    apidocs/modules
+        apidocs/modules
 

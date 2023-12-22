@@ -35,14 +35,14 @@ class Converter:
                     self.bnode_map[node] = rdflib.BNode()
                 return self.bnode_map[node]
             case Uri():
-                return rdflib.URIRef(node.full_uri())
+                return node.to_rdflib()
             case Literal():
                 # rdflib has problems with using XSD.string as default etc.
                 # see e.g. https://github.com/RDFLib/rdflib/issues/2123
                 if self.suppress_str_datatypes and node.datatype in {XSD.string, RDF.langString}:
                     rdflib_dt = None
                 else:
-                    rdflib_dt = node.datatype.full_uri()
+                    rdflib_dt = str(node.datatype)
                 return rdflib.Literal(node.string, lang=node.lang_tag, datatype=rdflib_dt)
             case _:
                 raise Exception('cannot support node type ', type(node))

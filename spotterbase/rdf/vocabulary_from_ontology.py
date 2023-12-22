@@ -27,7 +27,7 @@ VOCABULARIES = [
     ('FOAF', 'http://xmlns.com/foaf/0.1/index.rdf', 'http://xmlns.com/foaf/0.1/'),
     ('RDF', 'http://www.w3.org/1999/02/22-rdf-syntax-ns#', 'http://www.w3.org/1999/02/22-rdf-syntax-ns#'),
     ('RDFS', 'http://www.w3.org/2000/01/rdf-schema#', 'http://www.w3.org/2000/01/rdf-schema#'),
-    ('OA', 'http://www.w3.org/ns/oa.ttl', 'http://www.w3.org/ns/oa#'),
+    # ('OA', 'http://www.w3.org/ns/oa.ttl', 'http://www.w3.org/ns/oa#'),    # OA is part of model_core
     ('OWL', 'http://www.w3.org/2002/07/owl#', 'http://www.w3.org/2002/07/owl#'),
     ('SKOS', 'https://www.w3.org/2009/08/skos-reference/skos.rdf', 'http://www.w3.org/2004/02/skos/core#')
     # XSD is hard-coded

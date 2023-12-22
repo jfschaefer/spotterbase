@@ -1,1 +1,8 @@
-__version__ = '0.0.1'
+from importlib.metadata import version
+
+__version__ = version('spotterbase')
+
+
+from spotterbase.utils.plugin_loader import load_plugins
+
+load_plugins()

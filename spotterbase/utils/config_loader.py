@@ -12,9 +12,10 @@ import warnings
 from pathlib import Path
 from typing import Any, Optional, ClassVar
 
-import configargparse   # type: ignore
+import configargparse  # type: ignore
 
 from spotterbase.rdf.uri import Uri
+from spotterbase.utils.plugin_loader import log_plugin_loading_results
 
 logger = logging.getLogger(__name__)
 
@@ -73,6 +74,8 @@ class ConfigLoader:
         ConfigLoader.config_has_been_loaded = True
         for extension in self.extensions:
             extension.process_namespace(namespace)
+
+        log_plugin_loading_results()    # now logging has been configured
 
         used_configs = self.used_default_config_paths
         if namespace.config:

@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from typing import Optional, Any
+from typing import Optional, Any, Iterator
 
 from spotterbase.records.record import PredInfo, Record, RecordInfo, AttrInfo
-from spotterbase.records.record_class_resolver import RecordClassResolver
+from spotterbase.records.record_class_resolver import RecordClassResolver, DefaultRecordClassResolver
 from spotterbase.rdf.literal import Literal
 from spotterbase.rdf.uri import Uri, NameSpace
 
@@ -96,12 +96,16 @@ class JsonLdRecordConverter:
         )
         self.record_type_resolver: RecordClassResolver = record_type_resolver
 
+    @classmethod
+    def default(cls) -> JsonLdRecordConverter:
+        return DefaultContexts.get_converter()
+
     def format_uri(self, uri: Uri) -> str:
         # TODO: should we use namespaces?
         if uri in self._merged_context.obj_terms.uri_to_term:
             return self._merged_context.obj_terms.uri_to_term[uri]
         else:
-            return uri.full_uri()
+            return str(uri)
 
     def uri_from_str(self, string: str) -> Uri:
         # option 1: it's a term
@@ -223,3 +227,35 @@ class JsonLdRecordConverter:
                 result[key] = converted[0]
 
         return result
+
+
+class DefaultContexts:
+    _contexts: list[JsonLdContext] = []
+    _converter: Optional[JsonLdRecordConverter] = None
+
+    @classmethod
+    def get(cls) -> list[JsonLdContext]:
+        return cls._contexts
+
+    @classmethod
+    def __iter__(cls) -> Iterator[JsonLdContext]:
+        return iter(cls._contexts)
+
+    @classmethod
+    def append(cls, ctx: JsonLdContext):
+        cls._contexts.append(ctx)
+
+    @classmethod
+    def get_converter(cls, record_class_resolver: Optional[RecordClassResolver] = None) -> JsonLdRecordConverter:
+        if record_class_resolver is None:
+            if cls._converter is None:
+                cls._converter = JsonLdRecordConverter(
+                    contexts=cls._contexts,
+                    record_type_resolver=DefaultRecordClassResolver,
+                )
+            return cls._converter
+        else:
+            return JsonLdRecordConverter(
+                contexts=cls._contexts,
+                record_type_resolver=record_class_resolver,
+            )

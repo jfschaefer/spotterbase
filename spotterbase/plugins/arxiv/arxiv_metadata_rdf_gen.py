@@ -11,7 +11,7 @@ from spotterbase.utils import config_loader
 from spotterbase.model_core.annotation import Annotation
 from spotterbase.model_core.annotation_creator import SpotterRun
 from spotterbase.model_core.body import Tag, MultiTagBody, TagSet
-from spotterbase.corpora.arxiv import ArxivId, ArxivCategory, USE_CENTI_ARXIV, ArxivUris
+from spotterbase.plugins.arxiv.arxiv import ArxivId, ArxivCategory, USE_CENTI_ARXIV, ArxivUris
 from spotterbase.data.locator import Locator, DataDir
 from spotterbase.rdf.literal import Uri
 from spotterbase.rdf.types import TripleI

@@ -8,6 +8,7 @@ from spotterbase.model_core.sb import SB_JSONLD_CONTEXT
 from spotterbase.rdf.literal import Literal
 from spotterbase.rdf.bnode import BlankNode, counter_factory
 from spotterbase.rdf.uri import NameSpace, Vocabulary, Uri
+from spotterbase.rdf.namespace_collection import NameSpaceCollection
 from spotterbase.rdf.serializer import TurtleSerializer, NTriplesSerializer, FileSerializer
 from spotterbase.rdf.vocab import RDF, XSD
 from spotterbase.utils.resources import RESOURCES_DIR
@@ -47,8 +48,18 @@ mv:thingA a mv:someClass ;
 # this is another comment for turtle
 '''.strip())
 
+    def test_namespacify(self):
+        ns1 = NameSpace('http://example.com/ns1/', 'ns1:')
+        ns2 = NameSpace('http://example.com/ns2/', 'ns2:')
+        ns12 = NameSpace('http://example.com/ns1/2/', 'ns12:')
+        collection = NameSpaceCollection([ns1, ns2, ns12])
+        self.assertEqual(format(collection.namespacify('http://example.com/ns1/2/abc'), ':'), 'ns12:abc')
+        self.assertEqual(format(collection.namespacify('http://example.com/ns3'), ':'),
+                         '<http://example.com/ns3>')
+        self.assertEqual(format(collection.namespacify('http://example.com/ns1/foo'), ':'), 'ns1:foo')
+
     def test_uri(self):
-        uri = Uri('abc', NameSpace('http://example.com/', 'ex:'))
+        uri = Uri('http://example.com/abc', NameSpace('http://example.com/', 'ex:'))
         self.assertEqual(format(uri, ':'), 'ex:abc')
         self.assertEqual(format(uri, '<>'), '<http://example.com/abc>')
         self.assertEqual(str(uri), 'http://example.com/abc')

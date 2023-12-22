@@ -4,13 +4,12 @@ from pathlib import Path
 
 import rdflib
 
-from spotterbase.model_core.record_class_resolver import ANNOTATION_RECORD_CLASS_RESOLVER
+from spotterbase.model_core.sb import SB_CONTEXT_FILE
 from spotterbase.model_core.target import FragmentTarget, populate_standard_selectors
-from spotterbase.records.jsonld_support import JsonLdRecordConverter
-from spotterbase.model_core.oa import OA_JSONLD_CONTEXT
-from spotterbase.model_core.sb import SB_JSONLD_CONTEXT, SB_CONTEXT_FILE
-from spotterbase.records.sparql_populate import Populator
 from spotterbase.rdf import to_rdflib
+from spotterbase.records.jsonld_support import JsonLdRecordConverter
+from spotterbase.records.record_class_resolver import DefaultRecordClassResolver
+from spotterbase.records.sparql_populate import Populator
 from spotterbase.sparql.endpoint import RdflibEndpoint
 from spotterbase.test.mixins import GraphTestMixin
 
@@ -19,10 +18,8 @@ class TestAnnotationSerialization(GraphTestMixin, unittest.TestCase):
     package_root = Path(__file__).parent.parent
     with open(SB_CONTEXT_FILE) as fp:
         sb_context = json.load(fp)
-    converter = JsonLdRecordConverter(
-        contexts=[OA_JSONLD_CONTEXT, SB_JSONLD_CONTEXT],
-        record_type_resolver=ANNOTATION_RECORD_CLASS_RESOLVER,
-    )
+    converter = JsonLdRecordConverter.default()
+
     example_json_ld_files: list[Path] = [
         package_root.parent / 'doc' / 'source' / 'codesnippets' / 'example-annotation.jsonld',
         package_root.parent / 'doc' / 'source' / 'codesnippets' / 'example-target.jsonld',
@@ -52,7 +49,7 @@ class TestAnnotationSerialization(GraphTestMixin, unittest.TestCase):
                     to_rdflib.triples_to_graph(self.converter.json_ld_to_record(jsonld).to_triples())
                 )
 
-                populator = Populator(record_type_resolver=ANNOTATION_RECORD_CLASS_RESOLVER,
+                populator = Populator(record_type_resolver=DefaultRecordClassResolver,
                                       endpoint=endpoint,
                                       special_populators={
                                           FragmentTarget: [populate_standard_selectors]

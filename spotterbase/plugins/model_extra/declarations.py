@@ -1,7 +1,7 @@
 from typing import Optional
 
 from spotterbase.model_core.body import TagSet, Tag
-from spotterbase.model_extra.sbx import SBX, SBX_PRED
+from spotterbase.plugins.model_extra.sbx import SBX, SBX_PRED
 from spotterbase.rdf.uri import Uri, Vocabulary, NameSpace
 from spotterbase.records.record import Record, RecordInfo, AttrInfo
 

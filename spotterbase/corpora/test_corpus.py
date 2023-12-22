@@ -43,3 +43,8 @@ class _TestCorpus(Corpus):
 TEST_CORPUS: Corpus = _TestCorpus()
 
 TEST_DOC_A: Document = TEST_CORPUS.get_document(TEST_CORPUS_URI / 'paperA')
+
+
+def load():
+    from spotterbase.corpora.resolver import Resolver
+    Resolver.register_corpus(TEST_CORPUS)
