@@ -1,4 +1,5 @@
 # Spotterbase
+[![Documentation Status](https://readthedocs.org/projects/spotterbase/badge/?version=latest)](https://spotterbase.readthedocs.io/en/latest/?badge=latest)
 
 
 ## Installation
