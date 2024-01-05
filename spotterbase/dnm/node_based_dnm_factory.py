@@ -40,6 +40,8 @@ class ReplacingNP(NodeProcessor):
             # we need to make a copy without the tail
             node_copy = Element(node.tag, attrib=node.attrib)    # type: ignore
             node_copy.text = node.text
+            for child in node.getchildren():
+                node_copy.append(child)
 
             dnm_meta.embedded_annotations.insert(
                 replacement,

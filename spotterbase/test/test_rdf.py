@@ -4,8 +4,11 @@ import tempfile
 import unittest
 from pathlib import Path
 
+import rdflib
+from lxml import etree
+
 from spotterbase.model_core.sb import SB_JSONLD_CONTEXT
-from spotterbase.rdf.literal import Literal
+from spotterbase.rdf.literal import Literal, HtmlFragment
 from spotterbase.rdf.bnode import BlankNode, counter_factory
 from spotterbase.rdf.uri import NameSpace, Vocabulary, Uri
 from spotterbase.rdf.namespace_collection import NameSpaceCollection
@@ -117,6 +120,12 @@ mv:thingA mv:someRel mv:thingA,
         with self.assertRaises(TypeError):
             Literal.from_py_val([2, 3])
 
+    def test_rdflib_literal_conversion(self):
+        rdflib_literal = rdflib.Literal(42, datatype=rdflib.XSD.integer)
+        my_literal = Literal.from_rdflib(rdflib_literal)
+        self.assertEqual(my_literal.datatype, XSD.integer)
+        self.assertEqual(my_literal.to_py_val(), 42)
+
     def test_context_generation(self):
         updated_sb_context = {'@context': SB_JSONLD_CONTEXT.export_to_json()}
         SB_CONTEXT_FILE: Path = RESOURCES_DIR / 'sb-context.jsonld'
@@ -126,3 +135,9 @@ mv:thingA mv:someRel mv:thingA,
         self.assertEqual(sb_context, updated_sb_context,
                          msg='\n The "sb-context.jsonld" file is not up-to-date. '
                              f'Please re-run the "{spotterbase.model_core.sb.__name__}" module')
+
+    def test_html_literal(self):
+        f = HtmlFragment(etree.parse(io.StringIO('<a><b>x</b>y<c>z</c></a>')).getroot(), wrapped_in_div=False)
+        l = Literal.from_py_val(f)
+        self.assertEqual(l.to_turtle(),
+                         '"<a><b>x</b>y<c>z</c></a>"^^<http://www.w3.org/1999/02/22-rdf-syntax-ns#HTML>')
