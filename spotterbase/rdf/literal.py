@@ -6,12 +6,13 @@ from typing import Optional
 
 import lxml.html.diff
 import lxml.etree as etree
+import rdflib
 
 from spotterbase.rdf.uri import Uri
 from spotterbase.rdf.vocab import XSD, RDF
 
 
-__all__ = ['Literal']
+__all__ = ['Literal', 'HtmlFragment']
 
 
 class HtmlFragment:
@@ -90,7 +91,11 @@ class Literal:
         self.datatype: Uri = datatype
         self.lang_tag: Optional[str] = lang_tag
 
-    def _prepare_string(self) -> str:
+    @classmethod
+    def from_rdflib(cls, literal: rdflib.Literal) -> Literal:
+        return Literal(str(literal), Uri(literal.datatype) if literal.datatype else None, literal.language)
+
+    def format_string_ntriples(self) -> str:
         return '"' + self.string.replace('\\', '\\\\') \
             .replace('"', '\\"') \
             .replace('\n', '\\n') \
@@ -98,11 +103,11 @@ class Literal:
 
     def to_ntriples(self) -> str:
         if self.lang_tag is not None:
-            return f'{self._prepare_string()}@{self.lang_tag}'
+            return f'{self.format_string_ntriples()}@{self.lang_tag}'
         elif self.datatype == XSD.string:
-            return self._prepare_string()
+            return self.format_string_ntriples()
         else:
-            return f'{self._prepare_string()}^^{self.datatype:<>}'
+            return f'{self.format_string_ntriples()}^^{self.datatype:<>}'
 
     def to_turtle(self) -> str:
         if self.datatype in {XSD.integer, XSD.decimal, XSD.double, XSD.boolean}:

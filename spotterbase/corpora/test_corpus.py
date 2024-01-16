@@ -5,7 +5,8 @@ from spotterbase.corpora.interface import Corpus, DocumentNotInCorpusException, 
 from spotterbase.rdf.uri import Uri
 from spotterbase.model_core.sb import SB
 
-TEST_CORPUS_URI: Uri = SB.NS['test-corpus/']
+TEST_CORPUS_URI: Uri = SB.NS['data/test-corpus/']
+TEST_CORPUS_DIR: Path = Path(__file__).parent / 'test_corpus_data'
 
 
 class TestDocument(Document):
@@ -28,14 +29,13 @@ class _TestCorpus(Corpus):
         if not uri.starts_with(TEST_CORPUS_URI):
             raise DocumentNotInCorpusException()
         doc_name = uri.relative_to(TEST_CORPUS_URI)
-        path = Path(__file__).parent / 'test_corpus_data' / f'{doc_name}.html'
+        path = TEST_CORPUS_DIR / f'{doc_name}.html'
         if path.is_file():
             return TestDocument(uri, path)
         raise DocumentNotFoundError(f'{path} does not exist')
 
     def __iter__(self) -> Iterator[Document]:
-        directory = Path(__file__).parent / 'test_corpus_data'
-        for path in sorted(directory.glob('*.html')):
+        for path in sorted(TEST_CORPUS_DIR.glob('*.html')):
             uri = TEST_CORPUS_URI / path.name.removesuffix('.html')
             yield TestDocument(uri, path)
 

@@ -1,6 +1,6 @@
 {
     "@context": {
-        "sb": "http://sigmathling.kwarc.info/spotterbase/",
+        "sb": "https://ns.mathhub.info/project/sb/",
         "val": {
             "@id": "http://www.w3.org/1999/02/22-rdf-syntax-ns#value",
             "@type": "@id"
@@ -11,18 +11,18 @@
             "@container": "@list"
         },
         "belongsTo": {
-            "@id": "http://sigmathling.kwarc.info/spotterbase/belongsTo",
+            "@id": "https://ns.mathhub.info/project/sb/belongsTo",
             "@type": "@id"
         },
         "belongsTo_Rev_unreversed": {
-            "@id": "http://sigmathling.kwarc.info/spotterbase/belongsTo",
+            "@id": "https://ns.mathhub.info/project/sb/belongsTo",
             "@type": "@id"
         },
         "belongsTo_Rev": {
             "@reverse": "belongsTo_Rev_unreversed"
         },
         "contains": {
-            "@id": "http://sigmathling.kwarc.info/spotterbase/contains",
+            "@id": "https://ns.mathhub.info/project/sb/contains",
             "@type": "@id"
         },
         "comment": {
@@ -34,28 +34,29 @@
             "@type": "http://www.w3.org/1999/02/22-rdf-syntax-ns#HTML"
         },
         "endPath": {
-            "@id": "http://sigmathling.kwarc.info/spotterbase/endPath",
+            "@id": "https://ns.mathhub.info/project/sb/endPath",
             "@type": "http://www.w3.org/2001/XMLSchema#string"
         },
         "startPath": {
-            "@id": "http://sigmathling.kwarc.info/spotterbase/startPath",
+            "@id": "https://ns.mathhub.info/project/sb/startPath",
             "@type": "http://www.w3.org/2001/XMLSchema#string"
         },
         "spotterVersion": {
-            "@id": "http://sigmathling.kwarc.info/spotterbase/spotterVersion",
+            "@id": "https://ns.mathhub.info/project/sb/spotterVersion",
             "@type": "http://www.w3.org/2001/XMLSchema#string"
         },
         "withSpotter": {
-            "@id": "http://sigmathling.kwarc.info/spotterbase/withSpotter",
+            "@id": "https://ns.mathhub.info/project/sb/withSpotter",
             "@type": "@id"
         },
-        "FragmentTarget": "http://sigmathling.kwarc.info/spotterbase/FragmentTarget",
-        "ListSelector": "http://sigmathling.kwarc.info/spotterbase/ListSelector",
-        "PathSelector": "http://sigmathling.kwarc.info/spotterbase/PathSelector",
-        "OffsetSelector": "http://sigmathling.kwarc.info/spotterbase/OffsetSelector",
-        "SimpleTagBody": "http://sigmathling.kwarc.info/spotterbase/SimpleTagBody",
-        "SpotterRun": "http://sigmathling.kwarc.info/spotterbase/SpotterRun",
-        "TagSet": "http://sigmathling.kwarc.info/spotterbase/TagSet",
-        "Tag": "http://sigmathling.kwarc.info/spotterbase/Tag"
+        "FragmentTarget": "https://ns.mathhub.info/project/sb/FragmentTarget",
+        "ListSelector": "https://ns.mathhub.info/project/sb/ListSelector",
+        "PathSelector": "https://ns.mathhub.info/project/sb/PathSelector",
+        "OffsetSelector": "https://ns.mathhub.info/project/sb/OffsetSelector",
+        "SimpleTagBody": "https://ns.mathhub.info/project/sb/SimpleTagBody",
+        "MultiTagBody": "https://ns.mathhub.info/project/sb/MultiTagBody",
+        "SpotterRun": "https://ns.mathhub.info/project/sb/SpotterRun",
+        "TagSet": "https://ns.mathhub.info/project/sb/TagSet",
+        "Tag": "https://ns.mathhub.info/project/sb/Tag"
     }
 }

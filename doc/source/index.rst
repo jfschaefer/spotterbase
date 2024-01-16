@@ -9,21 +9,14 @@ Content
 
     getting_started
     contribute
+    rdf_intro
     anno_format
+    spotter_dev
     config
-    convert
-    annotations
+    cmdtools
     rdf
     dnm
     dnm_nlp
     corpora
-
-..
-    API reference
-    -------------
-
-    .. toctree::
-        :maxdepth: 3
-
-        apidocs/modules
+    api-doc
 

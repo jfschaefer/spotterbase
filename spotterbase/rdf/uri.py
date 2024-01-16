@@ -63,7 +63,7 @@ class Uri:
     _full_uri: str
 
     def __init__(self, uri: UriLike, namespace: Optional[NameSpace] = None):
-        if isinstance(uri, str):
+        if isinstance(uri, str) and not isinstance(uri, URIRef):   # URIRef is a subclass of str
             if uri.startswith('<') and uri.endswith('>'):
                 self._full_uri = uri[1:-1]
             else:

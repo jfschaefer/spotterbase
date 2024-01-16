@@ -18,6 +18,19 @@ class NameSpaceCollection:
         for namesepace in namespaces or []:
             self.add_namespace(namesepace)
 
+    @classmethod
+    def from_turtle(cls, turtle: str) -> NameSpaceCollection:
+        """ This extracts name spaces from the @prefix directives in a turtle string.
+
+        Note: It only supports a "reasonable" subset of turtle."""
+        namespaces = []
+        for line in turtle.splitlines():
+            line = line.strip()
+            if line.startswith('@prefix'):
+                prefix, _, uri = line[len('@prefix'):].partition(':')
+                namespaces.append(NameSpace(uri.strip(' .'), prefix.strip() + ':'))
+        return cls(namespaces)
+
     def add_namespace(self, namespace: NameSpace):
         self._namespaces.append(namespace)
         # Prefixes (in particular, check for duplicates)
@@ -101,6 +114,8 @@ class NameSpaceCollection:
         return iter(self._namespaces)
 
 
+EXAMPLE = NameSpace('http://example.org/', 'ex:')
+
 StandardNameSpaces = NameSpaceCollection(
     [
         vocab.DCTERMS.NS,
@@ -108,5 +123,6 @@ StandardNameSpaces = NameSpaceCollection(
         vocab.RDF.NS,
         vocab.RDFS.NS,
         vocab.SKOS.NS,
+        EXAMPLE,
     ]
 )

@@ -1,0 +1,8 @@
+PREFIX oa: <http://www.w3.org/ns/oa#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+SELECT ?document WHERE {
+    ?annotation a oa:Annotation .
+    ?annotation oa:hasTarget ?document .
+    ?annotation oa:hasBody/rdf:value <http://example.org/mathspotter-result#contains-math> .
+}

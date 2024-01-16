@@ -1,4 +1,5 @@
 import rdflib
+
 from spotterbase.rdf import TripleI, BlankNode, Uri, Literal
 
 
@@ -13,11 +14,9 @@ def triples_from_graph(graph: rdflib.Graph) -> TripleI:
         elif isinstance(node, rdflib.URIRef):
             return Uri(node)
         elif isinstance(node, rdflib.Literal):
-            # TODO: we will have to do more here
-            # return Literal(node)
-            raise NotImplementedError("Literals not yet supported")
+            return Literal.from_rdflib(node)
         else:
             raise TypeError(f'Unsupported node type {type(node)}')
 
     for s, p, o in graph:
-        yield convert(s), convert(p), convert(o)        # type: ignore
+        yield convert(s), convert(p), convert(o)  # type: ignore

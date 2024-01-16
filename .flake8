@@ -15,3 +15,5 @@ exclude =
 per-file-ignores =
     # ignore unused imports as they are intended as export
     ./spotterbase/*/__init__.py: F401
+    # f-strings without place holders sometimes useful for consistent formatting
+    ./doc/source/snippets/spotter_dev/formula_spotter.py: F541

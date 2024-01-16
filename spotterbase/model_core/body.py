@@ -47,9 +47,9 @@ class Tag(Record):
         ],
         is_root_record=True
     )
-    label: Optional[str] = None
-    belongs_to: Optional[Uri] = None
-    comment: Optional[str] = None
+    label: Optional[str]
+    belongs_to: Optional[Uri]
+    comment: Optional[str]
 
     def __init__(self, uri: Optional[Uri] = None, label: Optional[str] = None, belongs_to: Optional[Uri] = None,
                  comment: Optional[str] = None):
@@ -68,9 +68,9 @@ class TagSet(Record):
     )
 
     # tags: list[Uri]
-    comment: Optional[str] = None
-    label: Optional[str] = None
-    tags: Optional[list[Uri]] = None
+    comment: Optional[str]
+    label: Optional[str]
+    tags: Optional[list[Uri]]
 
     def __init__(self, uri: Optional[Uri] = None, label: Optional[str] = None, comment: Optional[str] = None):
         super().__init__(uri=uri, label=label, comment=comment)

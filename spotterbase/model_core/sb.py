@@ -9,7 +9,7 @@ from spotterbase.utils.resources import RESOURCES_DIR
 
 
 class SB(Vocabulary):
-    NS: NameSpace = NameSpace('http://sigmathling.kwarc.info/spotterbase/', 'sb:')
+    NS: NameSpace = NameSpace('https://ns.mathhub.info/project/sb/', 'sb:')
 
     # SPOTTER INFO
     SpotterRun: Uri
@@ -76,6 +76,7 @@ SB_JSONLD_CONTEXT: JsonLdContext = JsonLdContext(
         ('PathSelector', SB.PathSelector),
         ('OffsetSelector', SB.OffsetSelector),
         ('SimpleTagBody', SB.SimpleTagBody),
+        ('MultiTagBody', SB.MultiTagBody),
         ('SpotterRun', SB.SpotterRun),
         ('TagSet', SB.TagSet),
         ('Tag', SB.Tag),

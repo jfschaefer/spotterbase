@@ -32,10 +32,12 @@ Ways to use SpotterBase
 
 SpotterBase can be used in different ways:
 
-1.  As a **command line tool**: SpotterBase provides various commands for pre-processing documents and
+1.  As a **format**: Without using SpotterBase at all, you can use the SpotterBase format for annotations,
+    and exchange them with other people or systems.
+2.  As a **command line tool**: SpotterBase provides various commands for pre-processing documents and
     converting annotations in different formats.
-2.  As a **library**: SpotterBase has a lot of functionality for working with annotations and documents.
-3.  As a **framework**: SpotterBase can act as a framework for building and running your own spotters.
+3.  As a **library**: SpotterBase has a lot of functionality for working with annotations and documents.
+4.  As a **framework**: SpotterBase can act as a framework for building and running your own spotters.
 
 
 How can I develop a spotter?

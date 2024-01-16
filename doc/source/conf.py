@@ -11,17 +11,24 @@ from spotterbase import __version__
 release = __version__
 
 extensions = [
-        # 'sphinx.ext.autodoc',
-        # 'sphinxcontrib.apidoc',
-        'spotterbase.utils.sphinx_rdf'
+        'sphinx.ext.autodoc',
+        'sphinxcontrib.apidoc',
+        'spotterbase.utils.sphinx_rdf',
+        'spotterbase.utils.sphinx_warnings',
+        'sphinx.ext.todo',
 ]
 
-# apidoc_module_dir = str(Path(__file__).parent.parent.parent/'spotterbase')
-# apidoc_output_dir = 'apidocs'
+apidoc_module_dir = str(Path(__file__).parent.parent.parent/'spotterbase')
+apidoc_output_dir = 'apidocs'
+
+autodoc_typehints_format = 'short'
+autodoc_preserve_defaults = True
+autodoc_type_aliases = {
+    
+}
 
 templates_path = ['_templates']
-exclude_patterns = []
-
+exclude_patterns = ['apidocs/modules.rst']
 
 # html_theme = 'alabaster'
 html_theme = 'sphinx_rtd_theme'

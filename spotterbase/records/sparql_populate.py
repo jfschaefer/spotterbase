@@ -4,13 +4,13 @@ import logging
 from collections import defaultdict
 from typing import Iterator, Optional, NewType, Callable, TypeAlias, Iterable
 
+from spotterbase.rdf.bnode import BlankNode
+from spotterbase.rdf.literal import Literal
+from spotterbase.rdf.uri import Uri
+from spotterbase.rdf.vocab import RDF
 from spotterbase.records.record import Record, RecordInfo, AttrInfo, FieldKnownRecord, \
     FieldNoRecord, FieldUnknownRecord, FieldRecordSet
 from spotterbase.records.record_class_resolver import RecordClassResolver, DefaultRecordClassResolver
-from spotterbase.rdf.literal import Literal
-from spotterbase.rdf.bnode import BlankNode
-from spotterbase.rdf.uri import Uri
-from spotterbase.rdf.vocab import RDF
 from spotterbase.sparql.endpoint import SparqlEndpoint
 from spotterbase.sparql.property_path import PropertyPath, UriPath, SequencePropertyPath
 from spotterbase.sparql.sb_sparql import get_work_endpoint
@@ -24,11 +24,12 @@ logger = logging.getLogger(__name__)
 #   * results (e.g. for types) should be cached - at least for a single population run
 
 
-# The RootUri of a record C is the Uri of the root record that C belongs to.
-# The typical use case the following:
-#   There is a root record R has a sub record C, which we want to populate.
-#   C might not have a URI associated with it. So to somehow reference it in SPARQL queries,
-#   we instead refer to R's URI (the RootUri of C) and use a property path that leads from R to C.
+#: The RootUri of a record C is the Uri of the root record that C belongs to.
+#: The typical use case the following:
+#:
+#:     There is a root record R has a sub record C, which we want to populate.
+#:     C might not have a URI associated with it. So to somehow reference it in SPARQL queries,
+#:     we instead refer to R's URI (the RootUri of C) and use a property path that leads from R to C.
 RootUri = NewType('RootUri', Uri)
 
 SubRecords: TypeAlias = list[tuple[Record, RootUri]]
@@ -141,8 +142,11 @@ class Populator:
                     continue
                 sub_record_type = self._record_type_from_uris(types_[uri])
                 if sub_record_type is None:
-                    logger.warning(f'Cannot find record for types {types_[uri]} '
-                                   '(did you forget to add it to the resolver? (ignoring attribute)')
+                    if types_[uri]:
+                        logger.warning(f'Cannot find record for types {types_[uri]} '
+                                       '(did you forget to add it to the resolver?) (ignoring attribute)')
+                    else:
+                        logger.warning(f'{uri} has no type (ignoring attribute)')
                     continue
                 # TODO: set sub_record.uri (maybe this should be the task of _fill_records)
                 sub_record = sub_record_type()

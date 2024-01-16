@@ -1,13 +1,18 @@
+from datetime import datetime
+
 import nltk.tag
 
+from spotterbase import __version__
 from spotterbase.corpora.interface import Document
 from spotterbase.dnm.defaults import ARXMLIV_STANDARD_DNM_FACTORY_SIMPLE
 from spotterbase.dnm_nlp.sentence_tokenizer import sentence_tokenize
 from spotterbase.dnm_nlp.word_tokenizer import word_tokenize
+from spotterbase.model_core import SpotterRun
 from spotterbase.model_core.annotation import Annotation
 from spotterbase.model_core.sb import SB
 from spotterbase.model_core.body import SimpleTagBody, Tag, TagSet
 from spotterbase.model_core.target import FragmentTarget
+from spotterbase.plugins.model_extra import SBX
 from spotterbase.rdf.types import TripleI
 from spotterbase.rdf.uri import Uri
 from spotterbase.spotters.spotter import Spotter, UriGeneratorMixin, SpotterContext
@@ -53,6 +58,13 @@ class SimplePosTagSpotter(UriGeneratorMixin, Spotter):
         ctx = PosTagContext()
 
         def triple_gen() -> TripleI:
+            yield from SpotterRun(
+                uri=ctx.run_uri,
+                spotter_uri=SBX.NS[f'spotters#{cls.spotter_short_id}'],
+                spotter_version=__version__,
+                date=datetime.now(),
+                label='Simple Part-Of-Speech Tagger based on NLTK'
+            ).to_triples()
             yield from ctx.tag_set.to_triples()
             for tag in ctx.tags.values():
                 yield from tag.to_triples()

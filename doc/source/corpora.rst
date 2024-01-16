@@ -14,17 +14,17 @@ SpotterBase comes with a test corpus, which we will use for the examples:
 
 >>> from spotterbase.corpora.resolver import Resolver
 >>> from spotterbase.rdf import Uri
->>> uri = Uri('http://sigmathling.kwarc.info/spotterbase/test-corpus/')
+>>> uri = Uri('https://ns.mathhub.info/project/sb/data/test-corpus/')
 >>> corpus = Resolver.get_corpus(uri)
 >>> for document in corpus:
 ...     print(document.get_uri())
-http://sigmathling.kwarc.info/spotterbase/test-corpus/paperA
-http://sigmathling.kwarc.info/spotterbase/test-corpus/paperB
+https://ns.mathhub.info/project/sb/data/test-corpus/paperA
+https://ns.mathhub.info/project/sb/data/test-corpus/paperB
 >>> document = corpus.get_document(uri / 'paperB')
 >>> # alternatively, we can get the document directly from the Resolver:
 >>> document = Resolver.get_document(uri / 'paperB')
 >>> document.get_uri()
-Uri('http://sigmathling.kwarc.info/spotterbase/test-corpus/paperB')
+Uri('https://ns.mathhub.info/project/sb/data/test-corpus/paperB')
 >>> with document.open_text() as fp:
 ...     print(fp.read(21))
 <!DOCTYPE html><html>

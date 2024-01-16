@@ -6,6 +6,7 @@ import itertools
 import re
 from typing import TypeVar, Sequence, Generic, Optional, Iterable
 
+#: TypeVariable bound for :class:`LinkedStr`
 LinkedStr_T = TypeVar('LinkedStr_T', bound='LinkedStr')
 
 _MetaInfoType = TypeVar('_MetaInfoType')
@@ -40,16 +41,16 @@ class LinkedStr(Generic[_MetaInfoType]):
                  string: Optional[str] = None,
                  start_refs: Optional[Sequence[int]] = None,
                  end_refs: Optional[Sequence[int]] = None,
-                 rel_data: Optional[_RelData[_MetaInfoType]] = None,
+                 _rel_data: Optional[_RelData[_MetaInfoType]] = None,
                  ):
         self._meta_info = meta_info
         self._string = string
         self._start_refs = start_refs
         self._end_refs = end_refs
         if string is None or start_refs is None or end_refs is None:
-            if rel_data is None:
+            if _rel_data is None:
                 raise ValueError('No _RelData provided for incompletely populated instantiation')
-            self._rel_data = rel_data
+            self._rel_data = _rel_data
 
         # self.get_start_refs()
         # self.get_end_refs()
@@ -64,7 +65,7 @@ class LinkedStr(Generic[_MetaInfoType]):
     def with_string(self: LinkedStr_T, string: str) -> LinkedStr_T:
         assert len(string) == len(self)
         return type(self)(meta_info=self._meta_info, string=string, start_refs=self._start_refs,
-                          end_refs=self._end_refs, rel_data=self._rel_data)
+                          end_refs=self._end_refs, _rel_data=self._rel_data)
 
     def get_start_refs(self) -> Sequence[int]:
         if (sr := self._start_refs) is None:
@@ -109,7 +110,7 @@ class LinkedStr(Generic[_MetaInfoType]):
         if isinstance(item, slice):
             start, stop, step = item.indices(len(self))
             if step == 1:
-                return type(self)(meta_info=self._meta_info, rel_data=_RelData(self, start, stop))
+                return type(self)(meta_info=self._meta_info, _rel_data=_RelData(self, start, stop))
             return type(self)(meta_info=self._meta_info, string=str(self)[item], start_refs=self.get_start_refs()[item],
                               end_refs=self.get_end_refs()[item])
         elif isinstance(item, int):

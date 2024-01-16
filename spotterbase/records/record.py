@@ -94,15 +94,16 @@ class RecordMeta(type):
     """ Metaclass for Record. Used for some basic checks. """
     record_info: RecordInfo
 
-    def __init__(self, *args):
+    def __init__(cls, *args):
         super().__init__(*args)
-        if self.__qualname__ == 'Record':
+        if cls.__qualname__ == 'Record':
             return
-        assert hasattr(self, 'record_info'), f'No record_info provided for {self.__qualname__}'
-        assert isinstance(self.record_info, RecordInfo)
+        assert hasattr(cls, 'record_info'), f'No record_info provided for {cls.__qualname__}'
+        assert isinstance(cls.record_info, RecordInfo)
         # for a_info in self.record_info.attrs:
         #     assert hasattr(self, a_info.attr_name),\
         #         f'{self.__qualname__} does not have a default value for {a_info.attr_name}'
+        # TODO: check that __init__ has all the attrs as arguments (use inspect.signature?)
 
 
 class Record(metaclass=RecordMeta):
@@ -119,9 +120,12 @@ class Record(metaclass=RecordMeta):
         assert self.uri is not None
         return self.uri
 
-    def to_triples(self) -> TripleI:
-        assert self.uri
-        return _record_to_triples(self, self.uri)
+    def to_triples(self, use_blanknode_if_no_uri: bool = False) -> TripleI:
+        if use_blanknode_if_no_uri and self.uri is None:   # needed to document non-root records
+            return _record_to_triples(self, BlankNode())
+        else:
+            assert self.uri
+            return _record_to_triples(self, self.uri)
 
     def __set_attr(self, attr: str, val: Optional[Any]):
         assert attr == 'uri' or attr in self.record_info.attrs_by_name

@@ -20,11 +20,11 @@ class SpotterRun(Record):
         ]
     )
 
-    spotter_uri: Optional[Uri] = None
-    spotter_version: Optional[str] = None
-    date: Optional[datetime.datetime] = None
-    comment: Optional[str] = None
-    label: Optional[str] = None
+    spotter_uri: Optional[Uri]
+    spotter_version: Optional[str]
+    date: Optional[datetime.datetime]
+    comment: Optional[str]
+    label: Optional[str]
 
     def __init__(self,
                  uri: Optional[Uri] = None,

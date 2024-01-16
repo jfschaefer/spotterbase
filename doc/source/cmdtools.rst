@@ -1,5 +1,7 @@
-:mod:`~spotterbase.convert` package
-===================================
+.. _cmdtools:
+
+Command Line Tools
+==================
 
 The :mod:`~spotterbase.convert` can be used to
 convert a document into an easier-to-process format
@@ -13,6 +15,9 @@ The conversion code can be used from the command line or from Python code.
 
 :mod:`~spotterbase.convert` also can be used to recover and normalize
 annotation targets.
+
+
+.. _cmdtools-preprocess-json:
 
 Preprocessing to JSON
 ---------------------
@@ -36,7 +41,7 @@ Example call:
 
     python3 -m spotterbase.convert.document_to_json \
        --include-replaced-nodes \
-       --document=http://sigmathling.kwarc.info/spotterbase/test-corpus/paperA \
+       --document=https://ns.kwarc.info/project/sb/data/test-corpus/paperA \
        --output=tokenized.json
 
 With the ``--include-replaced-nodes`` option, the will contain the
@@ -49,7 +54,7 @@ If you want to use the preprocessor from Python code, you have to use the
 
 >>> from spotterbase.convert.document_to_json import Doc2JsonConverter
 >>> from spotterbase.corpora.resolver import Resolver
->>> document = Resolver.get_document('http://sigmathling.kwarc.info/spotterbase/test-corpus/paperA')
+>>> document = Resolver.get_document('https://ns.mathhub.info/project/sb/data/test-corpus/paperA')
 >>> converter = Doc2JsonConverter(include_replaced_nodes=True, skip_titles=True)
 >>> json_document = converter.process(document)
 

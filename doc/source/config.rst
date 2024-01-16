@@ -1,21 +1,20 @@
 Configuration
 =============
 
-SpotterBase uses the `ConfigArgParse <https://pypi.org/project/ConfigArgParse/>`
+SpotterBase uses the `ConfigArgParse <https://pypi.org/project/ConfigArgParse/>`_
 library for managing the configuration.
 It basically allows to load command line parameters from a configuration file.
-The code for the configuration management is in
-:mod:`spotterbase.config_loader`.
 
 Introduction
 ------------
 
-Let us create a simple example script to see the configuration
-options in action:
+We will create a simple example script to see the configuration in action.
+The command line tools in SpotterBase use the same configuration mechanism.
+Here is our example script ``greeting.py``:
 
 .. code:: python
 
-    import spotterbase.config_loader as config_loader
+    import spotterbase.utils.config_loader as config_loader
 
     greeting = config_loader.ConfigString('--greeting',
             description='the greeting', default='hi')

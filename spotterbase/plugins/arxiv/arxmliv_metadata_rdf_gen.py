@@ -21,7 +21,7 @@ from spotterbase import __version__
 logger = logging.getLogger(__name__)
 
 RELEASE_VERSION = ConfigString('--arxmliv-release', description='arXMLiv release', choices=ARXMLIV_RELEASES,
-                               default=ARXMLIV_RELEASES)
+                               default=ARXMLIV_RELEASES[-1])
 
 
 def _get_severities_lists(corpus: ArXMLivCorpus) -> Optional[tuple[list[str], list[str], list[str]]]:
@@ -85,6 +85,7 @@ def iter_triples(corpus: ArXMLivCorpus) -> TripleI:
 
 def main():
     release_version = RELEASE_VERSION.value
+    print(repr(release_version))
     assert release_version is not None
     corpus = Resolver.get_corpus(ArXMLivUris.get_corpus_uri(release_version))
     assert isinstance(corpus, ArXMLivCorpus)

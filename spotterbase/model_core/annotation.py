@@ -23,6 +23,6 @@ class Annotation(Record):
     body: Any
     creator_uri: Optional[Uri]
 
-    def __init__(self, uri: Optional[Uri] = None, target_uri: Optional[Uri] = None,
+    def __init__(self, uri: Optional[Uri] = None, *, target_uri: Optional[Uri] = None,
                  body: Optional[Any] = None, creator_uri: Optional[Uri] = None):
         super().__init__(uri=uri, target_uri=target_uri, body=body, creator_uri=creator_uri)
