@@ -30,7 +30,7 @@ class Document(abc.ABC):
     def get_html_tree(self, *, cached: bool) -> _ElementTree:
         if cached and self._html_tree is not None:
             return self._html_tree
-        with self.open_binary() as fp:
+        with self.open_text() as fp:
             # note: the choice of parser is difficult.
             # Options:
             # - HTMLParser:  has some weird bugs that are hard to re-produce

@@ -1,16 +1,54 @@
 from typing import Optional
 
+from spotterbase.model_core import SB
 from spotterbase.model_core.body import TagSet, Tag
-from spotterbase.plugins.model_extra.sbx import SBX, SBX_PRED
 from spotterbase.rdf.uri import Uri, Vocabulary, NameSpace
-from spotterbase.records.record import Record, RecordInfo, AttrInfo
+from spotterbase.rdf.vocab import XSD
+from spotterbase.records.jsonld_support import JsonLdContext
+from spotterbase.records.record import Record, RecordInfo, AttrInfo, PredInfo
+
+
+class DECL(Vocabulary):
+    NS: NameSpace = NameSpace(SB.NS.uri / 'ext/decl/', prefix='decl:')
+
+    Identifier: Uri
+    IdentifierOccurrence: Uri
+    IdentifierDeclaration: Uri
+    IdentifierTypeRestriction: Uri
+
+    occurrenceOf: Uri
+    restricts: Uri
+    hasPolarity: Uri
+    declares: Uri
+    idString: Uri
+
+
+class DECL_PRED:
+    occurrenceOf = PredInfo(DECL.occurrenceOf, json_ld_term='decl:occurrenceOf', json_ld_type_is_id=True)
+    restricts = PredInfo(DECL.restricts, json_ld_term='decl:restricts', json_ld_type_is_id=True)
+    idString = PredInfo(DECL.idString, json_ld_term='decl:idString', literal_type=XSD.string)
+    hasPolarity = PredInfo(DECL.hasPolarity, json_ld_term='decl:hasPolarity', json_ld_type_is_id=True)
+    declares = PredInfo(DECL.declares, json_ld_term='decl:declares', json_ld_type_is_id=True)
+
+
+DECL_JSONLD_CTX: JsonLdContext = JsonLdContext(
+    uri=None,
+    namespaces=[DECL.NS],
+    pred_infos=list(p_info for p_info in DECL_PRED.__dict__.values() if isinstance(p_info, PredInfo)),
+    terms=[
+        ('decl:Identifier', DECL.Identifier),
+        ('decl:IdentifierTypeRestriction', DECL.IdentifierTypeRestriction),
+        ('decl:IdentifierOccurrence', DECL.IdentifierOccurrence),
+        ('decl:IdentifierDeclaration', DECL.IdentifierDeclaration),
+    ]
+)
 
 
 class Identifier(Record):
     record_info = RecordInfo(
-        record_type=SBX.Identifier,
+        record_type=DECL.Identifier,
         attrs=[
-            AttrInfo('id_string', SBX_PRED.idString)
+            AttrInfo('id_string', DECL_PRED.idString)
         ],
         is_root_record=True,
     )
@@ -23,9 +61,9 @@ class Identifier(Record):
 
 class IdentifierOccurrence(Record):
     record_info = RecordInfo(
-        record_type=SBX.IdentifierOccurrence,
+        record_type=DECL.IdentifierOccurrence,
         attrs=[
-            AttrInfo('occurrence_of', SBX_PRED.occurrenceOf),
+            AttrInfo('occurrence_of', DECL_PRED.occurrenceOf),
         ],
     )
 
@@ -37,10 +75,10 @@ class IdentifierOccurrence(Record):
 
 class IdentifierDeclaration(Record):
     record_info = RecordInfo(
-        record_type=SBX.IdentifierDeclaration,
+        record_type=DECL.IdentifierDeclaration,
         attrs=[
-            AttrInfo('polarity', SBX_PRED.hasPolarity),
-            AttrInfo('declares', SBX_PRED.declares),
+            AttrInfo('polarity', DECL_PRED.hasPolarity),
+            AttrInfo('declares', DECL_PRED.declares),
         ],
     )
 
@@ -53,9 +91,9 @@ class IdentifierDeclaration(Record):
 
 class IdentifierTypeRestriction(Record):
     record_info = RecordInfo(
-        record_type=SBX.IdentifierTypeRestriction,
+        record_type=DECL.IdentifierTypeRestriction,
         attrs=[
-            AttrInfo('restricts', SBX_PRED.restricts),
+            AttrInfo('restricts', DECL_PRED.restricts),
         ],
     )
 
@@ -66,7 +104,7 @@ class IdentifierTypeRestriction(Record):
 
 
 class PolarityVocab(Vocabulary):
-    NS: NameSpace = NameSpace(SBX.NS['polarity/'])
+    NS: NameSpace = NameSpace(DECL.NS['polarity/'])
 
     universal: Uri
     existential: Uri

@@ -2,11 +2,8 @@ import functools
 import hashlib
 import re
 
-from spotterbase.utils.config_loader import ConfigFlag
 from spotterbase.model_core.sb import SB
 from spotterbase.rdf.uri import NameSpace, Uri
-
-USE_CENTI_ARXIV = ConfigFlag('--centi-arxiv', 'use a subset of arxiv (≈ 1 percent)')
 
 
 class InvalidArxivId(Exception):
@@ -14,6 +11,7 @@ class InvalidArxivId(Exception):
 
 
 class ArxivId:
+    __slots__ = ('identifier',)
     arxiv_id_regex = re.compile(r'^(?P<oldprefix>[a-z-]+/)?(?P<yymm>[0-9]{4})[0-9.]*$')
 
     def __init__(self, identifier: str):
@@ -48,10 +46,21 @@ class ArxivId:
     def as_uri(self) -> Uri:
         return ArxivUris.arxiv_id[self.identifier]
 
-    @functools.cache
+    @functools.lru_cache(maxsize=2**10)
+    def sha256_as_int(self) -> int:
+        return int(hashlib.sha256(self.identifier.encode('utf-8')).hexdigest(), base=16)
+
+    def is_in_deci_arxiv(self) -> bool:
+        return self.sha256_as_int() % 10 == 0
+
     def is_in_centi_arxiv(self) -> bool:
-        sha256 = hashlib.sha256(self.identifier.encode('utf-8')).hexdigest()
-        return int(sha256, base=16) % 100 == 0
+        return self.sha256_as_int() % 100 == 0
+
+    def is_in_milli_arxiv(self) -> bool:
+        return self.sha256_as_int() % 1000 == 0
+
+    def is_in_decimilli_arxiv(self) -> bool:
+        return self.sha256_as_int() % 10000 == 0
 
     @property
     def yymm(self) -> str:
@@ -74,7 +83,6 @@ class ArxivUris:
 
     topic_system = Uri('https://arxiv.org/category_taxonomy/')
     dataset = Uri('https://arxiv.org/')
-    centi_arxiv = Uri('http://sigmathling.kwarc.info/centi-arxiv')
 
     arxiv_id = NameSpace('https://arxiv.org/abs/', 'arxiv:')
     arxiv_cat = NameSpace('https://arxiv.org/archive/', 'arxivcat:')

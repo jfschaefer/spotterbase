@@ -1,8 +1,7 @@
-import json
 from pathlib import Path
 
 from spotterbase.rdf.uri import NameSpace, Vocabulary, Uri
-from spotterbase.rdf.vocab import RDF, RDFS, XSD
+from spotterbase.rdf.vocab import RDF, RDFS, XSD, DCTERMS
 from spotterbase.records.jsonld_support import JsonLdContext
 from spotterbase.records.record import PredInfo
 from spotterbase.utils.resources import RESOURCES_DIR
@@ -33,10 +32,11 @@ class SB(Vocabulary):
     MultiTagBody: Uri
     TagSet: Uri
     Tag: Uri
+    subTagOf: Uri
     ReplacedHtmlBody: Uri
 
     # DATASETS (TODO: can this replaced with dublin core?)
-    Dataset: Uri
+    Corpus: Uri
     Document: Uri
 
     isBasedOn: Uri
@@ -65,6 +65,15 @@ class SB_PRED:
     spotterVersion = PredInfo(SB.spotterVersion, json_ld_term='spotterVersion', literal_type=XSD.string)
     withSpotter = PredInfo(SB.withSpotter, json_ld_term='withSpotter', json_ld_type_is_id=True)
 
+    # corpora
+    license = PredInfo(DCTERMS.license, json_ld_term='license', json_ld_type_is_id=True)
+    title = PredInfo(DCTERMS.title, json_ld_term='title', json_ld_type_is_id=True)
+    year = PredInfo(DCTERMS.date, json_ld_term='year', literal_type=XSD.gYear)
+    isBasedOn = PredInfo(SB.isBasedOn, json_ld_term='isBasedOn', json_ld_type_is_id=True)
+
+    # other
+    subTagOf = PredInfo(SB.subTagOf, json_ld_term='subTagOf', json_ld_type_is_id=True)
+
 
 SB_JSONLD_CONTEXT: JsonLdContext = JsonLdContext(
     uri=None,
@@ -83,13 +92,3 @@ SB_JSONLD_CONTEXT: JsonLdContext = JsonLdContext(
     ]
 )
 SB_CONTEXT_FILE: Path = RESOURCES_DIR / 'sb-context.jsonld'
-
-
-def _write_to_file():
-    with open(SB_CONTEXT_FILE, 'w') as fp:
-        json.dump({'@context': SB_JSONLD_CONTEXT.export_to_json()}, fp, indent=4)
-        fp.write('\n')
-
-
-if __name__ == '__main__':
-    _write_to_file()

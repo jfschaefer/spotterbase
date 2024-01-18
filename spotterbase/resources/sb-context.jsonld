@@ -49,6 +49,22 @@
             "@id": "https://ns.mathhub.info/project/sb/withSpotter",
             "@type": "@id"
         },
+        "license": {
+            "@id": "http://purl.org/dc/terms/license",
+            "@type": "@id"
+        },
+        "title": {
+            "@id": "http://purl.org/dc/terms/title",
+            "@type": "@id"
+        },
+        "year": {
+            "@id": "http://purl.org/dc/terms/date",
+            "@type": "http://www.w3.org/2001/XMLSchema#gYear"
+        },
+        "subTagOf": {
+            "@id": "https://ns.mathhub.info/project/sb/subTagOf",
+            "@type": "@id"
+        },
         "FragmentTarget": "https://ns.mathhub.info/project/sb/FragmentTarget",
         "ListSelector": "https://ns.mathhub.info/project/sb/ListSelector",
         "PathSelector": "https://ns.mathhub.info/project/sb/PathSelector",

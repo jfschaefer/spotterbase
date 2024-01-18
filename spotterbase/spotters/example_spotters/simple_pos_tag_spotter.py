@@ -12,7 +12,7 @@ from spotterbase.model_core.annotation import Annotation
 from spotterbase.model_core.sb import SB
 from spotterbase.model_core.body import SimpleTagBody, Tag, TagSet
 from spotterbase.model_core.target import FragmentTarget
-from spotterbase.plugins.model_extra import SBX
+from spotterbase.plugins.model_extra import DECL
 from spotterbase.rdf.types import TripleI
 from spotterbase.rdf.uri import Uri
 from spotterbase.spotters.spotter import Spotter, UriGeneratorMixin, SpotterContext
@@ -60,7 +60,7 @@ class SimplePosTagSpotter(UriGeneratorMixin, Spotter):
         def triple_gen() -> TripleI:
             yield from SpotterRun(
                 uri=ctx.run_uri,
-                spotter_uri=SBX.NS[f'spotters#{cls.spotter_short_id}'],
+                spotter_uri=DECL.NS[f'spotters#{cls.spotter_short_id}'],
                 spotter_version=__version__,
                 date=datetime.now(),
                 label='Simple Part-Of-Speech Tagger based on NLTK'

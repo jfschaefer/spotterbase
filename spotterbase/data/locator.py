@@ -62,6 +62,8 @@ class Locator(ConfigExtension):
                       ', '.join(map(str, self.default_locations()))
             if self.how_to_get:
                 message += f'. {self.how_to_get}'
+            message += \
+                f'. If you have the dataset in a different location, you can specify it using {self.arg_name}=<path>'
             raise LocatorFailedException(message)
         return path
 

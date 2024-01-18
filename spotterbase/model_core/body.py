@@ -44,15 +44,17 @@ class Tag(Record):
             AttrInfo('belongs_to', SB_PRED.belongsTo),
             AttrInfo('label', OA_PRED.label, literal_type=XSD.string),
             AttrInfo('comment', SB_PRED.comment),
+            AttrInfo('sub_tag_of', SB_PRED.subTagOf),
         ],
         is_root_record=True
     )
     label: Optional[str]
     belongs_to: Optional[Uri]
     comment: Optional[str]
+    sub_tag_of: Optional[Uri]
 
-    def __init__(self, uri: Optional[Uri] = None, label: Optional[str] = None, belongs_to: Optional[Uri] = None,
-                 comment: Optional[str] = None):
+    def __init__(self, uri: Optional[Uri] = None, *, label: Optional[str] = None, belongs_to: Optional[Uri] = None,
+                 comment: Optional[str] = None, sub_tag_of: Optional[Uri] = None):
         super().__init__(uri=uri, label=label, belongs_to=belongs_to, comment=comment)
 
 

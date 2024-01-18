@@ -68,13 +68,15 @@ class Uri:
                 self._full_uri = uri[1:-1]
             else:
                 self._full_uri = uri
+        elif isinstance(uri, Uri):      # TODO: we could catch this in __new__ and avoid the copy
+            self._full_uri = uri._full_uri
+            self._namespace = uri._namespace
         elif isinstance(uri, URIRef):
             self._full_uri = str(uri)
         elif isinstance(uri, pathlib.Path):
             self._full_uri = uri.as_uri()
-        elif isinstance(uri, Uri):
-            self._full_uri = uri._full_uri
-            self._namespace = uri._namespace
+        elif isinstance(uri, VocabularyMeta):
+            self._full_uri = str(uri.NS.uri)  # type: ignore
         else:
             raise TypeError(f'Unsupported argument type {type(uri)}')
 
@@ -83,6 +85,13 @@ class Uri:
             self._namespace = namespace
         elif not hasattr(self, '_namespace'):
             self._namespace = None
+
+    @classmethod
+    def maybe(cls, uri: Optional[UriLike]) -> Optional[Uri]:
+        if uri is None:
+            return None
+        else:
+            return cls(uri)
 
     @property
     def namespace(self) -> Optional[NameSpace]:
@@ -169,4 +178,4 @@ class Uri:
 
 
 # Anything that can be converted to a Uri
-UriLike = str | Uri | URIRef | pathlib.Path
+UriLike = str | Uri | URIRef | pathlib.Path | VocabularyMeta

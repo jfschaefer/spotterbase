@@ -59,6 +59,7 @@ _LITERAL_TO_PYTHON_FUNCTIONS: dict[Uri, Callable[[str], Any]] = {
     XSD.boolean: lambda s: {'false': False, 'true': True, '0': False, '1': True}[s],
     XSD.nonNegativeInteger: int,    # TODO: check that not negative
     XSD.dateTime: datetime.datetime.fromisoformat,
+    XSD.gYear: int,
     RDF.HTML: lambda s: HtmlFragment(s),
 }
 
@@ -78,6 +79,7 @@ _PYTHON_TO_LITERAL_WITH_DATATYPE: dict[Uri, tuple[list[type], Callable[[Any], st
     XSD.float: ([float, int], lambda f: f'{f:E}'),
     XSD.boolean: ([bool], lambda b: str(b).lower()),
     XSD.dateTime: ([datetime.datetime], lambda d: d.isoformat()),
+    XSD.gYear: ([int], lambda i: str(i)),
     XSD.nonNegativeInteger: ([int], lambda i: str(i)),
     RDF.HTML: ([HtmlFragment], lambda h: h.get_literal_string()),
 }

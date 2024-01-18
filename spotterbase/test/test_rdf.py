@@ -131,10 +131,10 @@ mv:thingA mv:someRel mv:thingA,
         SB_CONTEXT_FILE: Path = RESOURCES_DIR / 'sb-context.jsonld'
         with open(SB_CONTEXT_FILE, 'r') as fp:
             sb_context = json.load(fp)
-        import spotterbase.model_core.sb
+        import spotterbase.model_core.update_sb_context_file
         self.assertEqual(sb_context, updated_sb_context,
                          msg='\n The "sb-context.jsonld" file is not up-to-date. '
-                             f'Please re-run the "{spotterbase.model_core.sb.__name__}" module')
+                             f'Please re-run the "{spotterbase.model_core.update_sb_context_file.__name__}" module')
 
     def test_html_literal(self):
         f = HtmlFragment(etree.parse(io.StringIO('<a><b>x</b>y<c>z</c></a>')).getroot(), wrapped_in_div=False)

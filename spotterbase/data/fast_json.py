@@ -35,6 +35,12 @@ def load(fp: typing.IO):
     return json.load(fp)        # works for binary files and text files
 
 
+def loads(s: str):
+    if orjson_check():
+        return orjson.loads(s)
+    return json.loads(s)
+
+
 def dump_bytes(obj, fp: typing.BinaryIO):   # potentially faster than dump_text if orjson is available
     if orjson_check():
         fp.write(orjson.dumps(obj))
