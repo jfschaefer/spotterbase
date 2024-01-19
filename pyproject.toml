@@ -30,7 +30,7 @@ Issues = "https://github.com/jfschaefer/spotterbase/issues"
 # dependencies for generating documentation
 # install with `pip install spotterbase[docs]`
 docs = [
-    # "sphinxcontrib.apidoc",
+    "sphinxcontrib.apidoc",
     "sphinx-rtd-theme",
     "graphviz"
 ]
