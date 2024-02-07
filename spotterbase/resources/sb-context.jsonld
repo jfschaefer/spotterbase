@@ -61,6 +61,10 @@
             "@id": "http://purl.org/dc/terms/date",
             "@type": "http://www.w3.org/2001/XMLSchema#gYear"
         },
+        "isBasedOn": {
+            "@id": "https://ns.mathhub.info/project/sb/isBasedOn",
+            "@type": "@id"
+        },
         "subTagOf": {
             "@id": "https://ns.mathhub.info/project/sb/subTagOf",
             "@type": "@id"

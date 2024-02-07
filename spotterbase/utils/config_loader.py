@@ -5,6 +5,7 @@ The configuration can be extended with custom :class:`ConfigExtension`.
 
 The configuration can be loaded with the :class:`ConfigLoader`.
 """
+import abc
 import argparse
 import logging
 import sys
@@ -112,18 +113,62 @@ class LogConfigExtension(ConfigExtension):
 ConfigLoader.default_extensions.append(LogConfigExtension())
 
 
+class _Group(ConfigExtension, abc.ABC):
+    sub_extensions: list[ConfigExtension]
+
+    def __init__(self):
+        self.sub_extensions = []
+
+    def register_sub_extension(self, extension: ConfigExtension):
+        self.sub_extensions.append(extension)
+
+    def process_namespace(self, args: argparse.Namespace):
+        for extension in self.sub_extensions:
+            extension.process_namespace(args)
+
+
+class ArgumentGroup(_Group):
+    def __init__(self, name: str, description: str):
+        super().__init__()
+        self.name = name
+        self.description = description
+        ConfigLoader.default_extensions.append(self)
+
+    def prepare_argparser(self, argparser: configargparse.ArgumentParser):
+        group = argparser.add_argument_group(self.name, self.description)
+        for extension in self.sub_extensions:
+            extension.prepare_argparser(group)   # type: ignore   # TODO: fix argument type for prepare_argparser
+
+
+class MutexGroup(_Group):
+    def __init__(self, required: bool, group: Optional[ArgumentGroup] = None):
+        super().__init__()
+        self.required = required
+        if group:
+            group.register_sub_extension(self)
+        else:
+            ConfigLoader.default_extensions.append(self)
+
+    def prepare_argparser(self, argparser: configargparse.ArgumentParser):
+        group = argparser.add_mutually_exclusive_group(required=self.required)
+        for extension in self.sub_extensions:
+            extension.prepare_argparser(group)   # type: ignore   # TODO: fix argument type for prepare_argparser
+
+
 class SimpleConfigExtension(ConfigExtension):
     value: Any
 
-    def __init__(self, name: str, description: str, add_to_default_configs: bool = True, **kwargs):
+    def __init__(self, name: str, description: str, group: Optional[_Group] = None, **kwargs):
         self.name = name
         self.description = description
         self.kwargs = kwargs
-        if add_to_default_configs:
+        if group:
+            group.register_sub_extension(self)
+        else:
             ConfigLoader.default_extensions.append(self)
-            if ConfigLoader.config_has_been_loaded:
-                warnings.warn('A new configuration option has been added '
-                              'even though a configuration has already been loaded')
+        if ConfigLoader.config_has_been_loaded:
+            warnings.warn('A new configuration option has been added '
+                          'even though a configuration has already been loaded')
         self.__post_init__()
 
     def __post_init__(self):

@@ -98,7 +98,8 @@ def main():
     corpus = Resolver.get_corpus(ArXMLivUris.get_corpus_uri(release_version))
     assert isinstance(corpus, ArXMLivCorpus)
     for centi in [False, True]:
-        dest = DataDir.get(('centi-' if centi else '') + f'arxmliv-{corpus.release}.nt.gz')
+        directory = DataDir.get('arxmliv-metadata')
+        dest = directory / ('centi-' if centi else '') / f'arxmliv-{corpus.release}.nt.gz'
         logger.info(f'Creating {dest}.')
         with gzip.open(dest, 'wt') as fp:
             fp.write(

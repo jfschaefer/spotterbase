@@ -27,6 +27,9 @@ class Document(abc.ABC):
     def open_binary(self) -> IO[bytes]:
         raise NotImplementedError()
 
+    def has_cached_tree(self) -> bool:
+        return self._html_tree is not None
+
     def get_html_tree(self, *, cached: bool) -> _ElementTree:
         if cached and self._html_tree is not None:
             return self._html_tree

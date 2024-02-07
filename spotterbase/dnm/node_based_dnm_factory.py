@@ -2,7 +2,7 @@ import abc
 from itertools import chain, repeat
 from typing import Iterable, Optional
 
-from lxml.etree import _Element, Element
+from lxml.etree import _Element
 
 from spotterbase.dnm.dnm import DnmMeta, DnmFactory, Dnm
 from spotterbase.dnm.replacement_pattern import ReplacementPattern
@@ -38,10 +38,16 @@ class ReplacingNP(NodeProcessor):
 
         if self.keep_annotation:
             # we need to make a copy without the tail
-            node_copy = Element(node.tag, attrib=node.attrib)    # type: ignore
-            node_copy.text = node.text
-            for child in node.getchildren():   # type: ignore
-                node_copy.append(child)
+            import copy
+            node_copy = copy.deepcopy(node)
+            node_copy.tail = None
+
+            # TODO: the following should be a bit more efficient, but it seems to remove
+            #   the children from the original DOM
+            # node_copy = Element(node.tag, attrib=node.attrib)    # type: ignore
+            # node_copy.text = node.text
+            # for child in node.getchildren():   # type: ignore
+            #     node_copy.append(child)
 
             dnm_meta.embedded_annotations.insert(
                 replacement,

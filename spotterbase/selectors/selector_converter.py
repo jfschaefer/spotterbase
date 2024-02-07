@@ -5,10 +5,11 @@ from typing import Optional, Any
 
 from lxml.etree import _Element
 
+from spotterbase.model_core import FragmentTarget
+from spotterbase.model_core.selector import PathSelector, OffsetSelector, ListSelector
+from spotterbase.rdf.uri import Uri, UriLike
 from spotterbase.selectors.dom_range import DomRange, DomPoint
 from spotterbase.selectors.offset_converter import OffsetConverter, OffsetType
-from spotterbase.model_core.selector import PathSelector, OffsetSelector, ListSelector
-from spotterbase.rdf.uri import Uri
 
 
 class SelectorConverter:
@@ -30,6 +31,17 @@ class SelectorConverter:
         # if self._offset_converter is None:
         #     self._offset_converter = OffsetConverter(self._dom)
         return self._offset_converter
+
+    def target_to_dom(self, target: FragmentTarget) -> tuple[DomRange, Optional[list[DomRange]]]:
+        assert target.uri == self._document_uri
+        assert target.selectors
+        supported_selectors = [
+            selector for selector in target.selectors
+            if isinstance(selector, PathSelector) or isinstance(selector, OffsetSelector)
+        ]
+        if not supported_selectors:
+            raise Exception('No supported selectors in target')
+        return self.selector_to_dom(supported_selectors[0])
 
     def selector_to_dom(self, selector: OffsetSelector | PathSelector) -> tuple[DomRange, Optional[list[DomRange]]]:
         main_range: DomRange = self._simple_selector_to_dom(selector)
@@ -86,6 +98,15 @@ class SelectorConverter:
             )
         offset_selector = self.dom_to_offset_selector(dom_range)
         return [path_selector, offset_selector]
+
+    def dom_to_fragment_target(
+            self, target_uri: UriLike, dom_range: DomRange, sub_ranges: Optional[list[DomRange]] = None
+    ) -> FragmentTarget:
+        return FragmentTarget(
+            uri=target_uri,
+            source=self._document_uri,
+            selectors=self.dom_to_selectors(dom_range, sub_ranges)
+        )
 
     def dom_to_offset_selector(self, dom_range: DomRange) -> OffsetSelector:
         dom_offset_range = self.offset_converter.convert_dom_range(dom_range)

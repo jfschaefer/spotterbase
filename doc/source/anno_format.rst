@@ -1,3 +1,5 @@
+.. _Annotation Format:
+
 SpotterBase Annotation Format
 =============================
 

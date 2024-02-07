@@ -1,3 +1,5 @@
+.. _DNM:
+
 :mod:`~spotterbase.dnm` package
 ===============================
 

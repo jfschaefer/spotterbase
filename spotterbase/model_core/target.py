@@ -11,7 +11,7 @@ from spotterbase.records.sparql_populate import SubRecords, Populator
 from spotterbase.rdf.literal import Literal
 from spotterbase.rdf.types import Subject
 from spotterbase.rdf.bnode import BlankNode
-from spotterbase.rdf.uri import Uri
+from spotterbase.rdf.uri import Uri, UriLike
 from spotterbase.rdf.vocab import RDF
 from spotterbase.model_core.sb import SB, SB_PRED
 from spotterbase.sparql.property_path import PropertyPath, UriPath
@@ -34,9 +34,9 @@ class FragmentTarget(Record):
     source: Uri
     selectors: list[PathSelector | OffsetSelector]
 
-    def __init__(self, uri: Optional[Uri] = None, source: Optional[Uri] = None,
+    def __init__(self, uri: Optional[UriLike] = None, source: Optional[UriLike] = None,
                  selectors: Optional[list] = None):
-        super().__init__(uri=uri, source=source, selectors=selectors)
+        super().__init__(uri=Uri.maybe(uri), source=Uri.maybe(source), selectors=selectors)
 
 
 def _populate_without_refinements(fragment_targets: SubRecords, property_path: PropertyPath, populator: Populator):

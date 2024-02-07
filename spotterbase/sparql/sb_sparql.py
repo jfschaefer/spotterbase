@@ -26,6 +26,11 @@ class EndpointConfig(SimpleConfigExtension):
         if not isinstance(self.value, SparqlEndpoint):
             raise ValueError(f'{getattr(args, k)} is not a valid SPARQL endpoint')
 
+    def require(self) -> SparqlEndpoint:
+        if self.value is None:
+            raise Exception(f'No SPARQL endpoint specified (set `{self.name}`)')
+        return self.value
+
 
 # having this list ensures that all endpoints were imported
 SUPPORTED_ENDPOINTS: list[type[SparqlEndpoint]] = [Virtuoso, RdflibEndpoint]
@@ -42,13 +47,8 @@ DATA_ENDPOINT: EndpointConfig = EndpointConfig(
 
 
 def get_work_endpoint() -> SparqlEndpoint:
-    endpoint = WORK_ENDPOINT.value
-    assert endpoint is not None
-    return endpoint
+    return WORK_ENDPOINT.require()
 
 
 def get_data_endpoint() -> SparqlEndpoint:
-    endpoint = DATA_ENDPOINT.value
-    if endpoint is None:
-        raise Exception(f'No SPARQL endpoint specified (set `{DATA_ENDPOINT.name}`)')
-    return endpoint
+    return DATA_ENDPOINT.require()

@@ -9,8 +9,10 @@ from lxml.etree import _Element
 
 from spotterbase.corpora.interface import Document
 from spotterbase.dnm.linked_str import LinkedStr
+from spotterbase.model_core import FragmentTarget
 from spotterbase.model_core.annotation import Annotation
-from spotterbase.rdf import Uri
+from spotterbase.rdf import Uri, UriLike
+from spotterbase.selectors.anno_by_offset import AnnoByOffset
 from spotterbase.selectors.dom_range import DomRange
 from spotterbase.selectors.offset_converter import OffsetConverter, DomOffsetRange, OffsetType
 from spotterbase.selectors.selector_converter import SelectorConverter
@@ -79,9 +81,11 @@ class EmbeddedAnnotations:
         self._annotations: list[tuple[str, DomOffsetRange, Annotation]] = []
         self._annotations_by_unique_replacement: dict[str, int] = {}
         self._category_counters: dict[str, int] = defaultdict(int)
+        self.anno_by_offset: AnnoByOffset = AnnoByOffset()
 
     def insert(self, replacement: str, range_: DomOffsetRange, annotation: Annotation, replacement_unique: bool = True):
         self._annotations.append((replacement, range_, annotation))
+        self.anno_by_offset.add_annotation(range_, annotation)
         if replacement_unique:
             if replacement in self._annotations_by_unique_replacement:
                 raise ValueError(f'Replacement {replacement} already exists')
@@ -136,3 +140,13 @@ class Dnm(LinkedStr[DnmMeta]):
             self.get_meta_info().offset_converter.get_dom_point(self.get_start_ref(), OffsetType.NodeText),
             self.get_meta_info().offset_converter.get_dom_point(self.get_end_ref(), OffsetType.NodeText),
         )
+
+    def to_dom_offset_range(self) -> DomOffsetRange:
+        # TODO: We can optimize this by not converting to DomRange and then back to DomOffsetRange
+        return self.get_meta_info().offset_converter.convert_dom_range(self.to_dom())
+
+    def get_embedded_annotations(self) -> list[Annotation]:
+        return self.get_meta_info().embedded_annotations.anno_by_offset[self.to_dom_offset_range()]
+
+    def to_fragment_target(self, target_uri: UriLike) -> FragmentTarget:
+        return self.get_meta_info().selector_converter.dom_to_fragment_target(target_uri, self.to_dom())

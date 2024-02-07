@@ -38,8 +38,8 @@ class Serializer(abc.ABC):
 
 
 class FileSerializer(Serializer):
-    def __init__(self, path: Path, append: bool = False):
-        self.path = path
+    def __init__(self, path: Path | str, append: bool = False):
+        self.path = Path(path)
         self.serializer: Serializer
         name = self.path.name
 
@@ -76,16 +76,23 @@ class FileSerializer(Serializer):
 
 class TurtleSerializer(Serializer):
     # https://www.w3.org/TR/turtle/#sec-grammar-grammar
-    def __init__(self, fp: TextIO, buffer_size: int = 100000):
+    def __init__(self, fp: TextIO, buffer_size: int = 1024, fixed_prefixes: Optional[Iterable[NameSpace]] = None,
+                 write_prefixes: bool = True):
         self.fp = fp
         self.max_buffer_size = buffer_size
         self.cur_buffer_size = 0
         self.buffer: OrderedDict[Subject, list[tuple[Predicate, Object]]] = OrderedDict()
         self.used_prefixes: dict[str, str] = {}
+        self.write_prefixes = write_prefixes
+        self.allow_new_prefixes = True
+        if fixed_prefixes:
+            for ns in fixed_prefixes:
+                self._require_prefix(ns)
+        self.allow_new_prefixes = fixed_prefixes is None
 
     def write_comment(self, s: str):
         self.flush()
-        self.fp.write('# ' + s + '\n')
+        self.fp.write('# ' + s.replace('\n', '\n# ') + '\n')
 
     def add(self, s: Subject, p: Predicate, o: Object):
         if s in self.buffer:
@@ -138,7 +145,10 @@ class TurtleSerializer(Serializer):
     def _write_node(self, node: Subject | Predicate | Object):
         if isinstance(node, Uri):
             # use 'nrprefix' because virtuoso seems to have problems with prefix:path\/to\/something
-            self.fp.write(format(node, 'nrprefix'))
+            if node.namespace and node.namespace.prefix in self.used_prefixes:
+                self.fp.write(format(node, 'nrprefix'))
+            else:
+                self.fp.write(format(node, '<>'))
         elif isinstance(node, BlankNode):
             self.fp.write(f'_:{node.value}')
         elif isinstance(node, Literal):
@@ -147,7 +157,7 @@ class TurtleSerializer(Serializer):
             raise NotImplementedError(f'Unsupported node type {type(node)}')
 
     def _require_prefix(self, ns: Optional[NameSpace]):
-        if not ns or not ns.prefix:
+        if not self.allow_new_prefixes or not ns or not ns.prefix:
             return
         if ns.prefix in self.used_prefixes:
             if self.used_prefixes[ns.prefix] != str(ns.uri):
@@ -155,7 +165,8 @@ class TurtleSerializer(Serializer):
                                 f'{self.used_prefixes[ns.prefix]} and {str(ns.uri)}')
             return
         self.used_prefixes[ns.prefix] = str(ns.uri)
-        self.fp.write(f'{ns:turtle}\n')
+        if self.write_prefixes:
+            self.fp.write(f'{ns:turtle}\n')
 
     def flush(self):
         while self.buffer:
@@ -171,7 +182,7 @@ class NTriplesSerializer(Serializer):
         self.fp = fp
 
     def write_comment(self, s: str):
-        self.fp.write('# ' + s + '\n')
+        self.fp.write('# ' + s.replace('\n', '\n# ') + '\n')
 
     def add(self, s: Subject, p: Predicate, o: Object):
         self._write_node(s)

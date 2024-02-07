@@ -9,9 +9,8 @@ from spotterbase.dnm_nlp.sentence_tokenizer import sentence_tokenize
 from spotterbase.dnm_nlp.word_tokenizer import word_tokenize
 from spotterbase.model_core import SpotterRun
 from spotterbase.model_core.annotation import Annotation
-from spotterbase.model_core.sb import SB
 from spotterbase.model_core.body import SimpleTagBody, Tag, TagSet
-from spotterbase.model_core.target import FragmentTarget
+from spotterbase.model_core.sb import SB
 from spotterbase.plugins.model_extra import DECL
 from spotterbase.rdf.types import TripleI
 from spotterbase.rdf.uri import Uri
@@ -75,7 +74,6 @@ class SimplePosTagSpotter(UriGeneratorMixin, Spotter):
         uri_generator = self.get_uri_generator_for(document)
 
         dnm = ARXMLIV_STANDARD_DNM_FACTORY_SIMPLE.dnm_from_document(document)
-        selector_converter = document.get_selector_converter()
 
         for sentence in sentence_tokenize(dnm):
             words = word_tokenize(sentence)
@@ -83,8 +81,7 @@ class SimplePosTagSpotter(UriGeneratorMixin, Spotter):
             assert len(words) == len(pos_tagged)
             for dnm_word, tagged_word in zip(words, pos_tagged):
                 uri = next(uri_generator)
-                target = FragmentTarget(uri('target'), document.get_uri(),
-                                        selector_converter.dom_to_selectors(dnm_word.to_dom()))
+                target = dnm_word.to_fragment_target(uri('target'))
                 yield from target.to_triples()
                 yield from Annotation(
                     uri=uri('anno'),

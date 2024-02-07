@@ -37,6 +37,13 @@ class Resolver:
         return document
 
     @classmethod
+    def get_document_or_fail(cls, uri: UriLike) -> Document:
+        document = cls.get_document(uri)
+        if document is None:
+            raise ValueError(f'Failed to find document {uri} in any of the corpora')
+        return document
+
+    @classmethod
     def get_known_corpora(cls) -> Iterable[Corpus]:
         yield from cls._corpora.values()
 

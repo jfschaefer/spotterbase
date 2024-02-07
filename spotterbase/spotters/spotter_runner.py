@@ -9,6 +9,7 @@ Currently, it is rather hacky. Possible improvements:
 from __future__ import annotations
 
 import dataclasses
+import gzip
 import logging
 import multiprocessing
 import pickle
@@ -17,24 +18,58 @@ from datetime import datetime
 from pathlib import Path
 from typing import Iterable, Iterator
 
+from spotterbase.corpora.document_queries import document_iterable_from_query
 from spotterbase.corpora.interface import Document
 from spotterbase.corpora.resolver import Resolver
 from spotterbase.data.locator import TmpDir
+from spotterbase.model_core import OA, SB
 from spotterbase.rdf import TripleI
-from spotterbase.rdf.serializer import FileSerializer, NTriplesSerializer
-from spotterbase.rdf.uri import Uri
+from spotterbase.rdf.serializer import TurtleSerializer
+from spotterbase.rdf.uri import Uri, NameSpace
+from spotterbase.rdf.vocab import RDF, RDFS, XSD
 from spotterbase.spotters.spotter import Spotter
 from spotterbase.utils import config_loader
-from spotterbase.utils.config_loader import ConfigUri, ConfigPath, ConfigInt
+from spotterbase.utils.config_loader import ConfigUri, ConfigPath, ConfigInt, ArgumentGroup, MutexGroup
 from spotterbase.utils.exit import DefaultSignalDelay
 from spotterbase.utils.progress_updater import ProgressUpdater
 
 logger = logging.getLogger()
 
-DOCUMENT = ConfigUri('--document', 'The document to be processed by the spotter')
-CORPUS = ConfigUri('--corpus', 'The corpus to be processed by the spotter')
+DOC_SOURCE = ArgumentGroup('documents', 'specification of what documents to process')
+DOC_SOURCE_MUTEX = MutexGroup(required=True, group=DOC_SOURCE)
+
+DOCUMENT = ConfigUri('--document', 'The document to be processed by the spotter',
+                     group=DOC_SOURCE_MUTEX)
+CORPUS = ConfigUri('--corpus', 'The corpus to be processed by the spotter', group=DOC_SOURCE_MUTEX)
+DOC_QUERY_PATH = ConfigPath(
+    '--doc-query',
+    'Path to a file with a SPARQL query for documents to be processed (document URI in ?doc)',
+    group=DOC_SOURCE_MUTEX
+)
+
+
 NUMBER_OF_PROCESSES = ConfigInt('--number-of-processes', description='number of processes', default=4)
-DIRECTORY = ConfigPath('--dir', 'Directory for the spotter results')
+DIRECTORY = ConfigPath('--dir', 'Directory for the spotter results', required=True)
+
+
+# namespaces used for turtle prefixes
+# (each spotter is allowed to use them while generating turtle snippets,
+# only the main process will write the relevant @prefix statements)
+STANDARD_NAMESPACES: list[NameSpace] = [
+    RDF.NS, RDFS.NS, XSD.NS, OA.NS, SB.NS,
+]
+
+
+class RunnerTtlSerializer(TurtleSerializer):
+    def __init__(self, path: Path):
+        assert path.name.endswith('.ttl.gz')
+        self.path = path
+        self.fp = gzip.open(path, 'at')
+        super().__init__(self.fp, fixed_prefixes=STANDARD_NAMESPACES)
+
+    def close(self):
+        super().close()
+        self.fp.close()
 
 
 class _ProcessedDocTracker:
@@ -52,9 +87,11 @@ class _ProcessedDocTracker:
                         self.previously_processed_docs.add(uri)
 
     def filter_documents(self, documents: Iterable[Document]) -> Iterator[Document]:
-        # should we also remove duplicates? (more complex/higher memory requirements)
+        duplicate_check: set[str] = set()
         for document in documents:
-            if str(document.get_uri()) not in self.previously_processed_docs:
+            uri_str = str(document.get_uri())
+            if uri_str not in self.previously_processed_docs and uri_str not in duplicate_check:
+                duplicate_check.add(uri_str)
                 yield document
 
     def add(self, document: Uri | str):
@@ -101,9 +138,12 @@ class _DocProcessor:
         result: dict[str, Path] = {}
         for spotter in self.spotters:
             try:
-                path = TmpDir.get(spotter.spotter_short_id + '-' + uuid.uuid4().hex + '.nt')
+                path = TmpDir.get(spotter.spotter_short_id + '-' + uuid.uuid4().hex + '.ttl')
                 result[spotter.spotter_short_id] = path
-                with open(path, 'w') as fp, NTriplesSerializer(fp) as serializer:
+                with (
+                    open(path, 'w') as fp,
+                    TurtleSerializer(fp, fixed_prefixes=STANDARD_NAMESPACES, write_prefixes=False) as serializer,
+                ):
                     serializer.add_from_iterable(spotter.process_document(document))
             except Exception:
                 logger.exception(f'{type(spotter)} raised an exception when processing {document.get_uri()}')
@@ -113,7 +153,7 @@ class _DocProcessor:
 def run(spotter_classes: list[type[Spotter]], documents: Iterable[Document], *, corpus_descr: str, directory: Path):
     directory.mkdir(exist_ok=True)
     spotters: list[Spotter] = []
-    serializers: dict[str, FileSerializer] = {}
+    serializers: dict[str, RunnerTtlSerializer] = {}
     for spotter_class in spotter_classes:
         spotter_id = spotter_class.spotter_short_id
         assert spotter_id not in serializers
@@ -129,10 +169,11 @@ def run(spotter_classes: list[type[Spotter]], documents: Iterable[Document], *, 
             context, triples = spotter_class.setup_run()
         spotters.append(spotter_class(context))
 
-        rdf_file_path = directory / f'{spotter_id}.nt.gz'
+        rdf_file_path = directory / f'{spotter_id}.ttl.gz'
         if not continuing and rdf_file_path.is_file():
             raise Exception(f'{rdf_file_path} already exists')
-        serializer = FileSerializer(rdf_file_path, append=True)
+
+        serializer = RunnerTtlSerializer(rdf_file_path)
         logger.info(f'{"Appending" if continuing else "Writing"} to {serializer.path}')
         serializers[spotter_id] = serializer
         if not continuing:
@@ -154,7 +195,11 @@ def run(spotter_classes: list[type[Spotter]], documents: Iterable[Document], *, 
     try:
         with multiprocessing.Pool(processes=NUMBER_OF_PROCESSES.value) as pool:
             doc_result: _DocResult
-            for i, doc_result in enumerate(pool.imap_unordered(doc_processor.process_doc, documents, chunksize=5)):
+            for i, doc_result in enumerate(
+                    pool.imap_unordered(
+                        doc_processor.process_doc, doc_tracker.filter_documents(documents), chunksize=5
+                    )
+            ):
                 progress_updater.update(i)
                 with DefaultSignalDelay():
                     for spotter_id, path in doc_result.files.items():
@@ -178,22 +223,24 @@ def auto_run_spotter(spotter_class: type[Spotter] | list[type[Spotter]]):
 
     config_loader.auto()
     if DOCUMENT.value is not None:
-        if CORPUS.value is not None:
-            raise Exception(f'Cannot have values for both {DOCUMENT.name} and {CORPUS.name}')
         document = Resolver.get_document(DOCUMENT.value)
         if document is None:
             raise Exception(f'Failed to find document {document}')
         documents_iterator = iter([document])
-    else:
-        if CORPUS.value is None:
-            raise Exception('No corpus or document was specified')
+        corpus_descr = f'document {document.get_uri()}'
+    elif CORPUS.value is not None:
         corpus = Resolver.get_corpus(CORPUS.value)
         if corpus is None:
             raise Exception(f'Failed to find corpus {corpus}')
         documents_iterator = iter(corpus)
+        corpus_descr = f'corpus {corpus.get_uri()}'
+    elif DOC_QUERY_PATH.value is not None:
+        query = DOC_QUERY_PATH.value.read_text()
+        documents_iterator = iter(document_iterable_from_query(query))
+        corpus_descr = f'query {query}'
+    else:
+        assert False, 'DOC_SOURCE_MUTEX should ensure that exactly one option is set'
 
-    uri = DOCUMENT.value or CORPUS.value
-    assert uri is not None
     directory = DIRECTORY.value
     assert directory is not None
-    run(spotter_classes, documents_iterator, corpus_descr=str(uri), directory=directory)
+    run(spotter_classes, documents_iterator, corpus_descr=corpus_descr, directory=directory)

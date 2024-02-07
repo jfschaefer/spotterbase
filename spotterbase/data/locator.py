@@ -1,11 +1,9 @@
-import argparse
 import logging
 import tempfile
-import warnings
 from pathlib import Path
 from typing import Optional, Iterator
 
-from spotterbase.utils.config_loader import ConfigExtension, ConfigLoader
+from spotterbase.utils.config_loader import SimpleConfigExtension, _Group
 
 logger = logging.getLogger(__name__)
 
@@ -14,31 +12,16 @@ class LocatorFailedException(Exception):
     pass
 
 
-class Locator(ConfigExtension):
-    def __init__(self, arg_name: str, description: str, default_rel_locations: list[Path | str],
-                 how_to_get: Optional[str] = None, add_to_default_configs: bool = True):
-        self.arg_name = arg_name
-        self.description = description
+class Locator(SimpleConfigExtension):
+    def __init__(self, name: str, description: str, default_rel_locations: list[Path | str],
+                 how_to_get: Optional[str] = None, group: Optional[_Group] = None):
+        super().__init__(
+            name=name,
+            description=description,
+            group=group
+        )
         self.how_to_get = how_to_get
         self.default_rel_locations = default_rel_locations
-
-        self.specified_location: Optional[str] = None
-
-        if add_to_default_configs:
-            if ConfigLoader.config_has_been_loaded:
-                warnings.warn('A new configuration option has been added '
-                              'even though a configuration has already been loaded')
-            ConfigLoader.default_extensions.append(self)
-
-    def prepare_argparser(self, argparser: argparse.ArgumentParser):
-        argparser.add_argument(self.arg_name, help=self.description)
-
-    def process_namespace(self, args: argparse.Namespace):
-        k = self.arg_name.lstrip('-').replace('-', '_')
-        if k in args:
-            value = getattr(args, k)
-            if value:
-                self.specified_location = value
 
     def is_located(self) -> bool:
         return self.location_opt() is not None
@@ -48,8 +31,8 @@ class Locator(ConfigExtension):
             yield DataDir.get(rel)
 
     def location_opt(self) -> Optional[Path]:
-        if self.specified_location:
-            return Path(self.specified_location)
+        if self.value:
+            return Path(self.value)
         for path in self.default_locations():
             if path.exists():
                 return path
@@ -63,7 +46,7 @@ class Locator(ConfigExtension):
             if self.how_to_get:
                 message += f'. {self.how_to_get}'
             message += \
-                f'. If you have the dataset in a different location, you can specify it using {self.arg_name}=<path>'
+                f'. If you have the dataset in a different location, you can specify it using {self.name}=<path>'
             raise LocatorFailedException(message)
         return path
 

@@ -4,7 +4,7 @@ from typing import Any, Optional
 
 from spotterbase.records.record import Record, RecordInfo, AttrInfo, FieldUnknownRecord
 from spotterbase.model_core.oa import OA_PRED, OA
-from spotterbase.rdf.uri import Uri
+from spotterbase.rdf.uri import Uri, UriLike
 
 
 class Annotation(Record):
@@ -23,6 +23,6 @@ class Annotation(Record):
     body: Any
     creator_uri: Optional[Uri]
 
-    def __init__(self, uri: Optional[Uri] = None, *, target_uri: Optional[Uri] = None,
+    def __init__(self, uri: Optional[UriLike] = None, *, target_uri: Optional[UriLike] = None,
                  body: Optional[Any] = None, creator_uri: Optional[Uri] = None):
-        super().__init__(uri=uri, target_uri=target_uri, body=body, creator_uri=creator_uri)
+        super().__init__(uri=Uri.maybe(uri), target_uri=Uri.maybe(target_uri), body=body, creator_uri=creator_uri)

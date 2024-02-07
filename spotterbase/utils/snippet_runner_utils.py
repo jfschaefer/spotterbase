@@ -1,6 +1,6 @@
 """Utilities for running documentation snippets
 
-They are used in ``snippet_runner.py`` files in the documentation
+They are used in ``snippet_test.py`` files in the documentation
 to run the snippets and ensure they are up-to-date."""
 
 import sys
