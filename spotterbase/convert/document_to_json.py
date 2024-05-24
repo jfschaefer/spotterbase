@@ -127,7 +127,8 @@ def main():
     config_loader.auto()
     assert document.value
     actual_doc = Resolver.get_document(document.value)
-    assert actual_doc is not None
+    if actual_doc is None:
+        raise ValueError(f'Failed to find document {document.value} in any of the corpora')
     assert outpath.value
     with open(outpath.value, 'w') as fp:
         json.dump(converter_factory.create().process(actual_doc), fp, indent=2)

@@ -39,8 +39,10 @@ DefaultSpecialPopulators: dict[type[Record], list[SpecialPopulator]] = {}
 
 
 class Populator:
-    def __init__(self, record_type_resolver: RecordClassResolver = DefaultRecordClassResolver,
+    def __init__(self,
                  endpoint: Optional[SparqlEndpoint] = None,
+                 *,
+                 record_type_resolver: RecordClassResolver = DefaultRecordClassResolver,
                  special_populators: Optional[dict[type[Record], list[SpecialPopulator]]] = None,
                  chunk_size: int = 1000):
 

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import functools
+import hashlib
 import pathlib
 import re
 import uuid
@@ -175,6 +176,10 @@ class Uri:
 
     def __hash__(self):
         return hash(str(self))
+
+    @functools.lru_cache(maxsize=2**10)
+    def sha256_as_int(self) -> int:
+        return int(hashlib.sha256(str(self).encode('utf-8')).hexdigest(), base=16)
 
 
 # Anything that can be converted to a Uri

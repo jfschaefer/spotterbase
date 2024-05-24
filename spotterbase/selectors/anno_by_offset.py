@@ -20,7 +20,7 @@ class AnnoByOffset:
             self._root = range_.converter.root
         else:
             # technically, it's okay to have them from different DOMs,
-            # but that is unlikelye and this way we can catch errors that would otherwise be hard to debug
+            # but that is unlikely and this way we can catch errors that would otherwise be hard to debug
             assert self._root == range_.converter.root, 'the annotations must be from the same DOM'
 
     def get_annotations_from_range(self, range_: DomOffsetRange) -> list[Annotation]:

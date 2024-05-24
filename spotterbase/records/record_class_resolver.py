@@ -35,9 +35,9 @@ class RecordClassResolver:
         except KeyError:
             raise KeyError(f'Unknown record type: {item!r}')
 
-    def add(self, record_type: type[Record]):
+    def add(self, record_type: type[Record], overwrite: bool = False):
         type_ = record_type.record_info.record_type
-        if type_ in self._lookup:
+        if type_ in self._lookup and not overwrite:
             if self._lookup[type_] != record_type:
                 raise Exception(f'failed to map {type_} to {record_type.__qualname__} '
                                 f'because it already refers to {self._lookup[type_].__qualname__}')

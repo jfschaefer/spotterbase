@@ -33,7 +33,7 @@ class SelectorConverter:
         return self._offset_converter
 
     def target_to_dom(self, target: FragmentTarget) -> tuple[DomRange, Optional[list[DomRange]]]:
-        assert target.uri == self._document_uri
+        assert target.source == self._document_uri
         assert target.selectors
         supported_selectors = [
             selector for selector in target.selectors
