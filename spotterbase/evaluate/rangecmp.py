@@ -99,6 +99,8 @@ class RangeMatching:
 
         for doc_uri in doc_uris:
             doc = Resolver.get_document(doc_uri)
+            if doc is None:
+                raise Exception(f'Document {doc_uri} not found')
             offset_equi = OffsetEquis.from_doc_simple(doc, offset_equi_config)
 
             def anno_to_interval(anno: AnnoWithFragTarget) -> Interval:
