@@ -210,4 +210,12 @@ class NodeBasedDnmFactory(DnmFactory):
 
         start_refs, end_refs, strings = self._root_processor.apply(dnm_meta.dom, dnm_meta)
 
-        return Dnm(meta_info=dnm_meta, string=''.join(strings), start_refs=list(start_refs), end_refs=list(end_refs))
+        string = ''.join(strings)
+        start_refs = list(start_refs)
+        end_refs = list(end_refs)
+
+        if len(string) != len(start_refs) or len(string) != len(end_refs):
+            raise Exception('Lengths of string, start_refs, and end_refs do not match. '
+                            'This is likely a bug in a NodeProcessor.')
+
+        return Dnm(meta_info=dnm_meta, string=string, start_refs=start_refs, end_refs=end_refs)
