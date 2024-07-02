@@ -30,7 +30,7 @@ class AnnoCollection:
                 raise ValueError(f'Duplicate record URI: {record.uri}')
             record_by_uri[record.uri] = record
 
-        fragment_annos_by_source = {}
+        fragment_annos_by_source: dict[Uri, list[AnnoWithFragTarget]] = {}
         for record in records:
             if not isinstance(record, Annotation):
                 continue
