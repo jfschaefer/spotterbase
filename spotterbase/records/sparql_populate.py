@@ -160,7 +160,7 @@ class Populator:
     def _get_types(self, uris: Iterable[Uri], property_path: PropertyPath = UriPath(RDF.type)) \
             -> dict[Uri, list[Uri]]:
         response = self.endpoint.query(f'''
-SELECT ?uri ?type WHERE {{
+SELECT DISTINCT ?uri ?type WHERE {{
     VALUES ?uri {{ {" ".join(format(uri, '<>') for uri in uris)} }}
     ?uri {property_path.to_string()} ?type .
 }}
@@ -252,7 +252,7 @@ SELECT DISTINCT ?uri {" ".join(var_to_attr.keys())} WHERE {{
 
             record_by_uri: dict[Uri, Record] = {uri: record for record, uri in records}
             response = self.endpoint.query(f'''
-SELECT ?uri ?val WHERE {{
+SELECT DISTINCT ?uri ?val WHERE {{
     VALUES ?uri {{ {" ".join(format(uri, '<>') for uri in record_by_uri)} }}
     ?uri {path.to_string()} ?val .
 }}
