@@ -5,7 +5,9 @@ from typing import IO, Iterable, Iterator, Optional, TextIO
 from lxml.etree import _ElementTree, _Element
 import lxml.etree as etree
 
+from spotterbase.model_core import FragmentTarget, PathSelector, OffsetSelector
 from spotterbase.rdf.uri import Uri
+from spotterbase.selectors.dom_range import DomRange
 from spotterbase.selectors.offset_converter import OffsetConverter
 from spotterbase.selectors.selector_converter import SelectorConverter
 
@@ -66,6 +68,9 @@ class Document(abc.ABC):
                 offset_converter=self.get_offset_converter(),
             )
         return self._selector_converter
+
+    def to_dom(self, arg: FragmentTarget | PathSelector | OffsetSelector) -> tuple[DomRange, Optional[list[DomRange]]]:
+        return self.get_selector_converter().to_dom(arg)
 
 
 class DocumentNotInCorpusException(Exception):

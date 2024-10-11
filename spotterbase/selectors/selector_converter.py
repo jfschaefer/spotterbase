@@ -5,7 +5,7 @@ from typing import Optional, Any
 
 from lxml.etree import _Element
 
-from spotterbase.model_core import FragmentTarget
+from spotterbase.model_core import FragmentTarget, Annotation
 from spotterbase.model_core.selector import PathSelector, OffsetSelector, ListSelector
 from spotterbase.rdf.uri import Uri, UriLike
 from spotterbase.selectors.dom_range import DomRange, DomPoint
@@ -49,6 +49,14 @@ class SelectorConverter:
             return main_range, self._complex_selector_to_dom(selector.refinement)
         else:
             return main_range, None
+
+    def to_dom(self, arg: FragmentTarget | PathSelector | OffsetSelector) -> tuple[DomRange, Optional[list[DomRange]]]:
+        if isinstance(arg, FragmentTarget):
+            return self.target_to_dom(arg)
+        elif isinstance(arg, PathSelector) or isinstance(arg, OffsetSelector):
+            return self.selector_to_dom(arg)
+        else:
+            raise TypeError(f'Unsupported argument type {type(arg)}')
 
     def _simple_selector_to_dom(self, selector: OffsetSelector | PathSelector) -> DomRange:
         """ Like selector_to_dom, but ignores refinements and cannot handle non-continuous ranges """
