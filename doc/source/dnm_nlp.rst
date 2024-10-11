@@ -59,18 +59,20 @@ Let's match simple numbers::
     [<"nat">]
 
 There is a lot to unpack here:
+
 1. ``mn_42`` is just an example XML tree.
+
 2. ``nat_matcher`` is a matcher for XML trees that correspond natural numbers:
 
     * ``xm.tag('mn')`` gives us a simple matcher for ``<mn>`` nodes.
     * ``.with_text('[0-9]+')`` restricts the matcher to only match nodes
-        whose text content matches the regular expression ``[0-9]+``.
+      whose text content matches the regular expression ``[0-9]+``.
     * ``** 'nat'`` adds a label to the match.
-        The idea is similar to named groups in Python's regular expressions.
-        Tags only really make sense with more complex examples.
+      The idea is similar to named groups in Python's regular expressions.
+      Tags only really make sense with more complex examples.
 
 3. ``nat_matcher.match(mn_42)`` returns an iterator for all matches in ``mn42`` (in this case only one).
-    You can ignore the output for now.
+   You can ignore the output for now.
 
 Currently, we cannot match floating point numbers, but of course we can make a new matcher::
 
