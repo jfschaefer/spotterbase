@@ -26,9 +26,11 @@ loading_results: dict[str, LoadingStatus] = {}
 def load_core_plugins():
     import spotterbase.model_core
     import spotterbase.corpora.test_corpus
+    import spotterbase.corpora.local_file_corpus
 
     spotterbase.model_core.load()
     spotterbase.corpora.test_corpus.load()
+    spotterbase.corpora.local_file_corpus.load()
 
 
 def load_plugins():
