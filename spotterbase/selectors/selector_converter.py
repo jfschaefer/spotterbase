@@ -5,7 +5,7 @@ from typing import Optional, Any
 
 from lxml.etree import _Element
 
-from spotterbase.model_core import FragmentTarget, Annotation
+from spotterbase.model_core import FragmentTarget
 from spotterbase.model_core.selector import PathSelector, OffsetSelector, ListSelector
 from spotterbase.rdf.uri import Uri, UriLike
 from spotterbase.selectors.dom_range import DomRange, DomPoint
