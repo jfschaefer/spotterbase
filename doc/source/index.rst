@@ -18,5 +18,6 @@ Content
     dnm
     dnm_nlp
     corpora
+    arxiv_plugin
     api-doc
 

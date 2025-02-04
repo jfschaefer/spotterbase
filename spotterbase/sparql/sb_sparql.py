@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 import argparse
+import contextlib
 import uuid
-from typing import Optional
+from typing import Optional, Iterator
 
 from spotterbase.utils.config_loader import SimpleConfigExtension
 from spotterbase.rdf.uri import Uri
@@ -52,3 +53,19 @@ def get_work_endpoint() -> SparqlEndpoint:
 
 def get_data_endpoint() -> SparqlEndpoint:
     return DATA_ENDPOINT.require()
+
+
+@contextlib.contextmanager
+def tmp_graph(
+        data: Optional[Uri | Path] = None, *, endpoint: Optional[SparqlEndpoint] = None
+) -> Iterator[tuple[SparqlEndpoint, Uri]]:
+    graph_uri = get_tmp_graph_uri()
+    data_uri = data if isinstance(data, Uri) else Uri(data.absolute()) if data else None
+    endpoint = endpoint or get_work_endpoint()
+    try:
+        endpoint.update(f'CREATE GRAPH {graph_uri:<>}')
+        if data:
+            endpoint.update(f'LOAD {data_uri:<>} INTO GRAPH {graph_uri:<>}')
+        yield endpoint, graph_uri
+    finally:
+        endpoint.update(f'DROP GRAPH {graph_uri:<>}')

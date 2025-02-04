@@ -31,6 +31,8 @@ class Locator(SimpleConfigExtension):
             yield DataDir.get(rel)
 
     def location_opt(self) -> Optional[Path]:
+        if not hasattr(self, 'value'):
+            raise RuntimeError('The locator appears uninitialized. Did you run spotterbase.utils.config_loader.auto()?')
         if self.value:
             return Path(self.value)
         for path in self.default_locations():
@@ -60,6 +62,19 @@ class DataDir:
         if not path.exists():
             path.mkdir()
         return path / rel_path
+
+
+class CacheDir:
+    cache_locator = Locator('--cache-dir', 'directory for caching data', [])
+
+    @classmethod
+    def get(cls, rel_path: Optional[Path | str] = None) -> Path:
+        path = cls.cache_locator.location_opt() or DataDir.get('cache')
+        if not path.exists():
+            path.mkdir()
+        if rel_path:
+            path = path / rel_path
+        return path
 
 
 class TmpDir:
