@@ -198,7 +198,7 @@ class MatcherNodeAsSeq(SeqMatcher):
 
     def _match(self, nodes: List[_Element]) -> Iterator[Tuple[List[_Match], List[_Element]]]:
         if not nodes:
-            return iter(())
+            return
         for match in self.node_matcher._match(nodes[0]):
             yield [match], nodes[1:]
 

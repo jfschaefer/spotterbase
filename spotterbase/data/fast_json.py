@@ -44,13 +44,15 @@ def loads(s: str):
 def dump_bytes(obj, fp: typing.BinaryIO):   # potentially faster than dump_text if orjson is available
     if orjson_check():
         fp.write(orjson.dumps(obj))
-    fp.write(json.dumps(obj).encode())
+    else:
+        fp.write(json.dumps(obj).encode())
 
 
 def dump_text(obj, fp: typing.TextIO):
     if orjson_check():
         fp.write(orjson.dumps(obj).decode())
-    return json.dump(obj, fp)
+    else:
+        json.dump(obj, fp)
 
 
 def dump(obj, fp: typing.TextIO):

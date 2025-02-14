@@ -81,7 +81,7 @@ class SelectorConverter:
         node: Any = self._dom.xpath(match.group('xpath'))
         if isinstance(node, list):
             if len(node) != 1:
-                raise Exception(f'XPath does not yield unique node (yields {len(node)} nodes)')
+                raise Exception(f'XPath {path} does not yield unique node (yields {len(node)} nodes)')
             node = node[0]
         if not isinstance(node, _Element):
             raise Exception('XPath does not point to normal node')
@@ -94,7 +94,7 @@ class SelectorConverter:
         assert type_ == 'char'
         if offset is None:
             raise Exception(f'No offset provided for path reference of type {type_}')
-        total_text_offset = int(offset) + self.offset_converter.get_offset(node, OffsetType.Text) + 1
+        total_text_offset = int(offset) + self.offset_converter.get_offset(node, OffsetType.Text)
         return self.offset_converter.get_dom_point(total_text_offset, OffsetType.Text)
 
     def dom_to_selectors(self, dom_range: DomRange, sub_ranges: Optional[list[DomRange]] = None)\

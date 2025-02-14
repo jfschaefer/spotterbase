@@ -27,7 +27,7 @@ def _run_shell_file_actual(shell_file: Path, cwd: Path) -> str:
         if line.startswith('#'):
             continue
         if line.startswith('python3 '):
-            line = f'{Path(sys.executable).resolve()} {line[len("python3 "):]}'
+            line = f'{Path(sys.executable)} {line[len("python3 "):]}'
         if line.endswith('\\'):
             current_command += line[:-1]
             continue

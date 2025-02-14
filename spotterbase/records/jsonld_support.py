@@ -50,7 +50,7 @@ class JsonLdContext:
         for p in pred_infos:
             if p.json_ld_term is None:
                 continue
-            assert p.json_ld_term not in self.pred_terms or self.pred_terms[p.json_ld_term] == p,\
+            assert p.json_ld_term not in self.pred_terms or self.pred_terms[p.json_ld_term] == p, \
                 f'{p.json_ld_term} already exists'
             self.pred_terms[p.json_ld_term] = p
 

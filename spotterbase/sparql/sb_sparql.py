@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import contextlib
 import uuid
+from pathlib import Path
 from typing import Optional, Iterator
 
 from spotterbase.utils.config_loader import SimpleConfigExtension

@@ -25,7 +25,7 @@ class _LocalCorpus(Corpus):
         if not uri.starts_with('file:'):
             raise DocumentNotInCorpusException()
         if hasattr(Path, 'from_uri'):
-            path = Path.from_uri(uri)
+            path = Path.from_uri(str(uri))
         else:
             from urllib.parse import unquote, urlparse
             path = Path(unquote(urlparse(str(uri)).path))

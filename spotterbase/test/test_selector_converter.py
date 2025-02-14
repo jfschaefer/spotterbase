@@ -2,6 +2,7 @@ import io
 import unittest
 
 from lxml import etree
+from spotterbase.model_core.selector import PathSelector
 
 from spotterbase.selectors.dom_range import DomPoint, DomRange
 from spotterbase.selectors.offset_converter import OffsetConverter
@@ -18,3 +19,16 @@ class TestSelectorConverter(unittest.TestCase):
         converter = SelectorConverter(Uri('http://example.org'), dom.getroot(), OffsetConverter(dom.getroot()))
         selector = converter.dom_to_path_selector(dom_range)
         self.assertEqual(selector.start, 'char(/a,0)')
+
+    def test2(self):
+        dom = etree.parse(io.StringIO('<a><b/>xyz</a>'))
+        selector = PathSelector(
+            start='char(/a,1)',
+            end='char(/a,2)',
+        )
+        converter = SelectorConverter(Uri('http://example.org'), dom.getroot(), OffsetConverter(dom.getroot()))
+        dom_range, subranges = converter.selector_to_dom(selector)
+        self.assertIsNone(subranges)
+        selector = converter.dom_to_path_selector(dom_range)
+        self.assertEqual(selector.start, 'char(/a,1)')
+        self.assertEqual(selector.end, 'char(/a,2)')

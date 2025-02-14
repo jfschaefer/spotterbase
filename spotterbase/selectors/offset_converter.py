@@ -175,7 +175,8 @@ class OffsetConverter:
                                     key=lambda entry: entry[1].get_offsets_of_type(offset_type)[1]) - 1
         node, offset_data = self._nodes_post_order[index]
         offsets = offset_data.get_offsets_of_type(offset_type)
-        if offset_type == OffsetType.NodeText and offsets[1] == offset:
+        # if offset_type == OffsetType.NodeText and offsets[1] == offset:
+        if offsets[1] == offset:    # we used to require that it is a NodeText offset... Any reason for that?
             return DomPoint(node, after=True)
         return DomPoint(node, tail_offset=offset - offsets[1])
 

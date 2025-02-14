@@ -14,7 +14,7 @@ def rdf_node_to_string(
                 pyval = rdfnode.to_py_val()
                 if type(pyval) in {int, float, bool}:
                     return rdfnode.string
-                elif type(pyval) == str:
+                elif type(pyval) == str:  # noqa
                     return rdfnode.format_string_ntriples()
             except NotImplementedError:
                 pass
