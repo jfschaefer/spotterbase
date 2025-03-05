@@ -200,6 +200,54 @@ class TextExtractingBlockedNP(NodeProcessor):
         return chain(*start_refs), chain(*end_refs), chain(*strings)
 
 
+class SourceHtmlNP(NodeProcessor):
+    """Essentially outputs the original HTML sources of the node (but generates it from the DOM).
+    TODO: Currently, attributes are skipped. This should be configurable.
+    """
+    def __init__(self):
+        pass
+
+    def apply(self, node: _Element, dnm_meta: DnmMeta) -> tuple[Iterable[int], Iterable[int], Iterable[str]]:
+        start_refs: list[Iterable[int]] = []
+        end_refs: list[Iterable[int]] = []
+        strings: list[Iterable[str]] = []
+
+        def recurse(node: _Element):
+            offs = dnm_meta.offset_converter.get_offset_data(node)
+
+            token = f'<{node.tag}>'
+            start_refs.append(repeat(offs.node_text_offset_before, len(token)))
+            end_refs.append(repeat(offs.node_text_offset_before, len(token)))
+            strings.append(token)
+
+            if text := node.text:
+                strings.append([text])
+                start_refs.append(range(offs.node_text_offset_before + 1,
+                                        offs.node_text_offset_before + len(text) + 1))
+                end_refs.append(range(offs.node_text_offset_before + 2,
+                                      offs.node_text_offset_before + len(text) + 2))
+            for child in node:
+                recurse(child)
+
+                if child.tail:
+                    tail = child.tail
+                    strings.append([tail])
+                    child_offs = dnm_meta.offset_converter.get_offset_data(child)
+                    start_refs.append(range(child_offs.node_text_offset_after,
+                                            child_offs.node_text_offset_after + len(tail)))
+                    end_refs.append(range(child_offs.node_text_offset_after + 1,
+                                          child_offs.node_text_offset_after + len(tail) + 1))
+
+            token = f'</{node.tag}>'
+            start_refs.append(repeat(offs.node_text_offset_after, len(token)))
+            end_refs.append(repeat(offs.node_text_offset_after, len(token)))
+            strings.append(token)
+
+        recurse(node)
+
+        return chain(*start_refs), chain(*end_refs), chain(*strings)
+
+
 class NodeBasedDnmFactory(DnmFactory):
     def __init__(self, root_processor: NodeProcessor):
         self._root_processor = root_processor

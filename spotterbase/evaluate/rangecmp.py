@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import dataclasses
+import functools
 from typing import Iterable
 
 from intervaltree import IntervalTree, Interval
@@ -8,7 +9,10 @@ from lxml.etree import _Element, _Comment
 
 from spotterbase.corpora.interface import Document
 from spotterbase.corpora.resolver import Resolver
+from spotterbase.dnm.dnm import Dnm
+from spotterbase.dnm.node_based_dnm_factory import NodeBasedDnmFactory, SourceHtmlNP
 from spotterbase.evaluate.annocollection import AnnoWithFragTarget, AnnoCollection
+from spotterbase.rdf import Uri
 from spotterbase.selectors.offset_converter import DomOffsetRange
 
 
@@ -22,6 +26,12 @@ class OffsetEquiConfig:
         if you annotate ``<span>def</span>`` or just ``def`` or just ``<span>def``.
         By adding ``span`` to ``visible_tags``, you can make the span visible.
         This is relevant for meaning-carrying tags (e.g. ``<msqrt>`` in MathML).
+
+    Clarification:
+        `'x' in invisible_nodes` is stronger than `'x' not in visible_tags`, because
+        it means that the content of `x` is completely irrelevant, while the content
+        of a tag not in `visible_tags` is still relevant, just whether the "open" and "close" tags
+        are included is irrelevant.
 
     Note: This is a prototype implementation. In the future, we need support more complex cases
         (e.g. tags that are only visible if they contain certain attributes).
@@ -76,6 +86,10 @@ class OffsetEquis:
 class AnnoWithFragTargetPair:
     golden: AnnoWithFragTarget
     prediction: AnnoWithFragTarget
+
+    def get_doc_uri(self) -> Uri:
+        assert self.golden.target.source == self.prediction.target.source
+        return self.golden.target.source
 
 
 @dataclasses.dataclass(frozen=True)
@@ -151,3 +165,26 @@ class RangeMatching:
                     result.prediction_in_multimatches.append(prediction_interval)
 
         return result
+
+    def print_overlap_details(self):
+        """Prints overlapping annotations in detail to help find out why they only overlap instead of being equal"""
+
+        overlaps = self.overlaps[:]
+        overlaps.sort(key=lambda pair: str(pair.get_doc_uri()))
+
+        dnm_factory = NodeBasedDnmFactory(SourceHtmlNP())
+
+        @functools.lru_cache(1)
+        def get_doc_and_dnm(uri: Uri) -> tuple[Document, Dnm]:
+            doc = Resolver.get_document(uri)
+            if doc is None:
+                raise Exception(f'Document {uri} not found')
+            return doc, dnm_factory.dnm_from_document(doc)
+
+        for pair in self.overlaps:
+            doc, dnm = get_doc_and_dnm(pair.get_doc_uri())
+            print(f'Golden: {pair.golden.anno.uri}')
+            print(repr(str(dnm.sub_dnm_from_dom_range(doc.to_dom(pair.golden.target)[0])[0])))
+            print(f'Prediction: {pair.prediction.anno.uri}')
+            print(repr(str(dnm.sub_dnm_from_dom_range(doc.to_dom(pair.prediction.target)[0])[0])))
+            print()

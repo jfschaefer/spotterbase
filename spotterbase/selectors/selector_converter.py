@@ -12,9 +12,11 @@ from spotterbase.selectors.dom_range import DomRange, DomPoint
 from spotterbase.selectors.offset_converter import OffsetConverter, OffsetType
 
 
-class SelectorConverter:
-    _path_regex = re.compile(r'(?P<type>(node)|(after-node)|(char))\((?P<xpath>.*?)(, *(?P<offset>[0-9]+))?\)')
+# Warning: this regex is used in other places
+PATH_SELECTOR_REGEX = re.compile(r'(?P<type>(node)|(after-node)|(char))\((?P<xpath>.*?)(, *(?P<offset>[0-9]+))?\)')
 
+
+class SelectorConverter:
     def __init__(self, document_uri: Uri, dom: _Element, offset_converter: OffsetConverter):
         self._document_uri: Uri = document_uri
         self._dom: _Element = dom
@@ -75,7 +77,7 @@ class SelectorConverter:
         raise NotImplementedError()
 
     def _path_to_dom_point(self, path: str) -> DomPoint:
-        match = self._path_regex.fullmatch(path)
+        match = PATH_SELECTOR_REGEX.fullmatch(path)
         if match is None:
             raise Exception(f'Invalid path: {path!r}')
         node: Any = self._dom.xpath(match.group('xpath'))
