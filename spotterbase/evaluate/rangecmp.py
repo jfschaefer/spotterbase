@@ -58,14 +58,14 @@ class OffsetEquis:
                     continue
                 if node.tag in offset_equi_config.invisible_nodes:
                     od = oc.get_offset_data(node)
-                    yield od.node_text_offset_before, od.node_text_offset_after
+                    yield od.node_text_offset_before, od.node_text_offset_after + 1
                 elif node.tag in offset_equi_config.visible_tags:
                     yield from get_invis_ranges(node)
                 else:
                     od = oc.get_offset_data(node)
-                    yield od.node_text_offset_before, od.node_text_offset_before + 1
+                    yield od.node_text_offset_before, od.node_text_offset_before + 2
                     yield from get_invis_ranges(node)
-                    yield od.node_text_offset_after - 1, od.node_text_offset_after
+                    yield od.node_text_offset_after - 1, od.node_text_offset_after + 1
 
         return OffsetEquis(get_invis_ranges(doc.get_html_tree(cached=True).getroot()), doc)
 

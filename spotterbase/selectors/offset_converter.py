@@ -28,6 +28,9 @@ class DomOffsetRange:
             self.converter.get_dom_point(self.end, OffsetType.NodeText)
         )
 
+    def __repr__(self) -> str:
+        return f'DomOffsetRange({self.start}, {self.end})'
+
 
 class OffsetType(enum.Enum):
     """
