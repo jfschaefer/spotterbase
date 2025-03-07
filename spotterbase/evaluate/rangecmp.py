@@ -44,8 +44,10 @@ class OffsetEquis:
     """Essentially an equivalence relation on offsets"""
 
     def __init__(self, invis_ranges: Iterable[tuple[int, int]], doc: Document):
+        # intervals do not include the end offset
+        invis_ranges = list(invis_ranges)
         self.invis = IntervalTree(Interval(*r) for r in invis_ranges)
-        self.invis.merge_overlaps(strict=False)
+        self.invis.merge_overlaps(strict=True)
         self.doc = doc
 
     @classmethod
@@ -121,6 +123,11 @@ class RangeMatching:
                 dom_range = doc.get_selector_converter().target_to_dom(anno.target)[0]
                 offset_range = doc.get_offset_converter().convert_dom_range(dom_range)
                 minimized_offset_range = offset_equi.minimize_range(offset_range)
+                if minimized_offset_range.start > minimized_offset_range.end:
+                    print('PROBLEM WITH', anno.anno.uri)
+                    print(dom_range)
+                    print(offset_range)
+                    print(minimized_offset_range)
                 return Interval(minimized_offset_range.start, minimized_offset_range.end, anno)
 
             golden_intervals = IntervalTree([
