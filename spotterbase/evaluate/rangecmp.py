@@ -185,6 +185,8 @@ class RangeMatching:
             doc, dnm = get_doc_and_dnm(pair.get_doc_uri())
             print(f'Golden: {pair.golden.anno.uri}')
             print(repr(str(dnm.sub_dnm_from_dom_range(doc.to_dom(pair.golden.target)[0])[0])))
+            print([(s.start, s.end) for s in pair.golden.target.selectors])
             print(f'Prediction: {pair.prediction.anno.uri}')
             print(repr(str(dnm.sub_dnm_from_dom_range(doc.to_dom(pair.prediction.target)[0])[0])))
+            print([(s.start, s.end) for s in pair.prediction.target.selectors])
             print()

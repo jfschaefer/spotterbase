@@ -217,7 +217,7 @@ class SourceHtmlNP(NodeProcessor):
 
             token = f'<{node.tag}>'
             start_refs.append(repeat(offs.node_text_offset_before, len(token)))
-            end_refs.append(repeat(offs.node_text_offset_before, len(token)))
+            end_refs.append(repeat(offs.node_text_offset_before + 1, len(token)))
             strings.append(token)
 
             if text := node.text:
@@ -239,7 +239,7 @@ class SourceHtmlNP(NodeProcessor):
                                           child_offs.node_text_offset_after + len(tail) + 1))
 
             token = f'</{node.tag}>'
-            start_refs.append(repeat(offs.node_text_offset_after, len(token)))
+            start_refs.append(repeat(offs.node_text_offset_after - 1, len(token)))
             end_refs.append(repeat(offs.node_text_offset_after, len(token)))
             strings.append(token)
 
