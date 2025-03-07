@@ -32,3 +32,16 @@ class TestSelectorConverter(unittest.TestCase):
         selector = converter.dom_to_path_selector(dom_range)
         self.assertEqual(selector.start, 'char(/a,1)')
         self.assertEqual(selector.end, 'char(/a,2)')
+
+    def test3(self):
+        dom = etree.parse(io.StringIO('<a>u<b>vw</b>x</a>'))
+        selector = PathSelector(
+            start='char(/a/b,0)',
+            end='char(/a/b,2)',
+        )
+        converter = SelectorConverter(Uri('http://example.org'), dom.getroot(), OffsetConverter(dom.getroot()))
+        dom_range, subranges = converter.selector_to_dom(selector)
+        self.assertIsNone(subranges)
+        selector = converter.dom_to_path_selector(dom_range)
+        self.assertEqual(selector.start, 'char(/a/b,0)')
+        self.assertEqual(selector.end, 'char(/a/b,2)')

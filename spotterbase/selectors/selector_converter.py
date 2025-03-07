@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 from typing import Optional, Any
 
-from lxml.etree import _Element
+from lxml.etree import _Element, XPathEvalError
 
 from spotterbase.model_core import FragmentTarget
 from spotterbase.model_core.selector import PathSelector, OffsetSelector, ListSelector
@@ -63,8 +63,8 @@ class SelectorConverter:
     def _simple_selector_to_dom(self, selector: OffsetSelector | PathSelector) -> DomRange:
         """ Like selector_to_dom, but ignores refinements and cannot handle non-continuous ranges """
         if isinstance(selector, PathSelector):
-            return DomRange(self._path_to_dom_point(selector.start),
-                            self._path_to_dom_point(selector.end))
+            return DomRange(self._path_to_dom_point(selector.start, True),
+                            self._path_to_dom_point(selector.end, False))
         elif isinstance(selector, OffsetSelector):
             return DomRange(
                 start=self.offset_converter.get_dom_point(selector.start, offset_type=OffsetType.NodeText),
@@ -76,11 +76,14 @@ class SelectorConverter:
     def _complex_selector_to_dom(self, selector: ListSelector) -> list[DomRange]:
         raise NotImplementedError()
 
-    def _path_to_dom_point(self, path: str) -> DomPoint:
+    def _path_to_dom_point(self, path: str, is_start: bool) -> DomPoint:
         match = PATH_SELECTOR_REGEX.fullmatch(path)
         if match is None:
             raise Exception(f'Invalid path: {path!r}')
-        node: Any = self._dom.xpath(match.group('xpath'))
+        try:
+            node: Any = self._dom.xpath(match.group('xpath'))
+        except XPathEvalError as e:
+            raise Exception(f'Error occurred when evaluating xPath {path!r}') from e
         if isinstance(node, list):
             if len(node) != 1:
                 raise Exception(f'XPath {path} does not yield unique node (yields {len(node)} nodes)')
@@ -97,7 +100,7 @@ class SelectorConverter:
         if offset is None:
             raise Exception(f'No offset provided for path reference of type {type_}')
         total_text_offset = int(offset) + self.offset_converter.get_offset(node, OffsetType.Text)
-        return self.offset_converter.get_dom_point(total_text_offset, OffsetType.Text)
+        return self.offset_converter.get_dom_point(total_text_offset, OffsetType.Text, is_start)
 
     def dom_to_selectors(self, dom_range: DomRange, sub_ranges: Optional[list[DomRange]] = None)\
             -> list[PathSelector | OffsetSelector]:

@@ -3,6 +3,7 @@ from __future__ import annotations
 import bisect
 import dataclasses
 import enum
+from typing import Optional
 
 from lxml.etree import _Element, _Comment
 
@@ -32,6 +33,7 @@ class OffsetType(enum.Enum):
     """
     We record two types of offsets:
     * Text offsets increase with every character in a text node
+        (we need this for the `char` because it only counts text)
     * Node text offsets additionally increase with every opening tag
     """
     Text = 0
@@ -137,6 +139,10 @@ class OffsetConverter:
     def get_offset(self, point: _Element | DomPoint, offset_type: OffsetType) -> int:
         if isinstance(point, _Element):
             return self.get_offset_data(point).get_offsets_of_type(offset_type)[0]
+        if offset_type != OffsetType.NodeText:
+            # this requires careful design and some testing.
+            raise Exception('Getting text offsets for a DomPoint is not supported')
+
         node_offsets = self.get_offset_data(point.node).get_offsets_of_type(offset_type)
 
         if point.text_offset is not None:
@@ -155,28 +161,51 @@ class OffsetConverter:
             else:
                 return node_offsets[0]
 
-    def get_dom_point(self, offset: int, offset_type: OffsetType) -> DomPoint:
+    def get_dom_point(self, offset: int, offset_type: OffsetType, is_start: Optional[bool] = None) -> DomPoint:
         assert offset >= 0
         if offset > self._nodes_post_order[-1][1].get_offsets_of_type(offset_type)[1] + 1:
             raise Exception('Offset is too large for this DOM. Maybe it refers to a different document?')
+
+        if offset_type == OffsetType.NodeText:
+            return self._get_dom_point_node_text(offset)
+        else:
+            assert offset_type == OffsetType.Text
+            assert is_start is not None
+
+            offset_alt = offset
+            if not is_start:
+                offset_alt -= 1
+
+            index = bisect.bisect_right(self._nodes_pre_order, offset_alt,
+                                        key=lambda entry: entry[1].get_offsets_of_type(OffsetType.Text)[0]) - 1
+            node, offset_data = self._nodes_pre_order[index]
+            offsets = offset_data.get_offsets_of_type(OffsetType.Text)
+            if offsets[1] > offset_alt:
+                return DomPoint(node, text_offset=offset - offsets[0])
+            index = bisect.bisect_right(self._nodes_post_order, offset_alt,
+                                        key=lambda entry: entry[1].get_offsets_of_type(OffsetType.Text)[1]) - 1
+            node, offset_data = self._nodes_post_order[index]
+            offsets = offset_data.get_offsets_of_type(OffsetType.Text)
+            return DomPoint(node, tail_offset=offset - offsets[1])
+
+    def _get_dom_point_node_text(self, offset: int):
         # option 1: it's a text (not a tail)
         index = bisect.bisect_right(self._nodes_pre_order, offset,
-                                    key=lambda entry: entry[1].get_offsets_of_type(offset_type)[0]) - 1
+                                    key=lambda entry: entry[1].get_offsets_of_type(OffsetType.NodeText)[0]) - 1
         node, offset_data = self._nodes_pre_order[index]
-        offsets = offset_data.get_offsets_of_type(offset_type)
+        offsets = offset_data.get_offsets_of_type(OffsetType.NodeText)
         if offsets[1] >= offset:
-            if offset_type == OffsetType.NodeText and offset == offsets[0]:  # actually, it's the node
+            if offset == offsets[0]:  # actually, it's the node
                 return DomPoint(node)
-            elif offset_type == OffsetType.NodeText and offset == offsets[1]:
+            if offset == offsets[1]:
                 return DomPoint(node, after=True)
             return DomPoint(node, text_offset=offset - offsets[0] - 1)
         # option 2: it's a tail
         index = bisect.bisect_right(self._nodes_post_order, offset,
-                                    key=lambda entry: entry[1].get_offsets_of_type(offset_type)[1]) - 1
+                                    key=lambda entry: entry[1].get_offsets_of_type(OffsetType.NodeText)[1]) - 1
         node, offset_data = self._nodes_post_order[index]
-        offsets = offset_data.get_offsets_of_type(offset_type)
-        # if offset_type == OffsetType.NodeText and offsets[1] == offset:
-        if offsets[1] == offset:    # we used to require that it is a NodeText offset... Any reason for that?
+        offsets = offset_data.get_offsets_of_type(OffsetType.NodeText)
+        if offsets[1] == offset:
             return DomPoint(node, after=True)
         return DomPoint(node, tail_offset=offset - offsets[1])
 

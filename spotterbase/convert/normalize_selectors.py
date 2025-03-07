@@ -17,7 +17,9 @@ from spotterbase.utils.config_loader import ConfigPath
 logger = logging.getLogger(__name__)
 
 
-@functools.lru_cache(5)   # usually, targets are sorted by document -> at least the "current" document should be cached
+# usually, targets are sorted by document -> at least the "current" document should be cached
+# TODO: actually sort them? (or should we retain the order in the input?)
+@functools.lru_cache(5)
 def get_selector_converter(document_uri: Uri) -> SelectorConverter:
     document = Resolver.get_document(document_uri)
     if not document:

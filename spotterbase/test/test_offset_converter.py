@@ -65,3 +65,16 @@ class TestOffsetConverter(unittest.TestCase):
                 self.assertEqual(conv.get_offset(dom_point, OffsetType.NodeText), node_offset)
                 if test_inverse:
                     self.assertEqual(conv.get_dom_point(node_offset, OffsetType.NodeText), dom_point)
+
+    def test_text_offsets(self):
+        tree = etree.parse(io.StringIO('<p>x<emph><b>yz</b></emph>ab</p>'))
+        conv = OffsetConverter(tree.getroot())
+
+        for text_offset, node_text_offset, is_start in [
+            (0, 1, True), (1, 4, True), (2, 5, True), (3, 8, True), (4, 9, True),
+            (1, 2, False), (2, 5, False), (3, 6, False), (4, 9, False), (5, 10, False)
+        ]:
+            with self.subTest(text_offset=text_offset, node_text_offset=node_text_offset, is_start=is_start):
+                dom_point = conv.get_dom_point(text_offset, OffsetType.Text, is_start)
+                self.assertEqual(conv.get_offset(dom_point, OffsetType.NodeText), node_text_offset)
+                # self.assertEqual(conv.get_offset(dom_point, OffsetType.Text), text_offset)
