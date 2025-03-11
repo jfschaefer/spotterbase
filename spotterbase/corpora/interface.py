@@ -57,7 +57,11 @@ class Document(abc.ABC):
 
     def get_offset_converter(self) -> OffsetConverter:
         if self._offset_converter is None:
-            self._offset_converter = OffsetConverter(self.get_html_tree(cached=True).getroot())
+            converter = OffsetConverter(self.get_html_tree(cached=True).getroot())
+            if self._offset_converter is not None:
+                raise RuntimeError('OffsetConverter was created twice - '
+                                   'this may be the result of multithreading, which SpotterBase does not support')
+            self._offset_converter = converter
         return self._offset_converter
 
     def get_selector_converter(self) -> SelectorConverter:

@@ -2,6 +2,7 @@ import functools
 import json
 import logging
 
+from spotterbase.corpora.interface import Document
 from spotterbase.corpora.resolver import Resolver
 from spotterbase.data import fast_json
 from spotterbase.model_core.selector import PathSelector, OffsetSelector
@@ -9,8 +10,6 @@ from spotterbase.model_core.target import FragmentTarget
 from spotterbase.rdf import Uri
 from spotterbase.records.jsonld_support import JsonLdRecordConverter
 from spotterbase.records.record import Record
-from spotterbase.selectors.offset_converter import OffsetConverter
-from spotterbase.selectors.selector_converter import SelectorConverter
 from spotterbase.utils import config_loader
 from spotterbase.utils.config_loader import ConfigPath
 
@@ -20,20 +19,15 @@ logger = logging.getLogger(__name__)
 # usually, targets are sorted by document -> at least the "current" document should be cached
 # TODO: actually sort them? (or should we retain the order in the input?)
 @functools.lru_cache(5)
-def get_selector_converter(document_uri: Uri) -> SelectorConverter:
+def get_document_cached(document_uri: Uri) -> Document:
     document = Resolver.get_document(document_uri)
     if not document:
         raise Exception(f'Could not find document {document_uri}')
-    dom = document.get_html_tree(cached=True).getroot()
-    return SelectorConverter(
-        document_uri=document_uri,
-        dom=dom,
-        offset_converter=OffsetConverter(dom),
-    )
+    return document
 
 
-def normalize_target(target: FragmentTarget):
-    converter = get_selector_converter(target.source)
+def normalize_target(target: FragmentTarget, document: Document):
+    converter = document.get_selector_converter()
     selector_lookup: dict[type[Record], Record] = {}
     for selector in target.selectors:
         if type(selector) in selector_lookup:
@@ -74,7 +68,7 @@ def process(input_json_records: list) -> list:
         if is_frag_target:
             target = converter.json_ld_to_record(obj)
             assert isinstance(target, FragmentTarget)
-            normalize_target(target)
+            normalize_target(target, get_document_cached(target.source))
             result.append(converter.record_to_json_ld(target))
         else:
             result.append(obj)

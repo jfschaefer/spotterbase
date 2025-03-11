@@ -124,6 +124,8 @@ class RangeMatching:
                 offset_range = doc.get_offset_converter().convert_dom_range(dom_range)
                 minimized_offset_range = offset_equi.minimize_range(offset_range)
                 if minimized_offset_range.start > minimized_offset_range.end:
+                    # TODO: Actually raise a meaningful exception or skip the annotation and print a warning
+                    # This happens if an annotation is in a completely invisible range
                     print('PROBLEM WITH', anno.anno.uri)
                     print(dom_range)
                     print(offset_range)

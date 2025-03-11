@@ -1,16 +1,16 @@
 import atexit
 import datetime
 import logging
-from collections import OrderedDict
+import zlib
 from io import BytesIO
-import shelve
 from typing import IO, Iterator, Optional
 
+import diskcache
 import requests
 
-from spotterbase.plugins.arxiv.arxiv import ArxivId
 from spotterbase.corpora.interface import Document, DocumentNotFoundError, Corpus, DocumentNotInCorpusException
 from spotterbase.data.locator import CacheDir
+from spotterbase.plugins.arxiv.arxiv import ArxivId
 from spotterbase.rdf import Uri
 from spotterbase.utils.logging import warn_once
 
@@ -28,51 +28,34 @@ class _Ar5ivCache:
 
         This class acts as a cache that stores a small number of most recently used documents
         and discards them after a while.
-
-        TODO: The current implementation is not thread-safe...
     """
-    shelve: shelve.Shelf
-    usages: OrderedDict[str, datetime.datetime]
+    cache: diskcache.Cache
 
     def __init__(self):
         pass
 
-    def require_shelve(self):
-        if not hasattr(self, 'shelve'):
+    def _require_cache(self):
+        if not hasattr(self, 'cache'):
             logger.info('Opening ar5iv cache at ' + str(CacheDir.get() / 'ar5iv_cache'))
-            self.shelve = shelve.open(CacheDir.get() / 'ar5iv_cache', writeback=True)
-            self.usages = self.shelve.setdefault('usages', OrderedDict())
-            self.shelve.sync()
-            assert len(self.usages) == len(self.shelve) - 1
-            atexit.register(self.shelve.close)
+            self.cache = diskcache.Cache(
+                str(CacheDir.get() / 'ar5iv_cache'),
+                size_limit=2 ** 25,  # 32 MiB
+            )
+            atexit.register(self.cache.close)
 
     def get(self, identifier: Uri) -> Optional[bytes]:
-        strid = str(identifier)
-        self.require_shelve()
-        if strid in self.usages:
-            if self.usages[strid] < datetime.datetime.now() - datetime.timedelta(days=1):
-                del self.shelve[strid]
-                del self.usages[strid]
-                self.shelve['usages'] = self.usages
-                self.shelve.sync()
-                return None
-            self.usages.move_to_end(strid)
-            self.shelve['usages'] = self.usages
-            self.shelve.sync()
-            r = self.shelve[strid]
-            assert r is not None
+        self._require_cache()
+        if str(identifier) in self.cache:
+            return zlib.decompress(self.cache[str(identifier)])
         return None
 
     def put(self, identifier: Uri, content: bytes):
-        self.require_shelve()
-        self.usages[str(identifier)] = datetime.datetime.now()
-        self.shelve[str(identifier)] = content
-        if len(self.usages) > 20:
-            # potential optimization: first remove all expired entries (could also be done during initializations)
-            least_recently_used = self.usages.popitem(last=False)[0]
-            del self.shelve[least_recently_used]
-        self.shelve['usages'] = self.usages
-        self.shelve.sync()
+        self._require_cache()
+        self.cache.set(
+            str(identifier),
+            zlib.compress(content, level=1),
+            expire=datetime.timedelta(days=1).total_seconds()
+        )
 
 
 _AR5IV_CACHE = _Ar5ivCache()
