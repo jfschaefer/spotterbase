@@ -46,6 +46,9 @@ class Document(abc.ABC):
             #                Unfortunately, modern browsers do the same.
             tree: _ElementTree = etree.parse(fp, parser=etree.HTMLParser())  # type: ignore
         if cached:
+            if self._html_tree is not None:
+                raise RuntimeError('HTML tree was created twice - '
+                                   'this may be the result of multithreading, which SpotterBase does not support')
             self._html_tree = tree
         return tree
 
