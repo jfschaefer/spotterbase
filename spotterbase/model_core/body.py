@@ -55,7 +55,7 @@ class Tag(Record):
 
     def __init__(self, uri: Optional[Uri] = None, *, label: Optional[str] = None, belongs_to: Optional[Uri] = None,
                  comment: Optional[str] = None, sub_tag_of: Optional[Uri] = None):
-        super().__init__(uri=uri, label=label, belongs_to=belongs_to, comment=comment)
+        super().__init__(uri=uri, label=label, belongs_to=belongs_to, comment=comment, sub_tag_of=sub_tag_of)
 
 
 class TagSet(Record):
