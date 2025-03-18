@@ -4,6 +4,7 @@ import unittest
 from lxml import etree
 
 from spotterbase.dnm.dnm import Dnm
+from spotterbase.dnm.linked_str import LinkedStr
 from spotterbase.dnm.node_based_dnm_factory import TextExtractingNP, SkippingNP, ReplacingNP, NodeBasedDnmFactory
 from spotterbase.dnm.replacement_pattern import StandardReplacementPattern, CategoryStyle
 from spotterbase.dnm.simple_dnm_factory import SimpleDnmFactory
@@ -86,3 +87,10 @@ class TestDnm(GraphTestMixin, unittest.TestCase):
                 from_, to = dnm.get_indices_from_ref_range(required_range.start, required_range.end)
                 self.assertEqual(from_, expected_from)
                 self.assertEqual(to, expected_to)
+
+    def test_regex_sub(self):
+        l = LinkedStr(meta_info=None, string='abcdef', start_refs=[2, 4, 6, 8, 10, 12], end_refs=[3, 5, 7, 9, 11, 13])
+        l2 = l.regex_sub(r'[bd]e?', 'xy')
+        self.assertEqual(str(l2), 'axycxyf')
+        self.assertEqual(list(l2.get_start_refs()), [2, 4, 4, 6, 8, 8, 12])
+        self.assertEqual(list(l2.get_end_refs()), [3, 5, 5, 7, 11, 11, 13])

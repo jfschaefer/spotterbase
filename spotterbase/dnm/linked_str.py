@@ -169,6 +169,18 @@ class LinkedStr(Generic[_MetaInfoType]):
             positions_are_references=False
         )
 
+    def regex_sub(self: LinkedStr_T, pattern: str | re.Pattern[str], sub: str) -> LinkedStr_T:
+        if isinstance(pattern, str):
+            pattern = re.compile(pattern)
+
+        return self.replacements_at_positions(
+            [
+                (match.start(), match.end(), re.sub(pattern, sub, match.group()))
+                for match in re.finditer(pattern, str(self))
+            ],
+            positions_are_references=False
+        )
+
     def get_meta_info(self) -> _MetaInfoType:
         return self._meta_info
 
