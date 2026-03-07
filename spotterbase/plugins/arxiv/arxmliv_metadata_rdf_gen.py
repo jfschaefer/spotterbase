@@ -35,6 +35,24 @@ def _get_severities_lists(corpus: ArXMLivCorpus) -> Optional[tuple[list[str], li
             with zf.open('error-tasks.txt', 'r') as fp:
                 e = [l.decode('utf-8').strip() for l in fp]
             return np, w, e
+
+    corpus._maybe_load_arxivid_to_zipfile()
+    arxivid_to_zip_file = corpus._arxivid_to_zipfile
+    if arxivid_to_zip_file is not None:
+        np: list[str] = []
+        w: list[str] = []
+        e: list[str] = []
+        for zipfilename, filename in arxivid_to_zip_file.values():
+            if 'no-problem' in zipfilename:
+                np.append(filename)
+            elif 'warning' in zipfilename:
+                w.append(filename)
+            elif 'error' in zipfilename:
+                e.append(filename)
+            else:
+                raise Exception(f'Unexpected file name in severity data: {zipfilename}')
+        return np, w, e
+
     return None
 
 
@@ -74,7 +92,7 @@ def iter_triples(corpus: ArXMLivCorpus, centi: bool = False) -> TripleI:
                 if i % 1000 == 0:
                     progress_updater.update(i)
 
-                arxivid = corpus.filename_to_arxivid_or_none(doc)
+                arxivid = corpus.filename_to_arxivid_or_none(doc.split('/')[-1])
                 if arxivid:
                     if centi and not arxivid.is_in_centi_arxiv():
                         continue
@@ -99,7 +117,7 @@ def main():
     assert isinstance(corpus, ArXMLivCorpus)
     for centi in [False, True]:
         directory = DataDir.get('arxmliv-metadata')
-        dest = directory / ('centi-' if centi else '') / f'arxmliv-{corpus.release}.nt.gz'
+        dest = directory / (('centi-' if centi else '') + f'arxmliv-{corpus.release}.nt.gz')
         logger.info(f'Creating {dest}.')
         with gzip.open(dest, 'wt') as fp:
             fp.write(

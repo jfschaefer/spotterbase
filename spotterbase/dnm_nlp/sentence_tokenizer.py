@@ -22,6 +22,10 @@ def is_display_math(node: _Element) -> bool:
     return 'ltx_equation' in classes
 
 
+def is_math_node(node: _Element) -> bool:
+    return node.tag == 'math'
+
+
 def is_in_header(node: _Element) -> bool:
     if node.tag in {'h1', 'h2', 'h3', 'h4', 'h5', 'h6'}:
         return True
@@ -50,7 +54,9 @@ def sentence_tokenize(dnm: Dnm) -> list[Dnm]:
         if in_header and not is_in_header(node_containing_i):
             in_header = False
             new_sent_start = i
-        if is_display_math(node_containing_i) and not is_display_math(get_surrounding_node(dnm[i + 1])) and \
+        if is_display_math(node_containing_i) and \
+                len(dnm) > i + 2 and \
+                not is_display_math(get_surrounding_node(dnm[i + 1])) and \
                 dnm.char_at(i + 1).isspace() and dnm.char_at(i + 2).upper():
             new_sent_start = i + 1
         if new_sent_start is not None:
@@ -58,11 +64,18 @@ def sentence_tokenize(dnm: Dnm) -> list[Dnm]:
             if len(new_sent) > 0:
                 sentences.append(new_sent)
             sent_start = new_sent_start
+
+    # add rest
+    new_sent = dnm[sent_start:].strip().normalize_spaces()
+    if new_sent:
+         sentences.append(new_sent)
     return sentences
 
 
 def normal_end_of_sentence(dnm: Dnm, i: int) -> bool:
     if dnm.char_at(i) not in {'.', '!', '?'}:
+        return False
+    if is_math_node(get_surrounding_node(dnm[i])):
         return False
     isdot = dnm.char_at(i) == '.'
     if isdot and i + 1 < len(dnm) and dnm.char_at(i + 1).islower():

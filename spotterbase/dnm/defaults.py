@@ -1,10 +1,13 @@
 import functools
 import re
+import typing
 from typing import Callable
+
+from lxml.etree import _Element
 
 from spotterbase.dnm.dnm import DnmFactory, Dnm
 from spotterbase.dnm.node_based_dnm_factory import NodeBasedDnmFactory, TextExtractingNP, SkippingNP, ReplacingNP, \
-    TokenAfterNodeNP, TextExtractingBlockedNP
+    TokenAfterNodeNP, TextExtractingBlockedNP, ReplaceByFunctionProcessor
 from spotterbase.dnm.post_processing_dnm_factory import PostProcessingDnmFactory
 from spotterbase.dnm.replacement_pattern import StandardReplacementPattern
 from spotterbase.dnm.simple_dnm_factory import SimpleDnmFactory
@@ -22,6 +25,13 @@ def whitespace_normalization_post_processing(dnm: Dnm) -> Dnm:
         positions_are_references=False
     )
 
+def _mathnode_alttext_replacement(node: _Element) -> str:
+    alttext = node.get('alttext')
+    if alttext is not None:
+        return '$' + alttext.replace('$', '\\$') + '$'
+    else:
+        return '$?$'
+
 
 def get_arxmliv_dnm_factory(
         *,  # only keyword arguments
@@ -31,6 +41,8 @@ def get_arxmliv_dnm_factory(
         keep_replacements_as_annotations: bool = True,
         normalize_white_space: bool = True,
         wrap_replacements_with_spaces: bool = False,
+        math_nodes_as_alttext: bool = False,
+        footnote_handling: typing.Literal['ignore', 'inline', 'replace'] = 'ignore'
 ) -> DnmFactory:
     processor = TextExtractingNP()
 
@@ -68,7 +80,12 @@ def get_arxmliv_dnm_factory(
 
     # Replace some nodes
     for tag, category in [('math', 'math node')]:
-        processor.register_tag_processor(tag, replacing_np(category=category))
+        if tag == 'math' and math_nodes_as_alttext:
+            processor.register_tag_processor(
+                tag, ReplaceByFunctionProcessor(_mathnode_alttext_replacement, keep_replacements_as_annotations)
+            )
+        else:
+            processor.register_tag_processor(tag, replacing_np(category=category))
     for class_, category in [
         ('ltx_equationgroup', 'math group'), ('ltx_equation', 'math equation'),
         ('ltx_cite', 'ltx cite'), ('ltx_ref', 'ltx ref'), ('ltx_ref_tag', 'ltx ref')
@@ -80,6 +97,14 @@ def get_arxmliv_dnm_factory(
         processor.register_class_processor(
             'ltx_para', TokenAfterNodeNP(LINEBREAK_PLACEHOLDER, TextExtractingBlockedNP(processor))
         )
+
+    # handling of footnotes
+    if footnote_handling == 'inline':
+        pass   # this is the default
+    elif footnote_handling == 'replace':
+        processor.register_class_processor('ltx_role_footnote', replacing_np(category='footnote'))
+    elif footnote_handling == 'ignore':
+        processor.register_class_processor('ltx_role_footnote', SkippingNP())
 
     factory: DnmFactory = NodeBasedDnmFactory(processor)
     if normalize_white_space:

@@ -1,18 +1,31 @@
+"""
+There are multiple releases of the arXMLiv dataset.
+The 04.2024 release was re-branded to ar5iv, but we still use the arXMLiv name for the release
+in the code/URIs for simplicity and use ar5iv to refer to the (non-fixed) content that is
+currently available at ar5iv.org.
+"""
+
 import abc
+import gzip
+import logging
 import re
 from pathlib import Path
 from typing import IO, Iterator, Optional
 
 from spotterbase.corpora import CORPUS_PATH_ARG_GROUP
+from spotterbase.data import fast_json
 from spotterbase.plugins.arxiv.arxiv import ArxivId
 from spotterbase.corpora.interface import Document, Corpus, DocumentNotFoundError, CannotLocateCorpusDataError, \
     DocumentNotInCorpusException
-from spotterbase.data.locator import Locator, LocatorFailedException
+from spotterbase.data.locator import Locator, LocatorFailedException, CacheDir
 from spotterbase.data.zipfilecache import SHARED_ZIP_CACHE
 from spotterbase.model_core.sb import SB
 from spotterbase.rdf.uri import Uri
 
-ARXMLIV_RELEASES: list[str] = ['08.2017', '08.2018', '08.2019', '2020']
+ARXMLIV_RELEASES: list[str] = ['08.2017', '08.2018', '08.2019', '2020', '04.2024']
+
+
+logger = logging.getLogger(__name__)
 
 
 class ArXMLivUris:
@@ -85,7 +98,46 @@ class ArXMLivCorpus(Corpus):
                        'https://sigmathling.kwarc.info/resources/')
         self._uri: Uri = ArXMLivUris.get_corpus_uri(release)
 
+        # Only initialized if necessary and the zip file name cannot be determined from the id
+        self._arxivid_to_zipfile: Optional[dict[str, tuple[str, str]]] = None
+
+    def _maybe_load_arxivid_to_zipfile(self):
+        if self._arxivid_to_zipfile is not None:
+            return
+
+        if self.release not in {'04.2024'}:   # not necessary for all releases
+            return
+
+        cache_file = CacheDir.get(f'arxmliv_{self.release}_arxivid_to_zipfile.json.gz')
+
+        if cache_file.exists():
+            logging.info(f'Loading cached arxmliv {self.release} file mapping from {cache_file}')
+            with gzip.open(cache_file, 'r') as f:
+                self._arxivid_to_zipfile = fast_json.load(f)
+                return
+
+        logging.info(f'Creating arxmliv {self.release} file mapping. '
+                     'This may take a moment. The mapping will be stored for the future.')
+        self._arxivid_to_zipfile = {}
+        for zf in self.get_path().glob('*.zip'):
+            with SHARED_ZIP_CACHE[zf] as z:
+                for name in z.namelist():
+                    if arxivid := self.filename_to_arxivid_or_none(name.split('/')[-1]):
+                        self._arxivid_to_zipfile[arxivid.identifier] = (zf.name, name)
+
+        with gzip.open(cache_file, 'w') as f:
+            fast_json.dump(self._arxivid_to_zipfile, f)
+
+
     def get_document_by_id(self, arxivid: ArxivId) -> ArXMLivDocument:
+        self._maybe_load_arxivid_to_zipfile()
+        if self._arxivid_to_zipfile is not None:
+            if arxivid.identifier in self._arxivid_to_zipfile:
+                zipfilename, filename = self._arxivid_to_zipfile[arxivid.identifier]
+                return ZipArXMLivDocument(arxivid, self.release, self.get_path() / zipfilename, filename)
+            raise DocumentNotFoundError(f'Failed to find a zip file for "{arxivid.identifier}" in {self.get_path()}')
+
+        # one zip for each YYMM
         location = self._get_yymm_location(arxivid.yymm)
         if location.name.endswith('.zip'):
             return ZipArXMLivDocument(arxivid, self.release, location,
@@ -137,6 +189,12 @@ class ArXMLivCorpus(Corpus):
         return None
 
     def __iter__(self) -> Iterator[ArXMLivDocument]:
+        self._maybe_load_arxivid_to_zipfile()
+        if self._arxivid_to_zipfile is not None:
+            for arxivid, (zipfilename, filename) in self._arxivid_to_zipfile.items():
+                yield ZipArXMLivDocument(ArxivId(arxivid), self.release, self.get_path() / zipfilename, filename)
+            return
+
         for yymm_location in self._iter_yymm_locations():
             if yymm_location.is_dir():
                 for path in yymm_location.iterdir():

@@ -1,6 +1,6 @@
 import abc
 from itertools import chain, repeat
-from typing import Iterable, Optional
+from typing import Iterable, Optional, Callable
 
 from lxml.etree import _Element
 
@@ -9,6 +9,7 @@ from spotterbase.dnm.replacement_pattern import ReplacementPattern
 from spotterbase.dnm.xml_util import get_node_classes
 from spotterbase.model_core.annotation import Annotation
 from spotterbase.model_core.body import ReplacedHtmlBody
+from spotterbase.rdf import Uri
 from spotterbase.rdf.literal import HtmlFragment
 from spotterbase.selectors.dom_range import DomRange
 
@@ -57,6 +58,38 @@ class ReplacingNP(NodeProcessor):
                     body=ReplacedHtmlBody(HtmlFragment(node_copy, wrapped_in_div=False)),
                 ),
                 replacement_unique=self.number_replacements,
+            )
+
+        return (
+            repeat(dom_offset_range.start, len(replacement)),
+            repeat(dom_offset_range.end, len(replacement)),
+            [replacement]
+        )
+
+
+class ReplaceByFunctionProcessor(NodeProcessor):
+    def __init__(self, function: Callable[[_Element], str], keep_annotation: bool = True):
+        self.function = function
+        self.keep_annotation = keep_annotation
+
+    def apply(self, node: _Element, dnm_meta: DnmMeta) -> tuple[Iterable[int], Iterable[int], Iterable[str]]:
+        dom_offset_range = dnm_meta.offset_converter.convert_dom_range(DomRange.from_node(node))
+        replacement = self.function(node)
+
+        if self.keep_annotation:
+            # we need to make a copy without the tail
+            import copy
+            node_copy = copy.deepcopy(node)
+            node_copy.tail = None
+
+            dnm_meta.embedded_annotations.insert(
+                replacement,
+                dom_offset_range,
+                Annotation(
+                    uri=Uri.uuid(),
+                    body=ReplacedHtmlBody(HtmlFragment(node_copy, wrapped_in_div=False)),
+                ),
+                replacement_unique=False,
             )
 
         return (
